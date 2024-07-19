@@ -107,6 +107,7 @@ impl Forge {
     }
 
     pub fn reload(&mut self) -> Result<(), std::io::Error> {
+        println!("Reloading tree");
         self.inner = Node::from(Self::load(self.path.clone(), 0)?)
             .take_first_child()
             .unwrap();

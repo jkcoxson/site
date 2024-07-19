@@ -37,35 +37,42 @@ impl ForgeRing {
     /// When an update is detected, update each forge appropriately
     pub fn watch(&self) {
         let forges = self.ring.clone();
-        println!("Watching the forge folder");
-        let mut watcher = notify::recommended_watcher(
-            move |res: Result<notify::Event, notify::Error>| match res {
-                Ok(event) => {
-                    if let notify::EventKind::Create(_)
-                    | notify::EventKind::Modify(_)
-                    | notify::EventKind::Remove(_) = event.kind
-                    {
-                        // Reload the tree
-                        forges.iter().for_each(|forge| {
-                            // TODO: make this actually reload the tree
-                            if let Err(e) = forge.blocking_lock().reload() {
-                                eprintln!("Failed to reload Forge: {e:?}");
+        tokio::task::spawn(async move {
+            println!("Watching the forge folder");
+            let mut watcher =
+                notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
+                    match res {
+                        Ok(event) => {
+                            if let notify::EventKind::Create(_)
+                            | notify::EventKind::Modify(_)
+                            | notify::EventKind::Remove(_) = event.kind
+                            {
+                                // Reload the tree
+                                forges.iter().for_each(|forge| {
+                                    // TODO: make this actually reload the tree
+                                    if let Err(e) = forge.blocking_lock().reload() {
+                                        eprintln!("Failed to reload Forge: {e:?}");
+                                    }
+                                });
                             }
-                        });
+                        }
+                        Err(e) => println!("watch error: {:?}", e),
                     }
-                }
-                Err(e) => println!("watch error: {:?}", e),
-            },
-        )
-        .expect("Watcher failed to create");
+                })
+                .expect("Watcher failed to create");
 
-        // Add a path to be watched. All files and directories at that path and
-        // below will be monitored for changes.
-        notify::Watcher::watch(
-            &mut watcher,
-            std::path::Path::new("forge"),
-            notify::RecursiveMode::Recursive,
-        )
-        .expect("Watcher crashed");
+            // Add a path to be watched. All files and directories at that path and
+            // below will be monitored for changes.
+            notify::Watcher::watch(
+                &mut watcher,
+                std::path::Path::new("forge"),
+                notify::RecursiveMode::Recursive,
+            )
+            .expect("Watcher crashed");
+
+            loop {
+                tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+            }
+        });
     }
 }

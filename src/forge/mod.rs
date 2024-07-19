@@ -20,6 +20,7 @@ use std::{collections::HashMap, io::Read, path::PathBuf};
 
 use tree::Node;
 
+pub mod buffer;
 mod config;
 mod converters;
 mod tree;
@@ -340,4 +341,27 @@ mod tests {
         forge.inner.print();
         Ok(())
     }
+
+    // #[test]
+    // fn watch() -> Result<(), notify::Error> {
+    //     println!("Watching the forge folder");
+    //     let mut watcher = notify::recommended_watcher(|res| match res {
+    //         Ok(event) => println!("event: {:?}", event),
+    //         Err(e) => println!("watch error: {:?}", e),
+    //     })?;
+    //
+    //     // Add a path to be watched. All files and directories at that path and
+    //     // below will be monitored for changes.
+    //     notify::Watcher::watch(
+    //         &mut watcher,
+    //         std::path::Path::new("forge"),
+    //         notify::RecursiveMode::Recursive,
+    //     )?;
+    //
+    //     loop {
+    //         std::thread::sleep(std::time::Duration::from_secs(5))
+    //     }
+    //
+    //     unimplemented!()
+    // }
 }

@@ -4,10 +4,6 @@ use leptos::*;
 
 use leptos_router::Redirect;
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "ssr")]
-use std::sync::Arc;
-#[cfg(feature = "ssr")]
-use tokio::sync::Mutex;
 
 use crate::{
     app::{Footer, NavBar},
@@ -15,7 +11,7 @@ use crate::{
 };
 
 #[cfg(feature = "ssr")]
-use crate::forge::Forge;
+use crate::forge::buffer::ForgeRing;
 
 #[component]
 /// Shows the Forge file explorer
@@ -119,7 +115,8 @@ pub enum PrintReturn {
 
 #[server(PrintTree, "/api")]
 pub async fn print_tree(request: Vec<String>) -> Result<PrintReturn, ServerFnError> {
-    let state = expect_context::<Arc<Mutex<Forge>>>();
+    let state = expect_context::<ForgeRing>();
+    let state = state.get();
 
     let borrowed_request: Vec<&str> = request
         .iter()

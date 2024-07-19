@@ -23,21 +23,25 @@ http = "1"
 serde = { version = "1.0.204", features = ["derive"] }
 toml = { version = "0.8.14", optional = true }
 once_cell = { version = "1.19.0", optional = true }
+notify = { version = "6.1.1", optional = true }
+num_cpus = { version = "1.9.0", optional = true }
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
-    "dep:axum",
-    "dep:tokio",
-    "dep:tower",
-    "dep:tower-http",
-    "dep:leptos_axum",
-    "leptos/ssr",
-    "leptos_meta/ssr",
-    "leptos_router/ssr",
-    "dep:tracing",
-    "dep:toml",
-    "dep:once_cell",
+  "dep:axum",
+  "dep:tokio",
+  "dep:tower",
+  "dep:tower-http",
+  "dep:leptos_axum",
+  "leptos/ssr",
+  "leptos_meta/ssr",
+  "leptos_router/ssr",
+  "dep:tracing",
+  "dep:toml",
+  "dep:once_cell",
+  "dep:notify",
+  "dep:num_cpus",
 ]
 
 # Defines a size-optimized profile for the WASM bundle in release mode

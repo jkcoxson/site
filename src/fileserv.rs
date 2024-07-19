@@ -1,7 +1,7 @@
-use std::sync::Arc;
+// Jackson Coxson
 
 use crate::app::App;
-use crate::forge::Forge;
+use crate::forge::{self};
 use axum::response::Response as AxumResponse;
 use axum::{
     body::Body,
@@ -10,14 +10,11 @@ use axum::{
     response::IntoResponse,
 };
 use leptos::*;
-use tokio::sync::Mutex;
-
-pub type ForgeOptions = Arc<Mutex<Forge>>;
 
 pub async fn file_and_error_handler(
     State(options): State<LeptosOptions>,
     req: Request<Body>,
-    forge_options: ForgeOptions,
+    forge_options: forge::buffer::ForgeRing,
 ) -> AxumResponse {
     let pkg_root = options.site_root.clone();
     let (parts, body) = req.into_parts();
@@ -33,7 +30,12 @@ pub async fn file_and_error_handler(
     let path: Vec<&str> = static_parts.uri.path().split('/').collect();
     if path.len() > 2 && path[1] == "cdn" {
         let context = forge_options.clone();
-        if let Ok(f) = forge_options.lock().await.get(path[2..].to_vec(), None) {
+        if let Ok(f) = forge_options
+            .get()
+            .lock()
+            .await
+            .get(path[2..].to_vec(), None)
+        {
             match f {
                 crate::forge::ForgeReturnType::File(f) => {
                     // Serve the file

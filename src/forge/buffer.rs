@@ -38,12 +38,25 @@ impl ForgeRing {
     pub fn watch(&self) {
         let forges = self.ring.clone();
         println!("Watching the forge folder");
-        let mut watcher = notify::recommended_watcher(move |res| match res {
-            Ok(_event) => {
-                let _ = forges.iter().map(|f| f.blocking_lock().print_tree());
-            }
-            Err(e) => println!("watch error: {:?}", e),
-        })
+        let mut watcher = notify::recommended_watcher(
+            move |res: Result<notify::Event, notify::Error>| match res {
+                Ok(event) => {
+                    if let notify::EventKind::Create(_)
+                    | notify::EventKind::Modify(_)
+                    | notify::EventKind::Remove(_) = event.kind
+                    {
+                        // Reload the tree
+                        forges.iter().for_each(|forge| {
+                            // TODO: make this actually reload the tree
+                            if let Err(e) = forge.blocking_lock().reload() {
+                                eprintln!("Failed to reload Forge: {e:?}");
+                            }
+                        });
+                    }
+                }
+                Err(e) => println!("watch error: {:?}", e),
+            },
+        )
         .expect("Watcher failed to create");
 
         // Add a path to be watched. All files and directories at that path and

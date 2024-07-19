@@ -31,6 +31,7 @@ pub struct Forge {
     cache: HashMap<String, Vec<u8>>,
     cache_size: usize,
     cache_limit: usize,
+    path: PathBuf,
 }
 
 #[derive(Clone)]
@@ -90,6 +91,30 @@ enum DefaultContentType {
 }
 
 impl Forge {
+    pub fn new(path: PathBuf, cache_limit: usize) -> Result<Self, std::io::Error> {
+        let head = Self::load(path.clone(), 0)?;
+        let node: Node = head.into();
+        let node = node.take_first_child().unwrap();
+        println!("Loaded tree");
+        node.print();
+        Ok(Forge {
+            inner: node,
+            cache: HashMap::new(),
+            cache_size: 0,
+            cache_limit,
+            path,
+        })
+    }
+
+    pub fn reload(&mut self) -> Result<(), std::io::Error> {
+        self.inner = Node::from(Self::load(self.path.clone(), 0)?)
+            .take_first_child()
+            .unwrap();
+        self.cache = HashMap::new();
+        self.cache_size = 0;
+        Ok(())
+    }
+
     pub fn get(
         &self,
         request: Vec<&str>,
@@ -154,20 +179,6 @@ impl Forge {
                 "File not found",
             ))
         }
-    }
-
-    pub fn new(path: PathBuf, cache_limit: usize) -> Result<Self, std::io::Error> {
-        let head = Self::load(path, 0)?;
-        let node: Node = head.into();
-        let node = node.take_first_child().unwrap();
-        println!("Loaded tree");
-        node.print();
-        Ok(Forge {
-            inner: node,
-            cache: HashMap::new(),
-            cache_size: 0,
-            cache_limit,
-        })
     }
 
     /// Loads the current Node and recursively loads nodes below

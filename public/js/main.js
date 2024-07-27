@@ -4,7 +4,7 @@
   const getStoredTheme = () => localStorage.getItem("theme");
   const setStoredTheme = (theme) => localStorage.setItem("theme", theme);
   const forcedTheme = document.documentElement.getAttribute(
-    "data-bss-forced-theme"
+    "data-bss-forced-theme",
   );
 
   const getPreferredTheme = () => {
@@ -41,7 +41,7 @@
 
   const showActiveTheme = (theme, focus = false) => {
     const themeSwitchers = [].slice.call(
-      document.querySelectorAll(".theme-switcher")
+      document.querySelectorAll(".theme-switcher"),
     );
 
     if (!themeSwitchers.length) return;
@@ -53,7 +53,7 @@
 
     for (const themeSwitcher of themeSwitchers) {
       const btnToActivate = themeSwitcher.querySelector(
-        '[data-bs-theme-value="' + theme + '"]'
+        '[data-bs-theme-value="' + theme + '"]',
       );
 
       if (btnToActivate) {
@@ -86,3 +86,5 @@
     });
   });
 })();
+
+hljs.highlightAll();

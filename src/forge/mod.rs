@@ -80,6 +80,7 @@ enum DefaultContentType {
     Csv,
     Html,
     Javascript,
+    Wasm,
     Plain,
     Xml,
     // Video
@@ -96,7 +97,6 @@ impl Forge {
         let node: Node = head.into();
         let node = node.take_first_child().unwrap();
         println!("Loaded tree");
-        node.print();
         Ok(Forge {
             inner: node,
             cache: HashMap::new(),
@@ -299,6 +299,7 @@ impl DefaultContentType {
             DefaultContentType::Csv => "text/csv",
             DefaultContentType::Html => "text/html",
             DefaultContentType::Javascript => "text/javascript",
+            DefaultContentType::Wasm => "application/wasm",
             DefaultContentType::Plain => "text/plain",
             DefaultContentType::Xml => "text/xml",
             DefaultContentType::VideoMpeg => "video/mpeg",
@@ -326,6 +327,7 @@ impl DefaultContentType {
             "csv" => DefaultContentType::Csv,
             "html" => DefaultContentType::Html,
             "js" => DefaultContentType::Javascript,
+            "wasm" => DefaultContentType::Wasm,
             "txt" => DefaultContentType::Plain,
             "mp4" => DefaultContentType::Mp4,
             "mov" => DefaultContentType::Quicktime,

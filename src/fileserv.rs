@@ -1,7 +1,7 @@
 // Jackson Coxson
 
 use crate::app::App;
-use crate::forge::{self};
+use crate::context::Context;
 use axum::response::Response as AxumResponse;
 use axum::{
     body::Body,
@@ -14,7 +14,7 @@ use leptos::*;
 pub async fn file_and_error_handler(
     State(options): State<LeptosOptions>,
     req: Request<Body>,
-    forge_options: forge::buffer::ForgeRing,
+    context: Context,
 ) -> AxumResponse {
     let pkg_root = options.site_root.clone();
     let (parts, body) = req.into_parts();
@@ -29,8 +29,9 @@ pub async fn file_and_error_handler(
 
     let path: Vec<&str> = static_parts.uri.path().split('/').collect();
     if path.len() > 2 && path[1] == "cdn" {
-        let context = forge_options.clone();
-        if let Ok(f) = forge_options
+        let context = context.clone();
+        if let Ok(f) = context
+            .forge
             .get()
             .lock()
             .await
@@ -71,7 +72,7 @@ pub async fn file_and_error_handler(
         } else {
             let handler = leptos_axum::render_app_to_stream_with_context(
                 options.to_owned(),
-                move || provide_context(forge_options.clone()),
+                move || provide_context(context.clone()),
                 App,
             );
             handler(Request::from_parts(parts, body))

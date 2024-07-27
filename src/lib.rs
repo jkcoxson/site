@@ -4,6 +4,9 @@ pub mod app;
 pub mod error_template;
 pub mod forge_component;
 
+pub mod blog;
+#[cfg(feature = "ssr")]
+pub mod context;
 #[cfg(feature = "ssr")]
 pub mod fileserv;
 #[cfg(feature = "ssr")]

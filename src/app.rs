@@ -1,4 +1,5 @@
 use crate::{
+    blog,
     error_template::{AppError, ErrorTemplate},
     forge_component::ForgeComponent,
 };
@@ -13,7 +14,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/jkcoxson.css"/>
+        <Stylesheet id="leptos" href="/cdn/site/pkg/jkcoxson.css"/>
         <Stylesheet
             id="bs1"
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -34,6 +35,10 @@ pub fn App() -> impl IntoView {
         <Script
             id="bootstrap-js"
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        />
+        <Script
+            id="highlighter-js"
+            src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
         />
         <Script id="aos-js" src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"/>
         <Script id="main-js" src="/cdn/site/js/main.js"/>
@@ -59,6 +64,8 @@ pub fn App() -> impl IntoView {
                 <Routes>
                     <Route path="" view=HomePage/>
                     <Route path="/forge/*any" view=ForgeComponent/>
+                    <Route path="/blog" view=blog::browse::BrowseView/>
+                    <Route path="/blog/:id" view=blog::page::PageView/>
                 </Routes>
             </main>
         </Router>
@@ -591,12 +598,12 @@ pub fn Footer() -> impl IntoView {
                         </a>
                     </li>
                     <li class="list-inline-item me-4">
-                        <a class="link-secondary" href="#">
+                        <a class="link-secondary" href="/blog">
                             Blog
                         </a>
                     </li>
                     <li class="list-inline-item">
-                        <a class="link-secondary" href="#">
+                        <a class="link-secondary" href="/forge">
                             Forge
                         </a>
                     </li>

@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[cfg(feature = "ssr")]
-use crate::forge::buffer::ForgeRing;
+use crate::context::Context;
 
 #[component]
 /// Shows the Forge file explorer
@@ -51,10 +51,9 @@ pub fn ForgeComponent() -> impl IntoView {
                                         }
                                         PrintReturn::Dir((dirs, files)) => {
                                             view! {
-
                                                 <div class="file-browser">
                                                     <ul class="folders">
-                                                    <Back/>
+                                                        <Back/>
                                                         {dirs
                                                             .into_iter()
                                                             .map(|n| view! { <Folder name=n/> })
@@ -115,8 +114,8 @@ pub enum PrintReturn {
 
 #[server(PrintTree, "/api")]
 pub async fn print_tree(request: Vec<String>) -> Result<PrintReturn, ServerFnError> {
-    let state = expect_context::<ForgeRing>();
-    let state = state.get();
+    let state = expect_context::<Context>();
+    let state = state.forge.get();
 
     let borrowed_request: Vec<&str> = request
         .iter()
@@ -162,13 +161,22 @@ fn Back() -> impl IntoView {
             <a class="folder-icon"></a>
             <a
                 class="folder-name"
-                href={move || {format!("/{}", {let path = leptos_router::use_location().pathname.get();
-                    let mut path = path
-                        .split("/")
-                        .filter(|s| !s.is_empty())
-                        .collect::<Vec<&str>>();
-                    path.pop();path.join("/")})}}
+                href=move || {
+                    format!(
+                        "/{}",
+                        {
+                            let path = leptos_router::use_location().pathname.get();
+                            let mut path = path
+                                .split("/")
+                                .filter(|s| !s.is_empty())
+                                .collect::<Vec<&str>>();
+                            path.pop();
+                            path.join("/")
+                        },
+                    )
+                }
             >
+
                 ".."
             </a>
         </li>

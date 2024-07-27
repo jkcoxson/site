@@ -25,6 +25,13 @@ toml = { version = "0.8.14", optional = true }
 once_cell = { version = "1.19.0", optional = true }
 notify = { version = "6.1.1", optional = true }
 num_cpus = { version = "1.9.0", optional = true }
+markdown = "1.0.0-alpha.18" # we're using an alpha on purpose, the stable version bad I guess
+sqlx = { version = "0.8.0", optional = true, features = [
+  "mysql",
+  "runtime-tokio",
+  "chrono",
+] }
+dotenvy = { version = "0.15.7", optional = true }
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
@@ -42,6 +49,8 @@ ssr = [
   "dep:once_cell",
   "dep:notify",
   "dep:num_cpus",
+  "dep:sqlx",
+  "dep:dotenvy",
 ]
 
 # Defines a size-optimized profile for the WASM bundle in release mode

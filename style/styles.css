@@ -121,3 +121,42 @@ h2 {
   text-decoration: none;
   color: var(--bs-text-primary);
 }
+
+.post {
+  margin-bottom: 20px;
+  background-color: var(--bs-secondary);
+  min-height: 5em;
+}
+.post-img {
+  max-width: 30em;
+  margin-right: 10px;
+}
+
+table {
+  /*width: 100%;*/
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Header styles */
+th {
+  background-color: var(--bs-blue);
+  color: var(--bs-text-primary);
+  font-weight: bold;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+
+/* Row styles */
+tr:nth-child(even) {
+  background-color: var(--bs-secondary);
+}
+
+/* Cell styles */
+td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}

@@ -2,7 +2,6 @@
 
 pub mod app;
 pub mod error_template;
-pub mod forge_component;
 
 pub mod blog;
 #[cfg(feature = "ssr")]

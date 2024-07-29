@@ -1,7 +1,7 @@
 use crate::{
     blog,
     error_template::{AppError, ErrorTemplate},
-    forge_component::ForgeComponent,
+    forge::component::ForgeComponent,
 };
 use leptos::*;
 use leptos_meta::*;

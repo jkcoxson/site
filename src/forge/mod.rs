@@ -21,6 +21,7 @@ use std::{collections::HashMap, io::Read, path::PathBuf};
 use tree::Node;
 
 pub mod buffer;
+pub mod component;
 mod config;
 mod converters;
 mod tree;

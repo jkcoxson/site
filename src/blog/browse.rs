@@ -77,7 +77,7 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
     }
 }
 
-#[server(GetPosts)]
+#[server(GetPosts, "/api", "Url", "get_posts")]
 async fn get_posts() -> Result<Vec<super::structures::PostPreview>, ServerFnError> {
     let state = expect_context::<Context>();
 

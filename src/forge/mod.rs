@@ -18,6 +18,7 @@
 
 use std::{collections::HashMap, io::Read, path::PathBuf};
 
+use hashlink::LinkedHashMap;
 use tree::Node;
 
 pub mod buffer;
@@ -29,8 +30,7 @@ mod tree;
 /// Serves as a cache for the files
 pub struct Forge {
     inner: Node,
-    cache: HashMap<String, Vec<u8>>,
-    cache_size: usize,
+    cache: LinkedHashMap<String, (Vec<u8>, String)>,
     cache_limit: usize,
     path: PathBuf,
 }
@@ -100,8 +100,7 @@ impl Forge {
         println!("Loaded tree");
         Ok(Forge {
             inner: node,
-            cache: HashMap::new(),
-            cache_size: 0,
+            cache: LinkedHashMap::with_capacity(cache_limit),
             cache_limit,
             path,
         })
@@ -112,16 +111,21 @@ impl Forge {
         self.inner = Node::from(Self::load(self.path.clone(), 0)?)
             .take_first_child()
             .unwrap();
-        self.cache = HashMap::new();
-        self.cache_size = 0;
+        self.cache.clear();
         Ok(())
     }
 
     pub fn get(
-        &self,
+        &mut self,
         request: Vec<&str>,
         _version: Option<String>,
     ) -> Result<ForgeReturnType, std::io::Error> {
+        // Search the cache for a answer
+        let cache_search = request.join("/");
+        if let Some(res) = self.cache.to_front(&cache_search) {
+            println!("Cache hit!");
+            return Ok(ForgeReturnType::File(res.to_owned()));
+        }
         if let Some(r) = self.inner.traverse(request) {
             // Did we get a file or dir?
             match r {
@@ -138,6 +142,13 @@ impl Forge {
                     for converter in entry.converters.iter() {
                         buf = converter(buf);
                     }
+
+                    // Place in the cache
+                    if self.cache.len() == self.cache_limit {
+                        self.cache.pop_back();
+                    }
+                    self.cache
+                        .insert(cache_search, (buf.clone(), entry.content_type.clone()));
 
                     Ok(ForgeReturnType::File((buf, entry.content_type.clone())))
                 }

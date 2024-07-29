@@ -1154,6 +1154,7 @@ dependencies = [
  "axum",
  "console_error_panic_hook",
  "dotenvy",
+ "hashlink",
  "http 1.1.0",
  "leptos",
  "leptos_axum",

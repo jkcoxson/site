@@ -22,7 +22,6 @@ use hashlink::LinkedHashMap;
 use tree::Node;
 
 pub mod buffer;
-pub mod component;
 mod config;
 mod converters;
 mod tree;

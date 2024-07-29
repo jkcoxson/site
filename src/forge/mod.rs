@@ -122,7 +122,6 @@ impl Forge {
         // Search the cache for a answer
         let cache_search = request.join("/");
         if let Some(res) = self.cache.to_front(&cache_search) {
-            println!("Cache hit!");
             return Ok(ForgeReturnType::File(res.to_owned()));
         }
         if let Some(r) = self.inner.traverse(request) {

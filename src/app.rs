@@ -231,7 +231,12 @@ fn AboutSection() -> impl IntoView {
                 style="text-align: center"
             >
                 <picture>
-                    <img class="rounded-circle img-fluid" alt="profile" id="pfp" src="cdn/site/img/profile.jpg"/>
+                    <img
+                        class="rounded-circle img-fluid"
+                        alt="profile"
+                        id="pfp"
+                        src="cdn/site/img/profile.jpg"
+                    />
                 </picture>
             </div>
         </div>

@@ -31,9 +31,7 @@ pub fn PageView() -> impl IntoView {
                 {match once.get() {
                     Some(data) => {
                         match data {
-                            Ok(data) => view! {
-                                <div inner_html=data/>
-                            }.into_view(),
+                            Ok(data) => view! { <div inner_html=data></div> }.into_view(),
                             Err(e) => {
                                 println!("Unable to get data! {e:?}");
                                 match e {

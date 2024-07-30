@@ -104,7 +104,7 @@ pub fn NavBar() -> impl IntoView {
                         class="bs-icon-sm bs-icon-rounded bs-icon-primary d-flex justify-content-center align-items-center me-2 bs-icon"
                         style="background: rgba(0, 0, 0, 0)"
                     >
-                        <img src="/cdn/site/img/transparent.png" width="53" height="53"/>
+                        <img src="/cdn/site/img/transparent.png" alt="logo" width="53" height="53"/>
                     </span>
                 </a>
                 <button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-2">
@@ -231,7 +231,7 @@ fn AboutSection() -> impl IntoView {
                 style="text-align: center"
             >
                 <picture>
-                    <img class="rounded-circle img-fluid" id="pfp" src="cdn/site/img/profile.jpg"/>
+                    <img class="rounded-circle img-fluid" alt="profile" id="pfp" src="cdn/site/img/profile.jpg"/>
                 </picture>
             </div>
         </div>
@@ -365,6 +365,7 @@ fn Projects() -> impl IntoView {
             </div>
             <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
                 <Project
+                    title="JitStreamer".to_string()
                     description="JitStreamer was a service that enabled users to exploit a
                 loophole in the iOS developer stack."
                         .to_string()
@@ -372,6 +373,7 @@ fn Projects() -> impl IntoView {
                     link="https://github.com/jkcoxson/JitStreamer".to_string()
                 />
                 <Project
+                    title="SideStore".to_string()
                     description="SideStore uses a custom IP stack to install apps on iOS
                     without the App Store."
                         .to_string()
@@ -379,6 +381,7 @@ fn Projects() -> impl IntoView {
                     link="https://github.com/SideStore".to_string()
                 />
                 <Project
+                    title="MoabDB".to_string()
                     description="MoabDB is a finance database and API for traders and
                     researches to view histories and make predictions."
                         .to_string()
@@ -391,7 +394,7 @@ fn Projects() -> impl IntoView {
 }
 
 #[component]
-fn Project(description: String, image: String, link: String) -> impl IntoView {
+fn Project(title: String, description: String, image: String, link: String) -> impl IntoView {
     view! {
         <div class="col">
             <a href=link target="_blank" style="color: var(--bs-body-color)">
@@ -403,9 +406,10 @@ fn Project(description: String, image: String, link: String) -> impl IntoView {
                     <div class="card-body p-4">
                         <img
                             src=image
+                            alt=title.clone()
                             style="margin-bottom: 11px; border-radius: 10px; max-height: 150px;"
                         />
-                        <h4 class="card-title">JitStreamer</h4>
+                        <h4 class="card-title">{title}</h4>
                         <p class="card-text">{description}</p>
                     </div>
                 </div>

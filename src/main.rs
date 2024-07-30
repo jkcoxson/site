@@ -27,7 +27,7 @@ async fn main() {
     let mut forges = Vec::new();
     for _ in 0..cpus {
         forges.push(Arc::new(Mutex::new(
-            jkcoxson::forge::Forge::new(path.clone(), 0)
+            jkcoxson::forge::Forge::new(path.clone(), 20)
                 .expect("Unable to create a new file forge"),
         )));
     }

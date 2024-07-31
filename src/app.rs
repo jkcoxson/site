@@ -6,6 +6,7 @@ use crate::{
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
+use rand::{rngs::ThreadRng, Rng};
 
 #[component]
 /// The root of the application
@@ -82,7 +83,6 @@ fn HomePage() -> impl IntoView {
     view! {
         <NavBar/>
         <HeroSection/>
-        <ParalaxImage src="/cdn/site/img/rusty.png".to_string()/>
         <AboutSection/>
         <hr/>
         <Toolbox/>
@@ -159,7 +159,8 @@ pub fn NavBar() -> impl IntoView {
 /// Hero section of the app
 fn HeroSection() -> impl IntoView {
     view! {
-        <section class="py-4 py-xl-5">
+        <section class="py-4 py-xl-5 hero-section">
+
             <div class="container h-100">
                 <div class="row h-100" data-aos="slide-right" data-aos-once="true">
                     <div class="col-md-10 col-xl-8 text-center d-flex d-sm-flex d-md-flex justify-content-center align-items-center mx-auto justify-content-md-start align-items-md-center justify-content-xl-center">
@@ -181,6 +182,7 @@ fn HeroSection() -> impl IntoView {
                     </div>
                 </div>
             </div>
+            <TraceSvg/>
         </section>
     }
 }
@@ -203,6 +205,41 @@ fn ParalaxImage(src: String) -> impl IntoView {
         >
         </div>
     }
+}
+
+#[component]
+fn TraceSvg() -> impl IntoView {
+    let mut rng = rand::thread_rng();
+    view! {
+        <svg xmlns="http://www.w3.org/2000/svg" width="120vw" height="220vh">
+            <path d=generate_trace(&mut rng) class="trace"/>
+            <path d=generate_trace(&mut rng) class="trace"/>
+            <path d=generate_trace(&mut rng) class="trace"/>
+            <path d=generate_trace(&mut rng) class="trace"/>
+            <path d=generate_trace(&mut rng) class="trace"/>
+            <path d=generate_trace(&mut rng) class="trace"/>
+            <path d=generate_trace(&mut rng) class="trace"/>
+        </svg>
+    }
+}
+
+fn generate_trace(rng: &mut ThreadRng) -> String {
+    let mut x = 400;
+    let mut y = 400;
+    let mut trace = "M 400 400".to_string();
+
+    let movements: u16 = rng.gen_range(120..=200);
+    let start = rng.gen_range(0..=1);
+    for m in start..movements {
+        if m % 2 == 0 {
+            x = rng.gen_range((x / 50) - 6..(x / 50) + 6) * 50;
+        } else {
+            y = rng.gen_range((y / 50) - 2..(y / 50) + 2) * 50;
+        }
+        trace = format!(" {trace} L {x}, {y}");
+    }
+
+    trace
 }
 
 #[component]

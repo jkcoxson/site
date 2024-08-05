@@ -1,8 +1,7 @@
 // Jackson Coxson
 
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "ssr")]
-use sqlx::types::chrono::NaiveDateTime;
 
 #[cfg(feature = "ssr")]
 pub mod raw {
@@ -48,7 +47,8 @@ pub struct PostPreview {
     pub sneak_peak: Option<String>,
     pub image_path: Option<String>,
     pub published: bool,
-    pub date_published: String,
+    pub date_published: NaiveDateTime,
+    pub relative_date: String,
     pub date_updated: Option<String>,
     pub category: Option<Category>,
     pub tags: Vec<Tag>,

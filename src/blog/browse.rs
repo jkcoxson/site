@@ -70,7 +70,7 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
                     <p class="mb-1">{preview.sneak_peak}</p>
                 </div>
                 <div class="col-auto float-right">
-                    <small>{preview.date_published}</small>
+                    <small>{preview.relative_date}</small>
                 </div>
             </div>
         </a>
@@ -136,7 +136,8 @@ WHERE post_tags.slug = ?;"#,
                 sneak_peak: p.sneak_peak,
                 image_path: p.image_path,
                 published: p.published.unwrap_or(false),
-                date_published: format_relative_time(p.date_published),
+                date_published: p.date_published,
+                relative_date: format_relative_time(p.date_published),
                 date_updated: p.date_updated.map(format_relative_time),
                 category: match p.category {
                     Some(c) => Some(super::structures::Category {
@@ -164,6 +165,7 @@ WHERE post_tags.slug = ?;"#,
             }
         }
     }
+    previews.sort_by(|a, b| b.date_published.cmp(&a.date_published));
     Ok(previews)
 }
 

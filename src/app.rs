@@ -212,7 +212,7 @@ fn ParalaxImage(src: String) -> impl IntoView {
 fn TraceSvg() -> impl IntoView {
     let mut rng = rand::thread_rng();
     view! {
-        <svg xmlns="http://www.w3.org/2000/svg" width="120vw" height="220vh">
+        <svg xmlns="http://www.w3.org/2000/svg" width="80%" height="220vh">
             <path d=generate_trace(&mut rng) class="trace"></path>
             <path d=generate_trace(&mut rng) class="trace"></path>
             <path d=generate_trace(&mut rng) class="trace"></path>
@@ -247,7 +247,7 @@ fn generate_trace(rng: &mut ThreadRng) -> String {
 /// About section
 fn AboutSection() -> impl IntoView {
     view! {
-        <div class="row ps-sm-0" id="about_row" style="margin-top: 50px; transform: rotate(0deg)">
+        <div class="row ps-sm-0" id="about_row" style="margin-top: 50px; max-width: 100%">
             <div class="col align-self-center" data-aos="slide-right" style="text-align: center">
                 <h1>Hi, I am Jackson!</h1>
                 <p>

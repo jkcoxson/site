@@ -54,6 +54,7 @@ async fn main() {
             move || provide_context(app_context.clone()),
             App,
         )
+        .route("/favicon.ico", axum::routing::get(get_favicon))
         .fallback(|state, req| file_and_error_handler(state, req, context))
         .with_state(leptos_options);
 
@@ -62,4 +63,12 @@ async fn main() {
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
+}
+
+pub async fn get_favicon() -> impl axum::response::IntoResponse {
+    (
+        http::StatusCode::OK,
+        [("content-type", "image/x-icon")],
+        include_bytes!("../public/favicon.ico"),
+    )
 }

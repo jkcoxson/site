@@ -78,7 +78,7 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
 }
 
 #[server(GetPosts, "/api", "Url", "get_posts")]
-async fn get_posts(
+pub async fn get_posts(
     page: Option<u16>,
     limit: Option<u16>,
 ) -> Result<Vec<super::structures::PostPreview>, ServerFnError> {
@@ -103,7 +103,10 @@ LIMIT ?,?;
 "#,
     )
     .bind(page.unwrap_or(0))
-    .bind(limit.unwrap_or(u16::MAX))
+    .bind(match limit {
+        Some(l) => l + 1,
+        None => u16::MAX,
+    })
     .fetch_all(&state.sql_pool)
     .await
     {

@@ -567,6 +567,10 @@ fn Contact() -> impl IntoView {
 #[component]
 /// Shows a few of the most recent blog posts
 fn BlogShowcase() -> impl IntoView {
+    let once = create_resource(
+        || (),
+        |_| async move { blog::browse::get_posts(None, Some(3)).await },
+    );
     view! {
         <div
             class="container py-4 py-xl-5"
@@ -586,48 +590,74 @@ fn BlogShowcase() -> impl IntoView {
                 </div>
             </div>
             <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
-                <BlogShowcaseItem
-                    title="todo fill this with stuff".to_string()
-                    preview="Nullam id dolor id nibh ultricies vehicula ut id elit. Cras
-            justo odio, dapibus ac facilisis in, egestas eget quam. Donec id
-            elit non mi porta gravida at eget metus."
-                        .to_string()
-                    image="https://cdn.bootstrapstudio.io/placeholders/1400x800.png".to_string()
-                />
-                <BlogShowcaseItem
-                    title="todo fill this with stuff".to_string()
-                    preview="Nullam id dolor id nibh ultricies vehicula ut id elit. Cras
-                justo odio, dapibus ac facilisis in, egestas eget quam. Donec id
-                elit non mi porta gravida at eget metus."
-                        .to_string()
-                    image="https://cdn.bootstrapstudio.io/placeholders/1400x800.png".to_string()
-                />
-                <BlogShowcaseItem
-                    title="todo fill this with stuff".to_string()
-                    preview="Nullam id dolor id nibh ultricies vehicula ut id elit. Cras
-                justo odio, dapibus ac facilisis in, egestas eget quam. Donec id
-                elit non mi porta gravida at eget metus."
-                        .to_string()
-                    image="https://cdn.bootstrapstudio.io/placeholders/1400x800.png".to_string()
-                />
+                <Suspense fallback=move || {
+                    view! { <h2>"Loading..."</h2> }
+                }>
+                    {move || match once.get() {
+                        Some(posts) => {
+                            match posts {
+                                Ok(posts) => {
+                                    view! {
+                                        {posts
+                                            .into_iter()
+                                            .map(|p| {
+                                                view! { <BlogShowcaseItem preview=p/> }
+                                            })
+                                            .collect::<Vec<_>>()
+                                            .into_view()}
+                                    }
+                                        .into_view()
+                                }
+                                Err(e) => {
+                                    println!("Error fetching posts: {e:?}");
+                                    let mut outside_errors = Errors::default();
+                                    outside_errors
+                                        .insert_with_default_key(AppError::InternalServerError);
+                                    view! { <ErrorTemplate outside_errors/> }.into_view()
+                                }
+                            }
+                        }
+                        None => view! { <h2>"Loading..."</h2> }.into_view(),
+                    }}
 
+                </Suspense>
             </div>
         </div>
     }
 }
 
 #[component]
-fn BlogShowcaseItem(title: String, preview: String, image: String) -> impl IntoView {
+fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoView {
     view! {
         <div class="col">
-            <div class="card">
-                <img class="card-img-top w-100 d-block fit-cover" style="height: 200px" src=image/>
-                <div class="card-body p-4">
-                    <p class="text-primary card-text mb-0">Article</p>
-                    <h4 class="card-title">{title}</h4>
-                    <p class="card-text">{preview}</p>
+            <a
+                href=format!("/blog/{}", preview.slug)
+                class="list-group-item list-group-item-action post"
+            >
+                <div class="card">
+                    <img
+                        class="card-img-top w-100 d-block fit-cover"
+                        style="height: 200px"
+                        src=preview
+                            .image_path
+                            .unwrap_or(
+                                "https://cdn.bootstrapstudio.io/placeholders/1400x800.png"
+                                    .to_string(),
+                            )
+                    />
+                    <div class="card-body p-4">
+                        <p class="text-primary card-text mb-0">
+                            {match preview.category {
+                                Some(c) => c.category_name,
+                                None => "Article".to_string(),
+                            }}
+
+                        </p>
+                        <h4 class="card-title">{preview.post_name}</h4>
+                        <p class="card-text">{preview.sneak_peak}</p>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     }
 }

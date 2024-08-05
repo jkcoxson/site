@@ -10,7 +10,7 @@
 
 pub mod browse;
 pub mod page;
-mod structures;
+pub mod structures;
 
 #[cfg(feature = "ssr")]
 mod tests {

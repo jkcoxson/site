@@ -9,7 +9,7 @@ use leptos::*;
 
 #[component]
 pub fn BrowseView() -> impl IntoView {
-    let once = create_resource(|| (), |_| async move { get_posts().await });
+    let once = create_resource(|| (), |_| async move { get_posts(None, None).await });
     view! {
         <NavBar/>
         <div class="container">
@@ -78,7 +78,10 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
 }
 
 #[server(GetPosts, "/api", "Url", "get_posts")]
-async fn get_posts() -> Result<Vec<super::structures::PostPreview>, ServerFnError> {
+async fn get_posts(
+    page: Option<u16>,
+    limit: Option<u16>,
+) -> Result<Vec<super::structures::PostPreview>, ServerFnError> {
     let state = expect_context::<Context>();
 
     let posts = match sqlx::query_as::<_, crate::blog::structures::raw::RawPostPreview>(
@@ -94,9 +97,13 @@ SELECT
     posts.category,
     categories.category_name
 FROM posts
-LEFT JOIN categories ON posts.category = categories.id;
+LEFT JOIN categories ON posts.category = categories.id
+ORDER BY posts.date_published DESC
+LIMIT ?,?;
 "#,
     )
+    .bind(page.unwrap_or(0))
+    .bind(limit.unwrap_or(u16::MAX))
     .fetch_all(&state.sql_pool)
     .await
     {

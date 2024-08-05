@@ -13,7 +13,7 @@ pub fn BrowseView() -> impl IntoView {
     view! {
         <NavBar/>
         <div class="container">
-            <h1>"This is where the blog posts go!"</h1>
+            <h1>"Blog Posts"</h1>
             <Suspense fallback=move || {
                 view! { <h2>"Loading..."</h2> }
             }>

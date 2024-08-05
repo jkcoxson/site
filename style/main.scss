@@ -6,3 +6,10 @@
 @import "Testimonials-images";
 @import "hljs";
 
+[data-bs-theme="light"] {
+  --hero-stroke: #6effff;
+}
+
+[data-bs-theme="dark"] {
+  --hero-stroke: #004511;
+}

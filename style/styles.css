@@ -72,20 +72,23 @@ h2 {
   position: absolute;
   top: 0;
   left: 25%;
-  z-index: -1; /* Ensure the SVG is behind the content */
+  z-index: -1;
+  /* Ensure the SVG is behind the content */
 }
 
 .trace {
-  stroke: #004511;
+  stroke: var(--hero-stroke);
   stroke-width: 2;
   fill: none;
   stroke-dasharray: 0, 100%;
   animation: draw 4s infinite;
 }
+
 @keyframes draw {
   from {
     stroke-dasharray: 0, 100%;
   }
+
   to {
     stroke-dasharray: 100%, 0;
   }
@@ -167,6 +170,7 @@ h2 {
   background-color: var(--bs-secondary);
   min-height: 5em;
 }
+
 .post-img {
   max-width: 30em;
   margin-right: 10px;

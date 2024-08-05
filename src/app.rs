@@ -213,13 +213,13 @@ fn TraceSvg() -> impl IntoView {
     let mut rng = rand::thread_rng();
     view! {
         <svg xmlns="http://www.w3.org/2000/svg" width="120vw" height="220vh">
-            <path d=generate_trace(&mut rng) class="trace"/>
-            <path d=generate_trace(&mut rng) class="trace"/>
-            <path d=generate_trace(&mut rng) class="trace"/>
-            <path d=generate_trace(&mut rng) class="trace"/>
-            <path d=generate_trace(&mut rng) class="trace"/>
-            <path d=generate_trace(&mut rng) class="trace"/>
-            <path d=generate_trace(&mut rng) class="trace"/>
+            <path d=generate_trace(&mut rng) class="trace"></path>
+            <path d=generate_trace(&mut rng) class="trace"></path>
+            <path d=generate_trace(&mut rng) class="trace"></path>
+            <path d=generate_trace(&mut rng) class="trace"></path>
+            <path d=generate_trace(&mut rng) class="trace"></path>
+            <path d=generate_trace(&mut rng) class="trace"></path>
+            <path d=generate_trace(&mut rng) class="trace"></path>
         </svg>
     }
 }

@@ -4,6 +4,8 @@ use crate::{
     forge_component::ForgeComponent,
 };
 use chrono::Datelike;
+use leptonic::components::prelude::*;
+use leptonic::Size;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -17,10 +19,10 @@ pub fn App() -> impl IntoView {
 
     view! {
         <Stylesheet id="leptos" href="/cdn/site/pkg/jkcoxson.css"/>
-        <Stylesheet
-            id="bs1"
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        />
+        // <Stylesheet
+        // id="bs1"
+        // href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        // />
         <Stylesheet
             id="bs2"
             href="https://fonts.googleapis.com/css?family=Alatsi&amp;display=swap"
@@ -52,25 +54,27 @@ pub fn App() -> impl IntoView {
         <Title text="Jackson Coxson"/>
 
         // content for this welcome page
-        <Router fallback=|| {
-            let mut outside_errors = Errors::default();
-            outside_errors.insert_with_default_key(AppError::NotFound);
-            view! {
-                <NavBar/>
-                <ErrorTemplate outside_errors/>
-                <Footer/>
-            }
-                .into_view()
-        }>
-            <main>
-                <Routes>
-                    <Route path="" view=HomePage/>
-                    <Route path="/forge/*any" view=ForgeComponent/>
-                    <Route path="/blog" view=blog::browse::BrowseView/>
-                    <Route path="/blog/:id" view=blog::page::PageView/>
-                </Routes>
-            </main>
-        </Router>
+        <Root default_theme=LeptonicTheme::Dark>
+            <Router fallback=|| {
+                let mut outside_errors = Errors::default();
+                outside_errors.insert_with_default_key(AppError::NotFound);
+                view! {
+                    <NavBar/>
+                    <ErrorTemplate outside_errors/>
+                    <Footer/>
+                }
+                    .into_view()
+            }>
+                <main>
+                    <Routes>
+                        <Route path="" view=HomePage/>
+                        <Route path="/forge/*any" view=ForgeComponent/>
+                        <Route path="/blog" view=blog::browse::BrowseView/>
+                        <Route path="/blog/:id" view=blog::page::PageView/>
+                    </Routes>
+                </main>
+            </Router>
+        </Root>
     }
 }
 
@@ -98,61 +102,45 @@ fn HomePage() -> impl IntoView {
 #[component]
 pub fn NavBar() -> impl IntoView {
     view! {
-        <nav class="navbar navbar-expand-md bg-body py-3">
-            <div class="container">
+        <AppBar>
+            <Stack
+                orientation=StackOrientation::Horizontal
+                spacing=Size::Em(1.0)
+                style="margin-right: 1em"
+            >
                 <a class="navbar-brand d-flex align-items-center" href="/">
-                    <span
-                        class="bs-icon-sm bs-icon-rounded bs-icon-primary d-flex justify-content-center align-items-center me-2 bs-icon"
-                        style="background: rgba(0, 0, 0, 0)"
-                    >
+                    <span style="background: rgba(0, 0, 0, 0)">
                         <img src="/cdn/site/img/transparent.png" alt="logo" width="53" height="53"/>
                     </span>
                 </a>
-                <button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-2">
-                    <span class="visually-hidden">Toggle navigation</span>
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navcol-2">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a
-                                class="nav-link active"
-                                href="/blog"
-                                style="font-family: Alatsi, sans-serif"
-                            >
-                                Blog
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="/forge"
-                                style="font-family: Alatsi, sans-serif"
-                            >
-                                Forge
-                            </a>
-                        </li>
-                        <li class="nav-item"></li>
-                    </ul>
-                    <div style="padding-right: 10px; padding-left: 10px">
-                        <a href="https://github.com/jkcoxson" target="_blank">
-                            <img
-                                class="img-fluid bg-light bg-opacity-75 border rounded-circle"
-                                data-bss-hover-animate="swing"
-                                src="/cdn/site/img/github-mark.png"
-                                width="40"
-                                height="40"
-                                style="margin: 0px; padding: 0px; width: 30px; height: 30px"
-                                alt="GitHub"
-                            />
-                        </a>
-                    </div>
-                    <a class="btn btn-primary ms-md-2" role="button" href="#">
-                        Say Hi
-                    </a>
-                </div>
-            </div>
-        </nav>
+                <a class="" href="/blog" style="">
+                    Blog
+                </a>
+                <a class="" href="/forge" style="">
+                    Forge
+                </a>
+                <a href="https://github.com/jkcoxson" target="_blank">
+                    <img
+                        class=""
+                        data-bss-hover-animate="swing"
+                        src="/cdn/site/img/github-mark.png"
+                        width="40"
+                        height="40"
+                        style="margin: 0px; padding: 0px; width: 30px; height: 30px"
+                        alt="GitHub"
+                    />
+                </a>
+                <a class="" role="button" href="#">
+                    Say Hi
+                </a>
+                <ThemeToggle
+                    off=LeptonicTheme::Light
+                    on=LeptonicTheme::Dark
+                    class="theme-toggle"
+                    variant=ToggleVariant::Stationary
+                />
+            </Stack>
+        </AppBar>
     }
 }
 
@@ -160,27 +148,20 @@ pub fn NavBar() -> impl IntoView {
 /// Hero section of the app
 fn HeroSection() -> impl IntoView {
     view! {
-        <section class="py-4 py-xl-5 hero-section">
-
-            <div class="container h-100">
-                <div class="row h-100" data-aos="slide-right" data-aos-once="true">
-                    <div class="col-md-10 col-xl-8 text-center d-flex d-sm-flex d-md-flex justify-content-center align-items-center mx-auto justify-content-md-start align-items-md-center justify-content-xl-center">
-                        <div style="color: var(--bs-body-color)">
-                            <h2
-                                class="text-uppercase fw-bold mb-3"
-                                style="font-family: Roboto, sans-serif; font-weight: bold"
-                            >
-                                Innovator, Engineer & Programmer
-                            </h2>
-                            <p>I design powerful systems and push the limits of technology.</p>
-                            <button class="btn btn-primary fs-5 me-2 py-2 px-4" type="button">
-                                Contact
-                            </button>
-                            <button class="btn btn-outline-primary fs-5 py-2 px-4" type="button">
-                                Portfolio
-                            </button>
-                        </div>
-                    </div>
+        <section class="hero-section">
+            <div
+                data-aos="slide-right"
+                data-aos-once="true"
+            >
+                <div style="color: var(--bs-body-color)">
+                    <h2>Innovator, Engineer & Programmer</h2>
+                    <p>I design powerful systems and push the limits of technology.</p>
+                    <button class="" type="button">
+                        Contact
+                    </button>
+                    <button class="" type="button">
+                        Portfolio
+                    </button>
                 </div>
             </div>
             <TraceSvg/>
@@ -247,7 +228,7 @@ fn generate_trace(rng: &mut ThreadRng) -> String {
 /// About section
 fn AboutSection() -> impl IntoView {
     view! {
-        <div class="row ps-sm-0" id="about_row" style="margin-top: 50px; max-width: 100%">
+        <div class="row ps-sm-0" id="about_row" style="margin-top: 50px; transform: rotate(0deg)">
             <div class="col align-self-center" data-aos="slide-right" style="text-align: center">
                 <h1>Hi, I am Jackson!</h1>
                 <p>
@@ -645,6 +626,7 @@ fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoV
                                     .to_string(),
                             )
                     />
+
                     <div class="card-body p-4">
                         <p class="text-primary card-text mb-0">
                             {match preview.category {

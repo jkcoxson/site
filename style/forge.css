@@ -1,0 +1,72 @@
+
+.file-browser {
+  background-color: var(--bs-secondary);
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Folder styles */
+.folder {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-radius: 10px;
+}
+
+.folder:hover {
+  background-color: var(--bs-primary);
+}
+
+.folder-icon {
+  width: 20px;
+  height: 20px;
+  background-color: #5aac44;
+  /* Green folder icon */
+  border-radius: 50%;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.folder-name {
+  flex: 1;
+  font-size: 16px;
+  text-decoration: none;
+  color: var(--bs-text-primary);
+}
+
+/* File styles */
+.file {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-radius: 10px;
+}
+
+.file:hover {
+  background-color: var(--bs-primary);
+}
+
+.file-icon {
+  width: 20px;
+  height: 20px;
+  background-color: #3388ff;
+  /* Blue file icon */
+  border-radius: 50%;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.file-name {
+  flex: 1;
+  font-size: 16px;
+  text-decoration: none;
+  color: var(--bs-text-primary);
+}
+

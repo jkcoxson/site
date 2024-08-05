@@ -3,7 +3,6 @@ body {
   max-width: 100%;
 }
 
-
 @media (max-width: 500px) {
   #about_row {
     display: inline;
@@ -43,12 +42,6 @@ body {
   }
 }
 
-@media (max-width: 500px) {
-  #paralax {
-    display: none;
-  }
-}
-
 @media (max-width: 800px) {
   #about_row {
     margin-left: 30px;
@@ -64,102 +57,84 @@ h2 {
   text-align: center;
 }
 
+button {
+  --bs-btn-padding-x: 0.75rem;
+  --bs-btn-padding-y: 0.375rem;
+  --bs-btn-font-family: ;
+  --bs-btn-font-size: 1rem;
+  --bs-btn-font-weight: 400;
+  --bs-btn-line-height: 1.5;
+  --bs-btn-color: var(--bs-body-color);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-width: var(--bs-border-width);
+  --bs-btn-border-color: transparent;
+  --bs-btn-border-radius: var(--bs-border-radius);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.075);
+  --bs-btn-disabled-opacity: 0.65;
+  --bs-btn-focus-box-shadow: 0 0 0 0.25rem rgba(var(--bs-btn-focus-shadow-rgb), .5);
+  display: inline-block;
+  padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
+  font-size: var(--bs-btn-font-size);
+  font-weight: var(--bs-btn-font-weight);
+  line-height: var(--bs-btn-line-height);
+  color: var(--bs-btn-color);
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
+  border-radius: var(--bs-btn-border-radius);
+  background-color: var(--bs-btn-bg);
+  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #0d6efd;
+  --bs-btn-border-color: #0d6efd;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #0b5ed7;
+  --bs-btn-hover-border-color: #0a58ca;
+  --bs-btn-focus-shadow-rgb: 49, 132, 253;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #0a58ca;
+  --bs-btn-active-border-color: #0a53be;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #0d6efd;
+  --bs-btn-disabled-border-color: #0d6efd;
+}
+
+
 .hero-section {
+  justify-content: center !important;
   height: 100vh;
+  display: flex;
+  align-items: center;
 }
 
 .hero-section svg {
   position: absolute;
   top: 0;
   left: 25%;
-  z-index: -1; /* Ensure the SVG is behind the content */
+  z-index: -1;
 }
 
 .trace {
-  stroke: #004511;
+  stroke: var(--hero-stroke);
   stroke-width: 2;
   fill: none;
   stroke-dasharray: 0, 100%;
   animation: draw 4s infinite;
 }
+
 @keyframes draw {
   from {
     stroke-dasharray: 0, 100%;
   }
+
   to {
     stroke-dasharray: 100%, 0;
   }
-}
-
-.file-browser {
-  background-color: var(--bs-secondary);
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* Folder styles */
-.folder {
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border-radius: 10px;
-}
-
-.folder:hover {
-  background-color: var(--bs-primary);
-}
-
-.folder-icon {
-  width: 20px;
-  height: 20px;
-  background-color: #5aac44;
-  /* Green folder icon */
-  border-radius: 50%;
-  margin-right: 10px;
-  margin-left: 10px;
-}
-
-.folder-name {
-  flex: 1;
-  font-size: 16px;
-  text-decoration: none;
-  color: var(--bs-text-primary);
-}
-
-/* File styles */
-.file {
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border-radius: 10px;
-}
-
-.file:hover {
-  background-color: var(--bs-primary);
-}
-
-.file-icon {
-  width: 20px;
-  height: 20px;
-  background-color: #3388ff;
-  /* Blue file icon */
-  border-radius: 50%;
-  margin-right: 10px;
-  margin-left: 10px;
-}
-
-.file-name {
-  flex: 1;
-  font-size: 16px;
-  text-decoration: none;
-  color: var(--bs-text-primary);
 }
 
 .post {
@@ -167,6 +142,7 @@ h2 {
   background-color: var(--bs-secondary);
   min-height: 5em;
 }
+
 .post-img {
   max-width: 30em;
   margin-right: 10px;
@@ -199,4 +175,8 @@ td {
   padding: 10px;
   text-align: left;
   border-bottom: 1px solid #ddd;
+}
+
+leptonic-theme-toggle {
+  margin: 1em;
 }

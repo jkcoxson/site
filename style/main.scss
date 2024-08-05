@@ -3,6 +3,18 @@
 // import is deprecated? didn't ask
 @import "Navbar-Right-Links-icons";
 @import "styles";
+@import "forge";
 @import "Testimonials-images";
 @import "hljs";
+@import "./leptonic/leptonic-themes";
 
+[data-theme="light"] {
+  --hero-stroke: #6effff;
+  --brand-color: #0d6efd;
+}
+
+
+[data-theme="dark"] {
+  --hero-stroke: #004511;
+  --brand-color: #0d6efd;
+}

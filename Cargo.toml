@@ -24,7 +24,7 @@ serde = { version = "1.0.204", features = ["derive"] }
 toml = { version = "0.8.14", optional = true }
 once_cell = { version = "1.19.0", optional = true }
 notify = { version = "6.1.1", optional = true }
-num_cpus = { version = "1.9.0", optional = true }
+num_cpus = { version = "1.16.0", optional = true }
 markdown = "1.0.0-alpha.18" # we're using an alpha on purpose, the stable version bad I guess
 sqlx = { version = "0.8.0", optional = true, features = [
   "mysql",
@@ -34,7 +34,8 @@ sqlx = { version = "0.8.0", optional = true, features = [
 dotenvy = { version = "0.15.7", optional = true }
 hashlink = { version = "0.9.1", optional = true }
 rand = { version = "0.8.5" }
-chrono = { version = "0.4.38", features = ["serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+leptonic = { git = "https://github.com/jkcoxson/leptonic" }
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
@@ -55,6 +56,7 @@ ssr = [
   "dep:sqlx",
   "dep:dotenvy",
   "dep:hashlink",
+  "leptonic/ssr",
 ]
 
 # Defines a size-optimized profile for the WASM bundle in release mode
@@ -103,4 +105,11 @@ lib-default-features = true
 
 lib-profile-release = "wasm-release"
 
-# RUSTFLAGS=--cfg=web_sys_unstable_apis
+RUSTFLAGS = ["--cfg=web_sys_unstable_apis"]
+
+[package.metadata.leptonic]
+# REQUIRED: Leptonic's build-script will copy the Leptonic themes to this directory.
+style-dir = "style"
+
+# REQUIRED: Leptonic's build-script will copy static JS dependencies to this directory.
+js-dir = "public/js"

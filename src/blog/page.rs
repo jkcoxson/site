@@ -85,9 +85,11 @@ async fn get_post_content(slug: String) -> Result<String, ServerFnError> {
         Ok(f) => f,
         Err(e) => return Err(ServerFnError::ServerError(e.to_string())),
     };
-    markdown::CompileOptions::gfm();
+
+    let mut parse = markdown::ParseOptions::gfm();
+    parse.constructs.block_quote = true;
     let options = markdown::Options {
-        parse: markdown::ParseOptions::gfm(),
+        parse,
         compile: markdown::CompileOptions {
             allow_dangerous_html: true,
             allow_dangerous_protocol: true,

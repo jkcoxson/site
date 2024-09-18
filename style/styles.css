@@ -204,3 +204,29 @@ td {
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
+
+blockquote {
+    font-style: italic;
+    color: var(--bs-body-color); /* Body text color */
+    border-left: 5px solid var(--bs-primary); /* Primary color for the left border */
+    padding: 10px 20px; /* Padding around the text */
+    margin: 20px 0; /* Space above and below the blockquote */
+    background-color: var(--bs-bg-secondary); /* Secondary background color */
+    border-radius: 0.25rem; /* Slightly rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+blockquote::before {
+    content: open-quote; /* Adds an opening quote */
+    font-size: 2em; /* Larger size for the quote */
+    color: var(--bs-primary); /* Match the border color */
+    margin-right: 10px; /* Space between quote and text */
+}
+
+blockquote::after {
+    content: close-quote; /* Adds a closing quote */
+    font-size: 2em; /* Larger size for the quote */
+    color: var(--bs-primary); /* Match the border color */
+    margin-left: 10px; /* Space between text and quote */
+}
+

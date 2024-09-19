@@ -17,7 +17,7 @@ use crate::context::Context;
 /// Shows the Forge file explorer
 pub fn ForgeComponent() -> impl IntoView {
     view! {
-        <NavBar/>
+        <NavBar />
         <h1>Forge</h1>
 
         {
@@ -47,22 +47,22 @@ pub fn ForgeComponent() -> impl IntoView {
                                                 .pathname
                                                 .get()
                                                 .replacen("/forge", "/cdn", 1);
-                                            view! { <Redirect path=path/> }.into_view()
+                                            view! { <Redirect path=path /> }.into_view()
                                         }
                                         PrintReturn::Dir((dirs, files)) => {
                                             view! {
                                                 <div class="file-browser">
                                                     <ul class="folders">
-                                                        <Back/>
+                                                        <Back />
                                                         {dirs
                                                             .into_iter()
-                                                            .map(|n| view! { <Folder name=n/> })
+                                                            .map(|n| view! { <Folder name=n /> })
                                                             .collect::<Vec<_>>()}
                                                     </ul>
                                                     <ul class="files">
                                                         {files
                                                             .into_iter()
-                                                            .map(|n| view! { <File name=n/> })
+                                                            .map(|n| view! { <File name=n /> })
                                                             .collect::<Vec<_>>()}
                                                     </ul>
                                                 </div>
@@ -76,13 +76,13 @@ pub fn ForgeComponent() -> impl IntoView {
                                         ServerFnError::Request(_) => {
                                             let mut outside_errors = Errors::default();
                                             outside_errors.insert_with_default_key(AppError::NotFound);
-                                            view! { <ErrorTemplate outside_errors/> }.into_view()
+                                            view! { <ErrorTemplate outside_errors /> }.into_view()
                                         }
                                         _ => {
                                             let mut outside_errors = Errors::default();
                                             outside_errors
                                                 .insert_with_default_key(AppError::InternalServerError);
-                                            view! { <ErrorTemplate outside_errors/> }.into_view()
+                                            view! { <ErrorTemplate outside_errors /> }.into_view()
                                         }
                                     }
                                 }
@@ -102,7 +102,7 @@ pub fn ForgeComponent() -> impl IntoView {
             }
         }
 
-        <Footer/>
+        <Footer />
     }
 }
 

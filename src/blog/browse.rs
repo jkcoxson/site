@@ -11,7 +11,7 @@ use leptos::*;
 pub fn BrowseView() -> impl IntoView {
     let once = create_resource(|| (), |_| async move { get_posts(None, None).await });
     view! {
-        <NavBar/>
+        <NavBar />
         <div class="container">
             <h1>"Blog Posts"</h1>
             <Suspense fallback=move || {
@@ -25,7 +25,7 @@ pub fn BrowseView() -> impl IntoView {
                                     <div class="list-group">
                                         {posts
                                             .into_iter()
-                                            .map(|p| view! { <PostPreviewComponent preview=p/> })
+                                            .map(|p| view! { <PostPreviewComponent preview=p /> })
                                             .collect::<Vec<_>>()
                                             .into_view()}
 
@@ -38,7 +38,7 @@ pub fn BrowseView() -> impl IntoView {
                                 let mut outside_errors = Errors::default();
                                 outside_errors
                                     .insert_with_default_key(AppError::InternalServerError);
-                                view! { <ErrorTemplate outside_errors/> }.into_view()
+                                view! { <ErrorTemplate outside_errors /> }.into_view()
                             }
                         }
                     }
@@ -47,8 +47,8 @@ pub fn BrowseView() -> impl IntoView {
 
             </Suspense>
         </div>
-        <br/>
-        <Footer/>
+        <br />
+        <Footer />
     }
 }
 

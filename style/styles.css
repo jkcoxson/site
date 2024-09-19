@@ -250,3 +250,34 @@ blockquote::after {
     margin-left: 10px; /* Space between text and quote */
 }
 
+details {
+  border: 2px solid var(--bs-secondary-bg);
+  border-radius: 5px;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: var(--bs-bg-primary);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+summary {
+  font-weight: bold;
+  cursor: pointer;
+  padding: 5px;
+  border: 2px solid transparent; /* Ensures padding is consistent */
+  border-radius: 4px;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+summary:hover {
+  background-color: var(--bs-secondary-bg); /* Light grey on hover */
+  border-color: var(--bs-primary-border-subtle); /* Border color on hover */
+}
+
+details[open] {
+  border: 2px solid var(--bs-secondary);
+  background-color: var(--bs-secondary-bg);
+}
+
+details[open] summary::before {
+  transform: rotate(90deg); /* Rotate marker when open */
+}

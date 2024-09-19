@@ -28,6 +28,7 @@ pub fn PageView() -> impl IntoView {
                 view! { <h2>"Loading..."</h2> }
             }>
 
+                <div class="blog-post">
                 {match once.get() {
                     Some(data) => {
                         match data {
@@ -52,6 +53,7 @@ pub fn PageView() -> impl IntoView {
                     }
                     None => view! { "Loading..." }.into_view(),
                 }}
+                </div>
 
             </Suspense>
         </div>

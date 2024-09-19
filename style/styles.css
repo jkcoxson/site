@@ -58,10 +58,30 @@ body {
 
 h1 {
   text-align: center;
+  font-weight: bold !important
 }
 
 h2 {
   text-align: center;
+  font-weight: bold !important;
+  padding: 20px;
+
+}
+
+.blog-post h2 {
+  text-decoration: underline;
+}
+
+h3 {
+  font-weight: bolder !important;
+}
+
+.blog-post h3 {
+  text-decoration: underline;
+}
+
+.blog-post img {
+  max-width: 100%;
 }
 
 .hero-section {

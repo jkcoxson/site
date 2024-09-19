@@ -16,7 +16,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/cdn/site/pkg/jkcoxson.css"/>
+        <Stylesheet id="leptos" href="/cdn/site/pkg/jkcoxson.css" />
         <Stylesheet
             id="bs1"
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -29,7 +29,7 @@ pub fn App() -> impl IntoView {
             id="bs3"
             href="https://fonts.googleapis.com/css?family=Roboto&amp;display=swap"
         />
-        <Stylesheet id="bs4" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"/>
+        <Stylesheet id="bs4" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
         <Stylesheet
             id="bs5"
             href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
@@ -42,32 +42,32 @@ pub fn App() -> impl IntoView {
             id="highlighter-js"
             src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
         />
-        <Script id="aos-js" src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"/>
-        <Script id="main-js" src="/cdn/site/js/main.js"/>
-        <Script id="bs-init" src="/cdn/site/js/bs-init.js"/>
+        <Script id="aos-js" src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" />
+        <Script id="main-js" src="/cdn/site/js/main.js" />
+        <Script id="bs-init" src="/cdn/site/js/bs-init.js" />
 
-        <Eruda/>
+        <Eruda />
 
         // sets the document title
-        <Title text="Jackson Coxson"/>
+        <Title text="Jackson Coxson" />
 
         // content for this welcome page
         <Router fallback=|| {
             let mut outside_errors = Errors::default();
             outside_errors.insert_with_default_key(AppError::NotFound);
             view! {
-                <NavBar/>
-                <ErrorTemplate outside_errors/>
-                <Footer/>
+                <NavBar />
+                <ErrorTemplate outside_errors />
+                <Footer />
             }
                 .into_view()
         }>
             <main>
                 <Routes>
-                    <Route path="" view=HomePage/>
-                    <Route path="/forge/*any" view=ForgeComponent/>
-                    <Route path="/blog" view=blog::browse::BrowseView/>
-                    <Route path="/blog/:id" view=blog::page::PageView/>
+                    <Route path="" view=HomePage />
+                    <Route path="/forge/*any" view=ForgeComponent />
+                    <Route path="/blog" view=blog::browse::BrowseView />
+                    <Route path="/blog/:id" view=blog::page::PageView />
                 </Routes>
             </main>
         </Router>
@@ -82,15 +82,15 @@ fn HomePage() -> impl IntoView {
     // let on_click = move |_| set_count.update(|count| *count += 1);
 
     view! {
-        <NavBar/>
-        <HeroSection/>
-        <AboutSection/>
-        <hr/>
-        <Toolbox/>
-        <Projects/>
-        <Contact/>
-        <BlogShowcase/>
-        <Footer/>
+        <NavBar />
+        <HeroSection />
+        <AboutSection />
+        <hr />
+        <Toolbox />
+        <Projects />
+        <Contact />
+        <BlogShowcase />
+        <Footer />
     }
 }
 
@@ -105,7 +105,12 @@ pub fn NavBar() -> impl IntoView {
                         class="bs-icon-sm bs-icon-rounded bs-icon-primary d-flex justify-content-center align-items-center me-2 bs-icon"
                         style="background: rgba(0, 0, 0, 0)"
                     >
-                        <img src="/cdn/site/img/transparent.png" alt="logo" width="53" height="53"/>
+                        <img
+                            src="/cdn/site/img/transparent.png"
+                            alt="logo"
+                            width="53"
+                            height="53"
+                        />
                     </span>
                 </a>
                 <button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-2">
@@ -183,7 +188,7 @@ fn HeroSection() -> impl IntoView {
                     </div>
                 </div>
             </div>
-            <TraceSvg/>
+            <TraceSvg />
         </section>
     }
 }
@@ -203,8 +208,7 @@ fn ParalaxImage(src: String) -> impl IntoView {
             padding-bottom: 0px;
             ",
             )
-        >
-        </div>
+        ></div>
     }
 }
 
@@ -253,14 +257,14 @@ fn AboutSection() -> impl IntoView {
                 <p>
                     I am an engineer, dreamer and {' '} <strong>
                         <span style="text-decoration: underline">innovator</span>
-                    </strong> . Pushing the limits of technology has been my passion since I was
+                    </strong>. Pushing the limits of technology has been my passion since I was
                     young, and I am also a strong believer in the power of {' '} <strong>
                         <span style="text-decoration: underline">open-source</span>
                     </strong> {' '}
                     and have contributed to various projects in the community. I am always
                     looking for new challenges and opportunities to learn and {' '} <strong>
                         <span style="text-decoration: underline">grow</span>
-                    </strong> .
+                    </strong>.
                 </p>
             </div>
             <div
@@ -273,7 +277,7 @@ fn AboutSection() -> impl IntoView {
                         class="rounded-circle img-fluid"
                         alt="profile"
                         id="pfp"
-                        src="cdn/site/img/profile.jpg"
+                        src="/cdn/site/img/profile.jpg"
                     />
                 </picture>
             </div>
@@ -296,7 +300,7 @@ fn Toolbox() -> impl IntoView {
             <div class="row">
                 <div class="col d-flex justify-content-center align-items-center flex-wrap">
                     <div class="w-100 d-flex justify-content-center"></div>
-                    <Tool name="Rust".to_string() img_src="cdn/site/img/rust.png".to_string()/>
+                    <Tool name="Rust".to_string() img_src="/cdn/site/img/rust.png".to_string() />
                     <Tool
                         name="Javascript".to_string()
                         img_src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/600px-JavaScript-logo.png?20120221235433"
@@ -358,16 +362,15 @@ fn Toolbox() -> impl IntoView {
                     target="_blank"
                 >
                     Rust Foundation
-                </a> - Python logo:
-                <a href="https://www.python.org/psf/trademarks/" target="_blank">
+                </a>- Python logo: <a href="https://www.python.org/psf/trademarks/" target="_blank">
                     PSF
-                </a> - <a href="https://github.com/sveltejs/branding" target="_blank">
+                </a>- <a href="https://github.com/sveltejs/branding" target="_blank">
                     Svelte
-                </a> - Git logo: <a href="https://git-scm.com/downloads/logos" target="_blank">
+                </a>- Git logo: <a href="https://git-scm.com/downloads/logos" target="_blank">
                     Jason Long
-                </a> - Go: <a href="https://go.dev/brand" target="_blank">
+                </a>- Go: <a href="https://go.dev/brand" target="_blank">
                     Google
-                </a> -
+                </a>-
                 <a
                     href="https://commons.wikimedia.org/wiki/File:MySQL_textlogo.svg"
                     target="_blank"
@@ -388,7 +391,7 @@ fn Tool(name: String, img_src: String) -> impl IntoView {
             style="margin-left: 15px; margin-right: 15px"
         >
             <h1 class="text-center">
-                <img src=img_src width="80vw" style="margin-right: 10px" alt=""/>
+                <img src=img_src width="80vw" style="margin-right: 10px" alt="" />
                 {name}
             </h1>
         </div>
@@ -403,7 +406,7 @@ fn Projects() -> impl IntoView {
             <div class="row mb-5" style="margin-bottom: 20px">
                 <div class="col-md-8 col-xl-6 text-center mx-auto">
                     <h2>Projects</h2>
-                    <p class="w-lg-50">Here is a small taste of the work {"I've"} done</p>
+                    <p class="w-lg-50">Here is a small taste of the work {"I've"}done</p>
                 </div>
             </div>
             <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
@@ -412,7 +415,7 @@ fn Projects() -> impl IntoView {
                     description="JitStreamer was a service that enabled users to exploit a
                 loophole in the iOS developer stack."
                         .to_string()
-                    image="cdn/site/img/jitstreamer.jpg".to_string()
+                    image="/cdn/site/img/jitstreamer.jpg".to_string()
                     link="https://github.com/jkcoxson/JitStreamer".to_string()
                 />
                 <Project
@@ -420,7 +423,7 @@ fn Projects() -> impl IntoView {
                     description="SideStore uses a custom IP stack to install apps on iOS
                     without the App Store."
                         .to_string()
-                    image="cdn/site/img/sidestore.jpeg".to_string()
+                    image="/cdn/site/img/sidestore.jpeg".to_string()
                     link="https://github.com/SideStore".to_string()
                 />
                 <Project
@@ -428,7 +431,7 @@ fn Projects() -> impl IntoView {
                     description="MoabDB is a finance database and API for traders and
                     researches to view histories and make predictions."
                         .to_string()
-                    image="cdn/site/img/moabdb.png".to_string()
+                    image="/cdn/site/img/moabdb.png".to_string()
                     link="https://moabdb.com".to_string()
                 />
             </div>
@@ -601,7 +604,7 @@ fn BlogShowcase() -> impl IntoView {
                                         {posts
                                             .into_iter()
                                             .map(|p| {
-                                                view! { <BlogShowcaseItem preview=p/> }
+                                                view! { <BlogShowcaseItem preview=p /> }
                                             })
                                             .collect::<Vec<_>>()
                                             .into_view()}
@@ -613,7 +616,7 @@ fn BlogShowcase() -> impl IntoView {
                                     let mut outside_errors = Errors::default();
                                     outside_errors
                                         .insert_with_default_key(AppError::InternalServerError);
-                                    view! { <ErrorTemplate outside_errors/> }.into_view()
+                                    view! { <ErrorTemplate outside_errors /> }.into_view()
                                 }
                             }
                         }
@@ -747,7 +750,7 @@ pub fn Footer() -> impl IntoView {
                     </li>
                 </ul>
                 <p class="mb-0">
-                    Copyright {" © "} {chrono::Utc::now().date_naive().year()} Jackson Coxson
+                    Copyright {" © "} {chrono::Utc::now().date_naive().year()}Jackson Coxson
                 </p>
                 <small>On to eternal perfection</small>
             </div>
@@ -760,7 +763,7 @@ pub fn Footer() -> impl IntoView {
 fn Eruda() -> impl IntoView {
     #[cfg(debug_assertions)]
     view! {
-        <Script id="eruda" src="https://cdn.jsdelivr.net/npm/eruda"/>
+        <Script id="eruda" src="https://cdn.jsdelivr.net/npm/eruda" />
         <div inner_html="<script>eruda.init();</script>"></div>
     }
 

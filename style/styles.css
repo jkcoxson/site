@@ -231,7 +231,7 @@ blockquote {
     border-left: 5px solid var(--bs-primary); /* Primary color for the left border */
     padding: 10px 20px; /* Padding around the text */
     margin: 20px 0; /* Space above and below the blockquote */
-    background-color: var(--bs-bg-secondary); /* Secondary background color */
+    background-color: var(--bs-info-bg-subtle); /* Secondary background color */
     border-radius: 0.25rem; /* Slightly rounded corners */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }

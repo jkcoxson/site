@@ -19,3 +19,13 @@ pub fn hydrate() {
     console_error_panic_hook::set_once();
     leptos::mount_to_body(App);
 }
+
+#[cfg(feature = "hydrate")]
+#[wasm_bindgen::prelude::wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen::prelude::wasm_bindgen(js_namespace = hljs)]
+    fn highlightAll();
+}
+
+#[cfg(not(feature = "hydrate"))]
+fn highlightAll() {}

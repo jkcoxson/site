@@ -8,16 +8,10 @@ use crate::error_template::ErrorTemplate;
 use crate::highlightAll;
 use leptos::*;
 use leptos_router::use_params_map;
-#[cfg(feature = "ssr")]
-use sqlx::{mysql::MySqlRow, Row};
 
 #[component]
 pub fn PageView() -> impl IntoView {
     let params = use_params_map();
-    let data = create_resource(
-        move || params.with(|p| p.get("id").cloned().unwrap_or_default()),
-        move |id| async move { id },
-    );
     let once = create_resource(
         move || params.get(),
         |d| async move { get_post_content(d.get("id").cloned().unwrap_or_default()).await },

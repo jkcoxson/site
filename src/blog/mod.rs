@@ -34,19 +34,4 @@ mod tests {
         let output = markdown::to_html_with_options(input, &options).unwrap();
         println!("{output}")
     }
-
-    #[tokio::test]
-    async fn t2() {
-        use sqlx::mysql::MySqlPoolOptions;
-        dotenvy::dotenv().unwrap();
-
-        let pool = MySqlPoolOptions::new()
-            .connect(&std::env::var("DB_URL").unwrap())
-            .await
-            .unwrap();
-
-        let rows = sqlx::query("SELECT * FROM posts").fetch(&pool);
-    }
 }
-
-// this is a test "" cool beans

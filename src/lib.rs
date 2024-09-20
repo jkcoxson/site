@@ -28,4 +28,5 @@ extern "C" {
 }
 
 #[cfg(not(feature = "hydrate"))]
+#[allow(non_snake_case)]
 fn highlightAll() {}

@@ -138,12 +138,16 @@ pub async fn print_tree(request: Vec<String>) -> Result<PrintReturn, ServerFnErr
 
 #[component]
 fn Folder(name: String) -> impl IntoView {
+    let mut current_path = leptos_router::use_location().pathname.get_untracked();
+    if current_path.ends_with('/') {
+        current_path.truncate(current_path.len() - 1)
+    }
     view! {
         <li class="folder">
             <a class="folder-icon"></a>
             <a
                 class="folder-name"
-                href=format!("{}/{}", leptos_router::use_location().pathname.get_untracked(), name)
+                href=format!("{}/{}", current_path, name)
             >
                 {name}
             </a>
@@ -182,12 +186,16 @@ fn Back() -> impl IntoView {
 
 #[component]
 fn File(name: String) -> impl IntoView {
+    let mut current_path = leptos_router::use_location().pathname.get_untracked();
+    if current_path.ends_with('/') {
+        current_path.truncate(current_path.len() - 1)
+    }
     view! {
         <li class="file">
             <span class="file-icon"></span>
             <a
                 class="file-name"
-                href=format!("{}/{}", leptos_router::use_location().pathname.get_untracked(), name)
+                href=format!("{}/{}", current_path, name)
                     .replacen("/forge", "/cdn", 1)
                 rel="external"
             >

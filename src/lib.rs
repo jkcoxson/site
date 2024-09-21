@@ -27,6 +27,18 @@ extern "C" {
     fn highlightAll();
 }
 
+#[cfg(feature = "hydrate")]
+#[wasm_bindgen::prelude::wasm_bindgen]
+pub fn reload() {
+    if let Some(window) = web_sys::window() {
+        window.location().reload().unwrap();
+    }
+}
+
 #[cfg(not(feature = "hydrate"))]
 #[allow(non_snake_case)]
 fn highlightAll() {}
+
+#[cfg(not(feature = "hydrate"))]
+#[allow(non_snake_case)]
+fn reload() {}

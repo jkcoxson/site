@@ -2,7 +2,6 @@
 
 use leptos::*;
 
-use leptos_router::Redirect;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -43,11 +42,8 @@ pub fn ForgeComponent() -> impl IntoView {
                                 Ok(d) => {
                                     match d {
                                         PrintReturn::File => {
-                                            let path = leptos_router::use_location()
-                                                .pathname
-                                                .get()
-                                                .replacen("/forge", "/cdn", 1);
-                                            view! { <Redirect path=path /> }.into_view()
+                                            crate::reload();
+                                            view! { "Reloading..." }.into_view()
                                         }
                                         PrintReturn::Dir((dirs, files)) => {
                                             view! {
@@ -129,7 +125,8 @@ pub async fn print_tree(request: Vec<String>) -> Result<PrintReturn, ServerFnErr
                 return Err(ServerFnError::Request("File not found".to_string()));
             }
             std::io::ErrorKind::InvalidData => {
-                leptos_axum::redirect(format!("/cdn/{}", borrowed_request.join("/")).as_str());
+                println!("Redirecting from: {borrowed_request:?}");
+                leptos_axum::redirect(format!("/cdn/{}", borrowed_request[1..].join("/")).as_str());
                 return Ok(PrintReturn::File);
             }
             _ => return Err(e.into()),

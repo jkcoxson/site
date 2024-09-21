@@ -13,6 +13,7 @@ leptos = { version = "0.6" }
 leptos_axum = { version = "0.6", optional = true }
 leptos_meta = { version = "0.6" }
 leptos_router = { version = "0.6" }
+web-sys = { version = "0.3.70", features = ["Window"], optional = true }
 tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 tower = { version = "0.5.1", features = ["util"], optional = true }
 tower-http = { version = "0.5", features = ["fs"], optional = true }
@@ -37,7 +38,12 @@ rand = { version = "0.8.5" }
 chrono = { version = "0.4.38", features = ["serde"] }
 
 [features]
-hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
+hydrate = [
+  "leptos/hydrate",
+  "leptos_meta/hydrate",
+  "leptos_router/hydrate",
+  "dep:web-sys",
+]
 ssr = [
   "dep:axum",
   "dep:tokio",

@@ -750,7 +750,7 @@ pub fn Footer() -> impl IntoView {
                     </li>
                 </ul>
                 <p class="mb-0">
-                    Copyright {" © "} {chrono::Utc::now().date_naive().year()}Jackson Coxson
+                    Copyright {" © "} {chrono::Utc::now().date_naive().year()} {" Jackson Coxson"}
                 </p>
                 <small>On to eternal perfection</small>
             </div>

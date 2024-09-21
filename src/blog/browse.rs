@@ -61,15 +61,18 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
         >
             <div class="row">
                 <img
-                    src="https://via.placeholder.com/100"
+                    src=match preview.image_path {
+                        Some(p) => p,
+                        None => "https://via.placeholder.com/100".to_string(),
+                    }
                     alt="Post Image"
-                    class="col-auto post-img"
+                    class="col-sm-auto post-img"
                 />
                 <div class="col">
                     <h3 class="mb-1">{preview.post_name}</h3>
                     <p class="mb-1">{preview.sneak_peak}</p>
                 </div>
-                <div class="col-auto float-right">
+                <div class="col-lg-auto float-right">
                     <small>{preview.relative_date}</small>
                 </div>
             </div>

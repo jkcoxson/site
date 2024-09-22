@@ -35,7 +35,7 @@ pub fn ForgeComponent() -> impl IntoView {
                 <Transition fallback=move || {
                     view! { <h2>"Loading..."</h2> }
                 }>
-                    <h2>{move || leptos_router::use_location().pathname.get()}</h2>
+                    <h2 class="text-sky-500">{move || leptos_router::use_location().pathname.get()}</h2>
                     {match resource.get() {
                         Some(data) => {
                             match data.clone() {

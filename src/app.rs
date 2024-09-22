@@ -17,34 +17,12 @@ pub fn App() -> impl IntoView {
 
     view! {
         <Stylesheet id="leptos" href="/cdn/site/pkg/jkcoxson.css" />
-        <Stylesheet
-            id="bs1"
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        />
-        <Stylesheet
-            id="bs2"
-            href="https://fonts.googleapis.com/css?family=Alatsi&amp;display=swap"
-        />
-        <Stylesheet
-            id="bs3"
-            href="https://fonts.googleapis.com/css?family=Roboto&amp;display=swap"
-        />
-        <Stylesheet id="bs4" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
-        <Stylesheet
-            id="bs5"
-            href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
-        />
-        <Script
-            id="bootstrap-js"
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        />
         <Script
             id="highlighter-js"
             src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
         />
         <Script id="aos-js" src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" />
         <Script id="main-js" src="/cdn/site/js/main.js" />
-        <Script id="bs-init" src="/cdn/site/js/bs-init.js" />
 
         <Eruda />
 

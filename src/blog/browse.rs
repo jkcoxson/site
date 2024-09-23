@@ -12,8 +12,8 @@ pub fn BrowseView() -> impl IntoView {
     let once = create_resource(|| (), |_| async move { get_posts(None, None).await });
     view! {
         <NavBar />
-        <div class="container">
-            <h1>"Blog Posts"</h1>
+        <div class="flex-col center-items center-text m-6">
+            <h1 class="text-4xl">"Blog Posts"</h1>
             <Suspense fallback=move || {
                 view! { <h2>"Loading..."</h2> }
             }>
@@ -57,22 +57,18 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
     view! {
         <a
             href=format!("/blog/{}", preview.slug)
-            class="list-group-item list-group-item-action post"
+            class="flex items-start p-4 border-b hover:bg-gray-100 transition"
         >
-            <div class="row">
-                <img
-                    src=match preview.image_path {
-                        Some(p) => p,
-                        None => "https://via.placeholder.com/100".to_string(),
-                    }
-                    alt="Post Image"
-                    class="col-sm-auto post-img"
-                />
-                <div class="col">
-                    <h3 class="mb-1">{preview.post_name}</h3>
-                    <p class="mb-1">{preview.sneak_peak}</p>
-                </div>
-                <div class="col-lg-auto float-right">
+            <div class="">
+                {if let Some(i) = preview.image_path {
+                    view! { <img src=i alt="Post Image" class="w-full h-96 object-cover mr-4" /> }
+                        .into_view()
+                } else {
+                    view! {}.into_view()
+                }} <div class="flex-grow">
+                    <h3 class="text-lg font-semibold mb-1">{preview.post_name}</h3>
+                    <p class="text-gray-600 mb-1">{preview.sneak_peak}</p>
+                </div> <div class="text-sm text-gray-500">
                     <small>{preview.relative_date}</small>
                 </div>
             </div>
@@ -184,7 +180,7 @@ WHERE post_tags.slug = ?;"#,
 
 #[cfg(feature = "ssr")]
 fn format_relative_time(dt: sqlx::types::chrono::NaiveDateTime) -> String {
-    let now = sqlx::types::chrono::Utc::now().naive_utc();
+    let now = sqlx::types::chrono::Local::now().naive_utc();
     let duration = now.signed_duration_since(dt);
 
     if duration.num_minutes() < 1 {

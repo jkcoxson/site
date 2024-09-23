@@ -4,7 +4,11 @@ module.exports = {
     files: ["*.html", "./src/**/*.rs"],
   },
   theme: {
-    extend: {},
+    extend: {
+      animation: {
+        draw: 'draw 4s infinite',
+      },
+    },
   },
   plugins: [],
 }

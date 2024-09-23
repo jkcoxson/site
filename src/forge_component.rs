@@ -17,6 +17,7 @@ use crate::context::Context;
 pub fn ForgeComponent() -> impl IntoView {
     view! {
         <NavBar />
+        <div class="flex flex-col justify-center text-center">
         <h1>Forge</h1>
 
         {
@@ -35,7 +36,9 @@ pub fn ForgeComponent() -> impl IntoView {
                 <Transition fallback=move || {
                     view! { <h2>"Loading..."</h2> }
                 }>
-                    <h2 class="text-sky-500">{move || leptos_router::use_location().pathname.get()}</h2>
+                    <h2 class="text-sky-500">
+                        {move || leptos_router::use_location().pathname.get()}
+                    </h2>
                     {match resource.get() {
                         Some(data) => {
                             match data.clone() {
@@ -47,7 +50,7 @@ pub fn ForgeComponent() -> impl IntoView {
                                         }
                                         PrintReturn::Dir((dirs, files)) => {
                                             view! {
-                                                <div class="file-browser">
+                                                <div class="file-browser w-1/2 bg-gray-200 rounded-t-xl ">
                                                     <ul class="folders">
                                                         <Back />
                                                         {dirs
@@ -97,6 +100,7 @@ pub fn ForgeComponent() -> impl IntoView {
                 </Transition>
             }
         }
+        </div>
 
         <Footer />
     }
@@ -145,10 +149,7 @@ fn Folder(name: String) -> impl IntoView {
     view! {
         <li class="folder">
             <a class="folder-icon"></a>
-            <a
-                class="folder-name"
-                href=format!("{}/{}", current_path, name)
-            >
+            <a class="folder-name" href=format!("{}/{}", current_path, name)>
                 {name}
             </a>
         </li>
@@ -195,8 +196,7 @@ fn File(name: String) -> impl IntoView {
             <span class="file-icon"></span>
             <a
                 class="file-name"
-                href=format!("{}/{}", current_path, name)
-                    .replacen("/forge", "/cdn", 1)
+                href=format!("{}/{}", current_path, name).replacen("/forge", "/cdn", 1)
                 rel="external"
             >
                 {name}

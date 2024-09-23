@@ -1,15 +1,9 @@
 // Jackson Coxson
 
 // import is deprecated? didn't ask
-@import "Navbar-Right-Links-icons";
-@import "styles";
-@import "Testimonials-images";
+@import "base";
+@import "blog";
 @import "hljs";
-
-[data-bs-theme="light"] {
-  --hero-stroke: #6effff;
-}
-
-[data-bs-theme="dark"] {
-  --hero-stroke: #004511;
-}
+@import "manual";
+@import "output";
+// @import "styles";

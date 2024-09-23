@@ -1,0 +1,10 @@
+@keyframes draw {
+  from {
+    stroke-dasharray: 0, 100%;
+  }
+
+  to {
+    stroke-dasharray: 100%, 0;
+  }
+}
+

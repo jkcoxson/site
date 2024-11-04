@@ -242,9 +242,9 @@ fn generate_trace(rng: &mut ThreadRng) -> String {
 /// About section
 fn AboutSection() -> impl IntoView {
     view! {
-        <div class="flex flex-col md:flex-row items-center m-24">
-            <div class="flex-1 flex-col flex items-center justify-center text-center">
-                <h1 class="text-3xl font-bold">Hi, I am Jackson!</h1>
+        <div class="items-center flex flex-wrap justify-center mb-8 m-2">
+            <div class="flex flex-col w-full md:w-1/2 lg:w-1/3">
+                <h1 class="text-center text-3xl font-bold">Hi, I am Jackson!</h1>
                 <p class="">
                     I am an engineer, dreamer and <strong>
                         <span class="underline">innovator</span>
@@ -259,14 +259,12 @@ fn AboutSection() -> impl IntoView {
                     </strong>.
                 </p>
             </div>
-            <div class="flex-1 flex items-center justify-center">
-                <picture>
-                    <img
-                        class="rounded-full w-1/3 h-1/3 object-cover"
-                        alt="profile"
-                        src="/cdn/site/img/profile.jpg"
-                    />
-                </picture>
+            <div class="w-full md:w-1/2 lg:w-1/3 flex flex-wrap justify-center">
+                <img
+                    class="rounded-full w-1/2 object-cover"
+                    alt="profile"
+                    src="/cdn/site/img/profile.jpg"
+                />
             </div>
         </div>
     }

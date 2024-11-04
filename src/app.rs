@@ -314,7 +314,7 @@ fn Toolbox() -> impl IntoView {
                         class="text-center flex justify-center items-center flex-wrap mx-4"
                         data-bss-hover-animate="rubberBand"
                     >
-                        <h1 class="mb-2 rounded-lg bg-gray-800 w-20 h-20 text-white flex items-center justify-center m-2">
+                        <h1 class="mb-2 rounded-lg bg-gray-800 w-20 h-20 text-white text-4xl flex items-center justify-center m-2">
                             >_
                         </h1>
                         <h1 class="text-center">Linux</h1>

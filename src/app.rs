@@ -494,7 +494,7 @@ fn Contact() -> impl IntoView {
                     </div>
                     <div class="w-full md:w-1/2 lg:w-2/3">
                         <div>
-                            <form class="p-4 bg-white rounded-lg shadow" method="post">
+                            <form class="p-4 bg-white rounded-lg shadow shadow-2xl" method="post">
                                 <div class="mb-4">
                                     <input
                                         class="form-input w-full p-3 border rounded"

@@ -36,7 +36,7 @@ pub fn ForgeComponent() -> impl IntoView {
                     <Transition fallback=move || {
                         view! { <h2>"Loading..."</h2> }
                     }>
-                        <h2 class="text-sky-500">
+                        <h2 class="text-stone-500">
                             {move || leptos_router::use_location().pathname.get()}
                         </h2>
                         {match resource.get() {

@@ -12,8 +12,10 @@ pub fn BrowseView() -> impl IntoView {
     let once = create_resource(|| (), |_| async move { get_posts(None, None).await });
     view! {
         <NavBar />
-        <div class="flex-col center-items center-text m-6">
-            <h1 class="text-4xl">"Blog Posts"</h1>
+        <div class="flex justify-center">
+        <div class="w-5/6 md:w-3/4 flex flex-col m-6">
+            <h1 class="m-6">"Blog Posts"</h1>
+            <hr />
             <Suspense fallback=move || {
                 view! { <h2>"Loading..."</h2> }
             }>
@@ -22,7 +24,7 @@ pub fn BrowseView() -> impl IntoView {
                         match posts {
                             Ok(posts) => {
                                 view! {
-                                    <div class="list-group">
+                                    <div>
                                         {posts
                                             .into_iter()
                                             .map(|p| view! { <PostPreviewComponent preview=p /> })
@@ -46,6 +48,7 @@ pub fn BrowseView() -> impl IntoView {
                 }}
 
             </Suspense>
+        </div>
         </div>
         <br />
         <Footer />

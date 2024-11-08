@@ -18,8 +18,9 @@ use crate::context::Context;
 pub fn ForgeComponent() -> impl IntoView {
     view! {
         <NavBar />
-        <div class="flex flex-col justify-center text-center items-center">
         <Title text="Forge" />
+
+        <div class="flex flex-col items-center justify-center text-center">
             <h1>Forge</h1>
 
             {
@@ -52,7 +53,7 @@ pub fn ForgeComponent() -> impl IntoView {
                                             }
                                             PrintReturn::Dir((dirs, files)) => {
                                                 view! {
-                                                    <div class="w-5/6 md:w-1/3 lg:1/4 bg-gray-200 rounded-t-xl">
+                                                    <div class="lg:1/4 w-5/6 rounded-t-xl bg-gray-200 md:w-1/3">
                                                         <ul>
                                                             <Back />
                                                             {dirs
@@ -149,9 +150,9 @@ fn Folder(name: String) -> impl IntoView {
         current_path.truncate(current_path.len() - 1)
     }
     view! {
-        <li class="p-2 m-4 outline outline-2 rounded-md hover:bg-blue-400 flex justify-center items-center">
-            <a class="flex w-full h-full" href=format!("{}/{}", current_path, name)>
-                <div class="w-8 h-8 bg-green-700 rounded-2xl flex-shrink-0 flex items-center justify-center mr-2"></div>
+        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400">
+            <a class="flex h-full w-full" href=format!("{}/{}", current_path, name)>
+                <div class="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-green-700"></div>
                 <p>{name}</p>
             </a>
         </li>
@@ -161,9 +162,9 @@ fn Folder(name: String) -> impl IntoView {
 #[component]
 fn Back() -> impl IntoView {
     view! {
-        <li class="p-2 m-4 outline outline-2 rounded-md hover:bg-blue-400 flex justify-center items-center">
+        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400">
             <a
-                class="flex w-full h-full"
+                class="flex h-full w-full"
                 href=move || {
                     format!(
                         "/{}",
@@ -180,7 +181,7 @@ fn Back() -> impl IntoView {
                 }
             >
 
-                <div class="-icon w-8 h-8 bg-green-700 rounded-2xl flex-shrink-0 flex items-center justify-center mr-2"></div>
+                <div class="-icon mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-green-700"></div>
                 <p>".."</p>
             </a>
         </li>
@@ -194,13 +195,13 @@ fn File(name: String) -> impl IntoView {
         current_path.truncate(current_path.len() - 1)
     }
     view! {
-        <li class="p-2 m-4 outline outline-2 rounded-md hover:bg-blue-400 flex justify-center items-center">
+        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400">
             <a
-                class="flex w-full h-full"
+                class="flex h-full w-full"
                 href=format!("{}/{}", current_path, name).replacen("/forge", "/cdn", 1)
                 rel="external"
             >
-                <div class="w-8 h-8 bg-blue-700 rounded-2xl flex-shrink-0 flex items-center justify-center mr-2"></div>
+                <div class="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-700"></div>
                 <p>{name}</p>
             </a>
         </li>

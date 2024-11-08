@@ -19,7 +19,7 @@ pub fn PageView() -> impl IntoView {
 
     view! {
         <NavBar />
-        <div class="flex content-center place-content-center">
+        <div class="flex place-content-center content-center">
             <Suspense fallback=move || {
                 view! { <h2>"Loading..."</h2> }
             }>
@@ -30,7 +30,7 @@ pub fn PageView() -> impl IntoView {
                         highlightAll();
                     });
                 }
-                <div class="flex blog-post w-3/4">
+                <div class="flex w-3/4">
                     {match once.get() {
                         Some(data) => {
                             match data {

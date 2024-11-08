@@ -39,7 +39,7 @@ pub fn App() -> impl IntoView {
             }
                 .into_view()
         }>
-            <main>
+            <main class="relative z-0 dark:bg-stone-900">
                 <Routes>
                     <Route path="" view=HomePage />
                     <Route path="/forge/*any" view=ForgeComponent />
@@ -75,10 +75,10 @@ fn HomePage() -> impl IntoView {
 #[component]
 pub fn NavBar() -> impl IntoView {
     view! {
-        <nav class="flex bg-white py-3">
-            <div class="container mx-auto flex justify-between items-center">
+        <nav class="flex bg-white py-3 dark:bg-stone-900">
+            <div class="container mx-auto flex items-center justify-between">
                 <a class="flex items-center" href="/">
-                    <span class="flex justify-center items-center rounded-full bg-transparent me-2">
+                    <span class="me-2 flex items-center justify-center rounded-full bg-transparent">
                         <img
                             src="/cdn/site/img/transparent.png"
                             alt="logo"
@@ -87,9 +87,9 @@ pub fn NavBar() -> impl IntoView {
                         />
                     </span>
                 </a>
-                <button class="lg:hidden p-2" aria-controls="navcol-2" aria-expanded="false">
+                <button class="p-2 lg:hidden" aria-controls="navcol-2" aria-expanded="false">
                     <span class="sr-only">Toggle navigation</span>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -99,14 +99,14 @@ pub fn NavBar() -> impl IntoView {
                     </svg>
                 </button>
                 <div class="hidden lg:flex lg:items-center" id="navcol-2">
-                    <ul class="flex space-x-4 ml-auto">
+                    <ul class="ml-auto flex space-x-4">
                         <li>
-                            <a class="text-gray-800 font-alatsi" href="/blog">
+                            <a class="font-alatsi text-gray-800" href="/blog">
                                 Blog
                             </a>
                         </li>
                         <li>
-                            <a class="text-gray-800 font-alatsi" href="/forge">
+                            <a class="font-alatsi text-gray-800" href="/forge">
                                 Forge
                             </a>
                         </li>
@@ -114,13 +114,13 @@ pub fn NavBar() -> impl IntoView {
                     <div class="px-2">
                         <a href="https://github.com/jkcoxson" target="_blank">
                             <img
-                                class="w-10 h-10 bg-light border rounded-full"
+                                class="bg-light h-10 w-10 rounded-full border"
                                 src="/cdn/site/img/github-mark.png"
                                 alt="GitHub"
                             />
                         </a>
                     </div>
-                    <a class="bg-blue-500 text-white py-2 px-4 rounded-md ml-2" href="#">
+                    <a class="ml-2 rounded-md bg-blue-500 px-4 py-2 text-white" href="#">
                         Say Hi
                     </a>
                 </div>
@@ -133,28 +133,28 @@ pub fn NavBar() -> impl IntoView {
 /// Hero section of the app
 fn HeroSection() -> impl IntoView {
     view! {
-        <section class=" content-center">
+        <section class="content-center">
             <div class="mx-auto">
                 <div class="flex h-screen">
-                    <div class="flex flex-col justify-center content-center mx-auto text-center">
+                    <div class="mx-auto flex flex-col content-center justify-center text-center">
                         <div class="">
                             <h2
-                                class="text-uppercase font-bold mb-3 text-3xl"
+                                class="text-uppercase mb-3 text-3xl font-bold dark:text-stone-400"
                                 style="font-family: 'Roboto', sans-serif;"
                             >
                                 Innovator, Engineer & Programmer
                             </h2>
-                            <p class="mb-4">
+                            <p class="mb-4 dark:text-stone-400">
                                 I design powerful systems and push the limits of technology.
                             </p>
                             <button
-                                class="bg-blue-500 text-white font-semibold text-lg py-2 px-4 rounded mr-2"
+                                class="mr-2 rounded bg-blue-500 px-4 py-2 text-lg font-semibold text-white dark:text-white"
                                 type="button"
                             >
                                 Contact
                             </button>
                             <button
-                                class="border border-blue-500 text-blue-500 font-semibold text-lg py-2 px-4 rounded"
+                                class="rounded border border-blue-500 px-4 py-2 text-lg font-semibold text-blue-500"
                                 type="button"
                             >
                                 Portfolio
@@ -173,46 +173,46 @@ fn TraceSvg() -> impl IntoView {
     let mut rng = rand::thread_rng();
     view! {
         <svg
-            class="bg-fixed absolute top-0 left-0 right-0 -z-50"
+            class="absolute left-0 right-0 top-0 -z-50"
             xmlns="http://www.w3.org/2000/svg"
             width="80%"
             height="220vh"
         >
             <path
                 d=generate_trace(&mut rng)
-                class="stroke-cyan-200 stroke-2 fill-none stroke-dasharray-[0,100%] animate-draw"
+                class="stroke-dasharray-[0,100%] animate-draw fill-none stroke-cyan-200 stroke-2 dark:stroke-green-800"
             ></path>
             <path
                 d=generate_trace(&mut rng)
-                class="stroke-cyan-200 stroke-2 fill-none stroke-dasharray-[0,100%] animate-draw"
+                class="stroke-dasharray-[0,100%] animate-draw fill-none stroke-cyan-200 stroke-2 dark:stroke-green-800"
             ></path>
             <path
                 d=generate_trace(&mut rng)
-                class="stroke-cyan-200 stroke-2 fill-none stroke-dasharray-[0,100%] animate-draw"
+                class="stroke-dasharray-[0,100%] animate-draw fill-none stroke-cyan-200 stroke-2 dark:stroke-green-800"
             ></path>
             <path
                 d=generate_trace(&mut rng)
-                class="stroke-cyan-200 stroke-2 fill-none stroke-dasharray-[0,100%] animate-draw"
+                class="stroke-dasharray-[0,100%] animate-draw fill-none stroke-cyan-200 stroke-2 dark:stroke-green-800"
             ></path>
             <path
                 d=generate_trace(&mut rng)
-                class="stroke-cyan-200 stroke-2 fill-none stroke-dasharray-[0,100%] animate-draw"
+                class="stroke-dasharray-[0,100%] animate-draw fill-none stroke-cyan-200 stroke-2 dark:stroke-green-800"
             ></path>
             <path
                 d=generate_trace(&mut rng)
-                class="stroke-cyan-200 stroke-2 fill-none stroke-dasharray-[0,100%] animate-draw"
+                class="stroke-dasharray-[0,100%] animate-draw fill-none stroke-cyan-200 stroke-2 dark:stroke-green-800"
             ></path>
             <path
                 d=generate_trace(&mut rng)
-                class="stroke-cyan-200 stroke-2 fill-none stroke-dasharray-[0,100%] animate-draw"
+                class="stroke-dasharray-[0,100%] animate-draw fill-none stroke-cyan-200 stroke-2 dark:stroke-green-800"
             ></path>
             <path
                 d=generate_trace(&mut rng)
-                class="stroke-cyan-200 stroke-2 fill-none stroke-dasharray-[0,100%] animate-draw"
+                class="stroke-dasharray-[0,100%] animate-draw fill-none stroke-cyan-200 stroke-2 dark:stroke-green-800"
             ></path>
             <path
                 d=generate_trace(&mut rng)
-                class="stroke-cyan-200 stroke-2 fill-none stroke-dasharray-[0,100%] animate-draw"
+                class="stroke-dasharray-[0,100%] animate-draw fill-none stroke-cyan-200 stroke-2 dark:stroke-green-800"
             ></path>
         </svg>
     }
@@ -241,8 +241,8 @@ fn generate_trace(rng: &mut ThreadRng) -> String {
 /// About section
 fn AboutSection() -> impl IntoView {
     view! {
-        <div class="items-center flex flex-wrap justify-center mb-8 m-2">
-            <div class="flex flex-col w-full md:w-1/2 lg:w-1/3">
+        <div class="m-2 mb-8 flex flex-wrap items-center justify-center">
+            <div class="flex w-full flex-col md:w-1/2 lg:w-1/3">
                 <h1 class="text-center text-3xl font-bold">Hi, I am Jackson!</h1>
                 <p class="">
                     I am an engineer, dreamer and <strong>
@@ -258,9 +258,9 @@ fn AboutSection() -> impl IntoView {
                     </strong>.
                 </p>
             </div>
-            <div class="w-full md:w-1/2 lg:w-1/3 flex flex-wrap justify-center">
+            <div class="flex w-full flex-wrap justify-center md:w-1/2 lg:w-1/3">
                 <img
-                    class="rounded-full w-1/2 object-cover"
+                    class="w-1/2 rounded-full object-cover"
                     alt="profile"
                     src="/cdn/site/img/profile.jpg"
                 />
@@ -273,11 +273,11 @@ fn AboutSection() -> impl IntoView {
 /// Toolbox
 fn Toolbox() -> impl IntoView {
     view! {
-        <div class="p-5 m-5 bg-gray-200 mx-0">
+        <div class="m-5 mx-0 bg-gray-200 p-5">
             <h1 class="text-center text-2xl font-bold">Toolbox</h1>
             <div class="flex flex-col">
-                <div class="flex justify-center items-center flex-wrap">
-                    <div class="w-full flex justify-center"></div>
+                <div class="flex flex-wrap items-center justify-center">
+                    <div class="flex w-full justify-center"></div>
                     <Tool name="Rust".to_string() img_src="/cdn/site/img/rust.png".to_string() />
                     <Tool
                         name="Javascript".to_string()
@@ -310,10 +310,10 @@ fn Toolbox() -> impl IntoView {
                             .to_string()
                     />
                     <div
-                        class="text-center flex justify-center items-center flex-wrap mx-4"
+                        class="mx-4 flex flex-wrap items-center justify-center text-center"
                         data-bss-hover-animate="rubberBand"
                     >
-                        <h1 class="mb-2 rounded-lg bg-gray-800 w-20 h-20 text-white text-4xl flex items-center justify-center m-2">
+                        <h1 class="m-2 mb-2 flex h-20 w-20 items-center justify-center rounded-lg bg-gray-800 text-4xl text-white">
                             >_
                         </h1>
                         <h1 class="text-center">Linux</h1>
@@ -371,8 +371,8 @@ fn Toolbox() -> impl IntoView {
 #[component]
 fn Tool(name: String, img_src: String) -> impl IntoView {
     view! {
-        <div class="text-center flex justify-center items-center flex-wrap mx-4 m-6">
-            <h1 class="text-center flex items-center">
+        <div class="m-6 mx-4 flex flex-wrap items-center justify-center text-center">
+            <h1 class="flex items-center text-center">
                 <img src=img_src width="80" class="mr-2" alt="" />
                 {name}
             </h1>
@@ -387,11 +387,11 @@ fn Projects() -> impl IntoView {
         <div class="w-screen">
             <div class="mb-5 text-center">
                 <h2 class="text-3xl font-bold">Projects</h2>
-                <p class="w-full lg:w-1/2 mx-auto">
+                <p class="mx-auto w-full lg:w-1/2">
                     Here is a small taste of the work {"I've"}done
                 </p>
             </div>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 justify-center m-24">
+            <div class="m-24 grid grid-cols-1 justify-center gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <Project
                     title="JitStreamer".to_string()
                     description="JitStreamer was a service that enabled users to exploit a loophole in the iOS developer stack."
@@ -423,12 +423,12 @@ fn Project(title: String, description: String, image: String, link: String) -> i
     view! {
         <div class="flex content-center items-center">
             <a href=link target="_blank" class="text-gray-800">
-                <div class="bg-gray-200 rounded-lg transition-transform transform hover:scale-105">
+                <div class="transform rounded-lg bg-gray-200 transition-transform hover:scale-105">
                     <div class="p-4">
                         <img
                             src=image
                             alt=title.clone()
-                            class="mb-3 rounded-lg max-h-40 object-cover"
+                            class="mb-3 max-h-40 rounded-lg object-cover"
                         />
                         <h4 class="text-lg font-semibold">{title}</h4>
                         <p class="text-gray-600">{description}</p>
@@ -443,16 +443,16 @@ fn Project(title: String, description: String, image: String, link: String) -> i
 /// Contact me tile
 fn Contact() -> impl IntoView {
     view! {
-        <section class="relative py-16 lg:py-24 m-44">
+        <section class="relative m-44 py-16 lg:py-24">
             <div class="relative">
                 <div class="mb-10 text-center">
                     <h2 class="text-3xl font-bold">Get in Contact</h2>
                 </div>
                 <div class="flex flex-wrap justify-center">
-                    <div class="w-full md:w-1/2 lg:w-1/3 mb-8">
-                        <div class="flex flex-col justify-center h-full">
+                    <div class="mb-8 w-full md:w-1/2 lg:w-1/3">
+                        <div class="flex h-full flex-col justify-center">
                             <div class="flex items-center p-4">
-                                <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-blue-500 text-white">
+                                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-white">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="1em"
@@ -470,7 +470,7 @@ fn Contact() -> impl IntoView {
                                 </div>
                             </div>
                             <div class="flex items-center p-4">
-                                <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-blue-500 text-white">
+                                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-white">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="1em"
@@ -491,10 +491,10 @@ fn Contact() -> impl IntoView {
                     </div>
                     <div class="w-full md:w-1/2 lg:w-2/3">
                         <div>
-                            <form class="p-4 bg-white rounded-lg shadow shadow-2xl" method="post">
+                            <form class="rounded-lg bg-white p-4 shadow-2xl" method="post">
                                 <div class="mb-4">
                                     <input
-                                        class="form-input w-full p-3 border rounded"
+                                        class="form-input w-full rounded border p-3"
                                         type="text"
                                         id="name-1"
                                         name="name"
@@ -503,7 +503,7 @@ fn Contact() -> impl IntoView {
                                 </div>
                                 <div class="mb-4">
                                     <input
-                                        class="form-input w-full p-3 border rounded"
+                                        class="form-input w-full rounded border p-3"
                                         type="email"
                                         id="email-1"
                                         name="email"
@@ -512,7 +512,7 @@ fn Contact() -> impl IntoView {
                                 </div>
                                 <div class="mb-4">
                                     <textarea
-                                        class="form-input w-full p-3 border rounded"
+                                        class="form-input w-full rounded border p-3"
                                         id="message-1"
                                         name="message"
                                         rows="6"
@@ -521,7 +521,7 @@ fn Contact() -> impl IntoView {
                                 </div>
                                 <div>
                                     <button
-                                        class="w-full bg-blue-500 text-white py-3 rounded hover:bg-blue-600 transition"
+                                        class="w-full rounded bg-blue-500 py-3 text-white transition hover:bg-blue-600"
                                         type="submit"
                                     >
                                         Send
@@ -544,17 +544,17 @@ fn BlogShowcase() -> impl IntoView {
         |_| async move { blog::browse::get_posts(None, Some(3)).await },
     );
     view! {
-        <div class="py-16 lg:py-24 bg-cyan-200">
+        <div class="bg-cyan-200 py-16 lg:py-24">
             <div class="mb-10 text-center">
                 <div class="text-3xl font-bold">
                     <h2>Blog</h2>
-                    <p class="w-full md:w-1/2 mx-auto text-gray-600">
+                    <p class="mx-auto w-full text-gray-600 md:w-1/2">
                         Read about my findings and work! I am passionate about technology and
                         not afraid to share my opinion.
                     </p>
                 </div>
             </div>
-            <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 m-24">
+            <div class="m-24 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <Suspense fallback=move || {
                     view! { <h2>"Loading..."</h2> }
                 }>
@@ -597,11 +597,11 @@ fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoV
         <div class="col">
             <a
                 href=format!("/blog/{}", preview.slug)
-                class="block transition-transform transform hover:scale-105"
+                class="block transform transition-transform hover:scale-105"
             >
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow-hidden rounded-lg bg-white shadow-md">
                     <img
-                        class="w-full h-48 object-cover"
+                        class="h-48 w-full object-cover"
                         src=preview
                             .image_path
                             .unwrap_or(
@@ -610,14 +610,14 @@ fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoV
                             )
                     />
                     <div class="p-4">
-                        <p class="text-blue-600 text-sm mb-1">
+                        <p class="mb-1 text-sm text-blue-600">
                             {match preview.category {
                                 Some(c) => c.category_name,
                                 None => "Article".to_string(),
                             }}
 
                         </p>
-                        <h4 class="text-xl font-semibold mb-2">{preview.post_name}</h4>
+                        <h4 class="mb-2 text-xl font-semibold">{preview.post_name}</h4>
                         <p class="text-gray-600">{preview.sneak_peak}</p>
                     </div>
                 </div>
@@ -631,25 +631,25 @@ fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoV
 pub fn Footer() -> impl IntoView {
     view! {
         <footer class="text-center shadow-md">
-            <div class="mx-auto text-gray-600 py-4 md:py-5">
-                <ul class="flex justify-center space-x-4 mb-4">
+            <div class="mx-auto py-4 text-gray-600 md:py-5">
+                <ul class="mb-4 flex justify-center space-x-4">
                     <li>
-                        <a class="text-gray-600 hover:text-blue-600 transition" href="/">
+                        <a class="text-gray-600 transition hover:text-blue-600" href="/">
                             Home
                         </a>
                     </li>
                     <li>
-                        <a class="text-gray-600 hover:text-blue-600 transition" href="/blog">
+                        <a class="text-gray-600 transition hover:text-blue-600" href="/blog">
                             Blog
                         </a>
                     </li>
                     <li>
-                        <a class="text-gray-600 hover:text-blue-600 transition" href="/forge">
+                        <a class="text-gray-600 transition hover:text-blue-600" href="/forge">
                             Forge
                         </a>
                     </li>
                 </ul>
-                <ul class="flex justify-center space-x-4 mb-4">
+                <ul class="mb-4 flex justify-center space-x-4">
                     <li>
                         <a
                             href="https://www.facebook.com/profile.php?id=100089118900022"
@@ -657,7 +657,7 @@ pub fn Footer() -> impl IntoView {
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 text-gray-600 hover:text-blue-600 transition"
+                                class="h-6 w-6 text-gray-600 transition hover:text-blue-600"
                                 fill="currentColor"
                                 viewBox="0 0 16 16"
                             >
@@ -669,7 +669,7 @@ pub fn Footer() -> impl IntoView {
                         <a href="https://x.com/jkcoxson" target="_blank">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 text-gray-600 hover:text-blue-600 transition"
+                                class="h-6 w-6 text-gray-600 transition hover:text-blue-600"
                                 fill="currentColor"
                                 viewBox="0 0 16 16"
                             >
@@ -681,7 +681,7 @@ pub fn Footer() -> impl IntoView {
                         <a href="https://instagram.com/jkcoxson" target="_blank">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 text-gray-600 hover:text-blue-600 transition"
+                                class="h-6 w-6 text-gray-600 transition hover:text-blue-600"
                                 fill="currentColor"
                                 viewBox="0 0 16 16"
                             >
@@ -693,7 +693,7 @@ pub fn Footer() -> impl IntoView {
                         <a href="https://github.com/jkcoxson" target="_blank">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 text-gray-600 hover:text-blue-600 transition"
+                                class="h-6 w-6 text-gray-600 transition hover:text-blue-600"
                                 fill="currentColor"
                                 viewBox="0 0 96 96"
                             >

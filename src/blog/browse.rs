@@ -13,7 +13,7 @@ pub fn BrowseView() -> impl IntoView {
     view! {
         <NavBar />
         <div class="flex justify-center">
-        <div class="w-5/6 md:w-3/4 flex flex-col m-6">
+        <div class="m-6 flex w-5/6 flex-col md:w-3/4">
             <h1 class="m-6">"Blog Posts"</h1>
             <hr />
             <Suspense fallback=move || {
@@ -60,17 +60,17 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
     view! {
         <a
             href=format!("/blog/{}", preview.slug)
-            class="flex items-start p-4 border-b hover:bg-gray-100 transition"
+            class="flex items-start border-b p-4 transition hover:bg-gray-100"
         >
             <div class="">
                 {if let Some(i) = preview.image_path {
-                    view! { <img src=i alt="Post Image" class="w-full h-96 object-cover mr-4" /> }
+                    view! { <img src=i alt="Post Image" class="mr-4 h-96 w-full object-cover" /> }
                         .into_view()
                 } else {
                     view! {}.into_view()
                 }} <div class="flex-grow">
-                    <h3 class="text-lg font-semibold mb-1">{preview.post_name}</h3>
-                    <p class="text-gray-600 mb-1">{preview.sneak_peak}</p>
+                    <h3 class="mb-1 text-lg font-semibold">{preview.post_name}</h3>
+                    <p class="mb-1 text-gray-600">{preview.sneak_peak}</p>
                 </div> <div class="text-sm text-gray-500">
                     <small>{preview.relative_date}</small>
                 </div>

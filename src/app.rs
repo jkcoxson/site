@@ -21,7 +21,6 @@ pub fn App() -> impl IntoView {
             id="highlighter-js"
             src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
         />
-        <Script id="aos-js" src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" />
         <Script id="main-js" src="/cdn/site/js/main.js" />
 
         <Eruda />

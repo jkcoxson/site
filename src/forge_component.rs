@@ -2,6 +2,7 @@
 
 use leptos::*;
 
+use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -18,6 +19,7 @@ pub fn ForgeComponent() -> impl IntoView {
     view! {
         <NavBar />
         <div class="flex flex-col justify-center text-center items-center">
+        <Title text="Forge" />
             <h1>Forge</h1>
 
             {

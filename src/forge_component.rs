@@ -18,7 +18,6 @@ use crate::context::Context;
 pub fn ForgeComponent() -> impl IntoView {
     view! {
         <NavBar />
-        <Title text="Forge" />
 
         <div class="flex flex-col items-center justify-center text-center">
             <h1>Forge</h1>
@@ -39,9 +38,14 @@ pub fn ForgeComponent() -> impl IntoView {
                     <Transition fallback=move || {
                         view! { <h2>"Loading..."</h2> }
                     }>
-                        <h2 class="text-stone-500">
-                            {move || leptos_router::use_location().pathname.get()}
-                        </h2>
+                        {
+                            let path = leptos_router::use_location().pathname.get();
+                            view! {
+                                <Title text=format!("Forge - {path}") />
+                                <h2 class="text-stone-500">{path}</h2>
+                            }
+                                .into_view()
+                        }
                         {match resource.get() {
                             Some(data) => {
                                 match data.clone() {

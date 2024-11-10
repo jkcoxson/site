@@ -6,46 +6,51 @@ use crate::context::Context;
 use crate::error_template::AppError;
 use crate::error_template::ErrorTemplate;
 use leptos::*;
+use leptos_meta::Title;
 
 #[component]
 pub fn BrowseView() -> impl IntoView {
     let once = create_resource(|| (), |_| async move { get_posts(None, None).await });
     view! {
         <NavBar />
-        <div class="container">
-            <h1>"Blog Posts"</h1>
-            <Suspense fallback=move || {
-                view! { <h2>"Loading..."</h2> }
-            }>
-                {move || match once.get() {
-                    Some(posts) => {
-                        match posts {
-                            Ok(posts) => {
-                                view! {
-                                    <div class="list-group">
-                                        {posts
-                                            .into_iter()
-                                            .map(|p| view! { <PostPreviewComponent preview=p /> })
-                                            .collect::<Vec<_>>()
-                                            .into_view()}
+        <Title text="Blog" />
+        <div class="flex justify-center">
+            <div class="m-6 flex w-5/6 flex-col md:w-3/4">
+                <h1 class="m-6">"Blog Posts"</h1>
+                <hr />
+                <Suspense fallback=move || {
+                    view! { <h2>"Loading..."</h2> }
+                }>
+                    {move || match once.get() {
+                        Some(posts) => {
+                            match posts {
+                                Ok(posts) => {
+                                    view! {
+                                        <div>
+                                            {posts
+                                                .into_iter()
+                                                .map(|p| view! { <PostPreviewComponent preview=p /> })
+                                                .collect::<Vec<_>>()
+                                                .into_view()}
 
-                                    </div>
+                                        </div>
+                                    }
+                                        .into_view()
                                 }
-                                    .into_view()
-                            }
-                            Err(e) => {
-                                println!("Error fetching posts: {e:?}");
-                                let mut outside_errors = Errors::default();
-                                outside_errors
-                                    .insert_with_default_key(AppError::InternalServerError);
-                                view! { <ErrorTemplate outside_errors /> }.into_view()
+                                Err(e) => {
+                                    println!("Error fetching posts: {e:?}");
+                                    let mut outside_errors = Errors::default();
+                                    outside_errors
+                                        .insert_with_default_key(AppError::InternalServerError);
+                                    view! { <ErrorTemplate outside_errors /> }.into_view()
+                                }
                             }
                         }
-                    }
-                    None => view! { <h2>"Loading..."</h2> }.into_view(),
-                }}
+                        None => view! { <h2>"Loading..."</h2> }.into_view(),
+                    }}
 
-            </Suspense>
+                </Suspense>
+            </div>
         </div>
         <br />
         <Footer />
@@ -57,22 +62,18 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
     view! {
         <a
             href=format!("/blog/{}", preview.slug)
-            class="list-group-item list-group-item-action post"
+            class="flex items-start border-b p-4 transition hover:bg-gray-100 dark:hover:bg-gray-800"
         >
-            <div class="row">
-                <img
-                    src=match preview.image_path {
-                        Some(p) => p,
-                        None => "https://via.placeholder.com/100".to_string(),
-                    }
-                    alt="Post Image"
-                    class="col-sm-auto post-img"
-                />
-                <div class="col">
-                    <h3 class="mb-1">{preview.post_name}</h3>
-                    <p class="mb-1">{preview.sneak_peak}</p>
-                </div>
-                <div class="col-lg-auto float-right">
+            <div class="">
+                {if let Some(i) = preview.image_path {
+                    view! { <img src=i alt="Post Image" class="mr-4 h-96 w-full object-cover" /> }
+                        .into_view()
+                } else {
+                    view! {}.into_view()
+                }} <div class="flex-grow">
+                    <h3 class="mb-1 text-lg font-semibold">{preview.post_name}</h3>
+                    <p class="mb-1 text-gray-600 dark:text-gray-200">{preview.sneak_peak}</p>
+                </div> <div class="text-sm text-gray-500">
                     <small>{preview.relative_date}</small>
                 </div>
             </div>
@@ -184,7 +185,7 @@ WHERE post_tags.slug = ?;"#,
 
 #[cfg(feature = "ssr")]
 fn format_relative_time(dt: sqlx::types::chrono::NaiveDateTime) -> String {
-    let now = sqlx::types::chrono::Utc::now().naive_utc();
+    let now = sqlx::types::chrono::Local::now().naive_utc();
     let duration = now.signed_duration_since(dt);
 
     if duration.num_minutes() < 1 {

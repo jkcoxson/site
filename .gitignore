@@ -21,3 +21,5 @@ playwright/.cache/
 /forge
 
 .env
+
+style/output.css

@@ -2,6 +2,7 @@
 
 use leptos::*;
 
+use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -17,86 +18,96 @@ use crate::context::Context;
 pub fn ForgeComponent() -> impl IntoView {
     view! {
         <NavBar />
-        <h1>Forge</h1>
 
-        {
-            let resource = create_resource(
-                move || leptos_router::use_location().pathname.get(),
-                |route| async move {
-                    let split_route = route
-                        .split('/')
-                        .map(|r| r.to_string())
-                        .collect::<Vec<String>>();
-                    println!("loading data from API");
-                    print_tree(split_route).await
-                },
-            );
-            view! {
-                <Transition fallback=move || {
-                    view! { <h2>"Loading..."</h2> }
-                }>
-                    <h2>{move || leptos_router::use_location().pathname.get()}</h2>
-                    {match resource.get() {
-                        Some(data) => {
-                            match data.clone() {
-                                Ok(d) => {
-                                    match d {
-                                        PrintReturn::File => {
-                                            crate::reload();
-                                            view! { "Reloading..." }.into_view()
-                                        }
-                                        PrintReturn::Dir((dirs, files)) => {
-                                            view! {
-                                                <div class="file-browser">
-                                                    <ul class="folders">
-                                                        <Back />
-                                                        {dirs
-                                                            .into_iter()
-                                                            .map(|n| view! { <Folder name=n /> })
-                                                            .collect::<Vec<_>>()}
-                                                    </ul>
-                                                    <ul class="files">
-                                                        {files
-                                                            .into_iter()
-                                                            .map(|n| view! { <File name=n /> })
-                                                            .collect::<Vec<_>>()}
-                                                    </ul>
-                                                </div>
-                                            }
-                                                .into_view()
-                                        }
-                                    }
-                                }
-                                Err(e) => {
-                                    match e {
-                                        ServerFnError::Request(_) => {
-                                            let mut outside_errors = Errors::default();
-                                            outside_errors.insert_with_default_key(AppError::NotFound);
-                                            view! { <ErrorTemplate outside_errors /> }.into_view()
-                                        }
-                                        _ => {
-                                            let mut outside_errors = Errors::default();
-                                            outside_errors
-                                                .insert_with_default_key(AppError::InternalServerError);
-                                            view! { <ErrorTemplate outside_errors /> }.into_view()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        None => {
+        <div class="flex flex-col items-center justify-center text-center">
+            <h1>Forge</h1>
+
+            {
+                let resource = create_resource(
+                    move || leptos_router::use_location().pathname.get(),
+                    |route| async move {
+                        let split_route = route
+                            .split('/')
+                            .map(|r| r.to_string())
+                            .collect::<Vec<String>>();
+                        println!("loading data from API");
+                        print_tree(split_route).await
+                    },
+                );
+                view! {
+                    <Transition fallback=move || {
+                        view! { <h2>"Loading..."</h2> }
+                    }>
+                        {
+                            let path = leptos_router::use_location().pathname.get();
                             view! {
-                                // every time `count` changes, this will run
-
-                                <h2>Loading...</h2>
+                                <Title text=format!("Forge - {path}") />
+                                <h2 class="text-stone-500">{path}</h2>
                             }
                                 .into_view()
                         }
-                    }}
+                        {match resource.get() {
+                            Some(data) => {
+                                match data.clone() {
+                                    Ok(d) => {
+                                        match d {
+                                            PrintReturn::File => {
+                                                crate::reload();
+                                                view! { "Reloading..." }.into_view()
+                                            }
+                                            PrintReturn::Dir((dirs, files)) => {
+                                                view! {
+                                                    <div class="lg:1/4 w-5/6 rounded-t-xl bg-gray-200 dark:bg-gray-600 md:w-1/3">
+                                                        <ul>
+                                                            <Back />
+                                                            {dirs
+                                                                .into_iter()
+                                                                .map(|n| view! { <Folder name=n /> })
+                                                                .collect::<Vec<_>>()}
+                                                        </ul>
+                                                        <ul>
+                                                            {files
+                                                                .into_iter()
+                                                                .map(|n| view! { <File name=n /> })
+                                                                .collect::<Vec<_>>()}
+                                                        </ul>
+                                                    </div>
+                                                }
+                                                    .into_view()
+                                            }
+                                        }
+                                    }
+                                    Err(e) => {
+                                        match e {
+                                            ServerFnError::Request(_) => {
+                                                let mut outside_errors = Errors::default();
+                                                outside_errors.insert_with_default_key(AppError::NotFound);
+                                                view! { <ErrorTemplate outside_errors /> }.into_view()
+                                            }
+                                            _ => {
+                                                let mut outside_errors = Errors::default();
+                                                outside_errors
+                                                    .insert_with_default_key(AppError::InternalServerError);
+                                                view! { <ErrorTemplate outside_errors /> }.into_view()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            None => {
+                                view! {
+                                    // every time `count` changes, this will run
 
-                </Transition>
+                                    <h2>Loading...</h2>
+                                }
+                                    .into_view()
+                            }
+                        }}
+
+                    </Transition>
+                }
             }
-        }
+        </div>
 
         <Footer />
     }
@@ -143,13 +154,10 @@ fn Folder(name: String) -> impl IntoView {
         current_path.truncate(current_path.len() - 1)
     }
     view! {
-        <li class="folder">
-            <a class="folder-icon"></a>
-            <a
-                class="folder-name"
-                href=format!("{}/{}", current_path, name)
-            >
-                {name}
+        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400 dark:hover:bg-blue-950">
+            <a class="flex h-full w-full" href=format!("{}/{}", current_path, name)>
+                <div class="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-green-700"></div>
+                <p class="truncate">{name}</p>
             </a>
         </li>
     }
@@ -158,10 +166,9 @@ fn Folder(name: String) -> impl IntoView {
 #[component]
 fn Back() -> impl IntoView {
     view! {
-        <li class="folder">
-            <a class="folder-icon"></a>
+        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400 dark:hover:bg-blue-950">
             <a
-                class="folder-name"
+                class="flex h-full w-full"
                 href=move || {
                     format!(
                         "/{}",
@@ -178,7 +185,8 @@ fn Back() -> impl IntoView {
                 }
             >
 
-                ".."
+                <div class="-icon mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-green-700"></div>
+                <p class="truncate">".."</p>
             </a>
         </li>
     }
@@ -191,15 +199,14 @@ fn File(name: String) -> impl IntoView {
         current_path.truncate(current_path.len() - 1)
     }
     view! {
-        <li class="file">
-            <span class="file-icon"></span>
+        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400 dark:hover:bg-blue-950">
             <a
-                class="file-name"
-                href=format!("{}/{}", current_path, name)
-                    .replacen("/forge", "/cdn", 1)
+                class="flex h-full w-full"
+                href=format!("{}/{}", current_path, name).replacen("/forge", "/cdn", 1)
                 rel="external"
             >
-                {name}
+                <div class="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-700"></div>
+                <p class="truncate">{name}</p>
             </a>
         </li>
     }

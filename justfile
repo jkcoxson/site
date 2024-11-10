@@ -4,7 +4,10 @@ default:
   just --list
 
 run:
-  cargo leptos watch
+  tailwindcss -i ./style/input.css -o ./style/output.css --watch & cargo leptos watch
+
+tailwind:
+  tailwindcss -i ./style/input.css -o ./style/output.css --watch 
 
 _remote-build:
   LEPTOS_BIN_TARGET_TRIPLE=$DEPLOY_TARGET_TRIPLE cargo leptos build --release

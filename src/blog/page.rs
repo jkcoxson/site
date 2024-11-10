@@ -7,6 +7,7 @@ use crate::error_template::AppError;
 use crate::error_template::ErrorTemplate;
 use crate::highlightAll;
 use leptos::*;
+use leptos_meta::Title;
 use leptos_router::use_params_map;
 
 #[component]
@@ -19,7 +20,7 @@ pub fn PageView() -> impl IntoView {
 
     view! {
         <NavBar />
-        <div class="container">
+        <div class="flex place-content-center content-center">
             <Suspense fallback=move || {
                 view! { <h2>"Loading..."</h2> }
             }>
@@ -30,11 +31,17 @@ pub fn PageView() -> impl IntoView {
                         highlightAll();
                     });
                 }
-                <div class="blog-post">
+                <div class="flex w-5/6 md:w-3/4">
                     {match once.get() {
                         Some(data) => {
                             match data {
-                                Ok(data) => view! { <div inner_html=data></div> }.into_view(),
+                                Ok(data) => {
+                                    view! {
+                                        <Title text=data.1 />
+                                        <div inner_html=data.0></div>
+                                    }
+                                        .into_view()
+                                }
                                 Err(e) => {
                                     println!("Unable to get data! {e:?}");
                                     match e {
@@ -70,12 +77,13 @@ pub fn PageView() -> impl IntoView {
 }
 
 #[server(GetPostContent)]
-async fn get_post_content(slug: String) -> Result<String, ServerFnError> {
+async fn get_post_content(slug: String) -> Result<(String, String), ServerFnError> {
     let state = expect_context::<Context>();
-    let post = match sqlx::query_as::<_, (String,)>(
+    let (post, name) = match sqlx::query_as::<_, (String, String)>(
         r#"
      SELECT
-         file_path
+         file_path,
+         post_name
      FROM posts
      WHERE slug = ?;
              "#,
@@ -84,7 +92,7 @@ async fn get_post_content(slug: String) -> Result<String, ServerFnError> {
     .fetch_one(&state.sql_pool)
     .await
     {
-        Ok(p) => p.0,
+        Ok(p) => p,
         Err(e) => match e {
             sqlx::Error::RowNotFound => return Err(ServerFnError::Request("".to_string())),
             _ => return Err(ServerFnError::ServerError(e.to_string())),
@@ -108,7 +116,7 @@ async fn get_post_content(slug: String) -> Result<String, ServerFnError> {
         },
     };
     Ok(match markdown::to_html_with_options(&file, &options) {
-        Ok(o) => o,
+        Ok(o) => (o, name),
         Err(e) => return Err(ServerFnError::ServerError(e.to_string())),
     })
 }

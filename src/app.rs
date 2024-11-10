@@ -95,8 +95,9 @@ pub fn NavBar() -> impl IntoView {
                         onclick="toggleMenu()"
                     >
                         <span class="sr-only">Toggle navigation</span>
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
                             <path
+                                class="stroke-cyan-400 stroke-2 dark:stroke-green-800"
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"

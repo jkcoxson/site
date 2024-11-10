@@ -57,7 +57,7 @@ pub fn ForgeComponent() -> impl IntoView {
                                             }
                                             PrintReturn::Dir((dirs, files)) => {
                                                 view! {
-                                                    <div class="lg:1/4 w-5/6 rounded-t-xl bg-gray-200 md:w-1/3">
+                                                    <div class="lg:1/4 w-5/6 rounded-t-xl bg-gray-200 dark:bg-gray-600 md:w-1/3">
                                                         <ul>
                                                             <Back />
                                                             {dirs
@@ -154,7 +154,7 @@ fn Folder(name: String) -> impl IntoView {
         current_path.truncate(current_path.len() - 1)
     }
     view! {
-        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400">
+        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400 dark:hover:bg-blue-950">
             <a class="flex h-full w-full" href=format!("{}/{}", current_path, name)>
                 <div class="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-green-700"></div>
                 <p>{name}</p>
@@ -166,7 +166,7 @@ fn Folder(name: String) -> impl IntoView {
 #[component]
 fn Back() -> impl IntoView {
     view! {
-        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400">
+        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400 dark:hover:bg-blue-950">
             <a
                 class="flex h-full w-full"
                 href=move || {
@@ -199,7 +199,7 @@ fn File(name: String) -> impl IntoView {
         current_path.truncate(current_path.len() - 1)
     }
     view! {
-        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400">
+        <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400 dark:hover:bg-blue-950">
             <a
                 class="flex h-full w-full"
                 href=format!("{}/{}", current_path, name).replacen("/forge", "/cdn", 1)

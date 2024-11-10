@@ -75,9 +75,9 @@ fn HomePage() -> impl IntoView {
 #[component]
 pub fn NavBar() -> impl IntoView {
     view! {
-        <nav class="flex bg-white py-3 dark:bg-stone-900">
-            <div class="container mx-auto flex items-center justify-between">
-                <a class="flex items-center" href="/">
+        <nav class="flex bg-white  dark:bg-stone-900">
+            <div class="container mx-auto flex items-start justify-between">
+                <a class="flex items-start justify-start m-4" href="/">
                     <span class="me-2 flex items-center justify-center rounded-full bg-transparent">
                         <img
                             src="/cdn/site/img/transparent.png"
@@ -87,42 +87,59 @@ pub fn NavBar() -> impl IntoView {
                         />
                     </span>
                 </a>
-                <button class="p-2 lg:hidden" aria-controls="navcol-2" aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 6h16M4 12h16m-7 6h7"
-                        />
-                    </svg>
-                </button>
-                <div class="hidden lg:flex lg:items-center" id="navcol-2">
-                    <ul class="ml-auto flex space-x-4">
-                        <li>
-                            <a class="font-alatsi text-gray-800 dark:text-gray-200" href="/blog">
-                                Blog
-                            </a>
-                        </li>
-                        <li>
-                            <a class="font-alatsi text-gray-800 dark:text-gray-200" href="/forge">
-                                Forge
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="px-2">
-                        <a href="https://github.com/jkcoxson" target="_blank">
-                            <img
-                                class="bg-light h-10 w-10 rounded-full border dark:bg-white"
-                                src="/cdn/site/img/github-mark.png"
-                                alt="GitHub"
+                <div class="m-2 grid justify-items-end p-2">
+                    <button
+                        class="p-2 lg:hidden"
+                        aria-controls="navcol-2"
+                        aria-expanded="false"
+                        onclick="toggleMenu()"
+                    >
+                        <span class="sr-only">Toggle navigation</span>
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6h16M4 12h16m-7 6h7"
                             />
-                        </a>
+                        </svg>
+                    </button>
+                    <div class="hidden lg:flex lg:items-center" id="navcol-2">
+                        <ul class="ml-auto space-y-4 lg:space-y-0 lg:flex lg:space-x-4">
+                            <li>
+                                <a
+                                    class="font-alatsi text-gray-800 dark:text-gray-200"
+                                    href="/blog"
+                                >
+                                    Blog
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    class="font-alatsi text-gray-800 dark:text-gray-200"
+                                    href="/forge"
+                                >
+                                    Forge
+                                </a>
+                            </li>
+                            <li>
+                                <div class="px-2">
+                                    <a href="https://github.com/jkcoxson" target="_blank">
+                                        <img
+                                            class="bg-light h-10 w-10 rounded-full border dark:bg-white"
+                                            src="/cdn/site/img/github-mark.png"
+                                            alt="GitHub"
+                                        />
+                                    </a>
+                                </div>
+                            </li>
+                            <li>
+                                <a class="m-2 rounded-md bg-blue-500 px-4 py-2 text-white" href="#">
+                                    Say Hi
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                    <a class="ml-2 rounded-md bg-blue-500 px-4 py-2 text-white" href="#">
-                        Say Hi
-                    </a>
                 </div>
             </div>
         </nav>
@@ -391,7 +408,7 @@ fn Projects() -> impl IntoView {
                     Here is a small taste of the work {"I've"}done
                 </p>
             </div>
-            <div class="m-6 md:m-24 grid grid-cols-1 justify-center gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div class="m-6 grid grid-cols-1 justify-center gap-4 md:m-24 md:grid-cols-2 xl:grid-cols-3">
                 <Project
                     title="JitStreamer".to_string()
                     description="JitStreamer was a service that enabled users to exploit a loophole in the iOS developer stack."
@@ -423,7 +440,7 @@ fn Project(title: String, description: String, image: String, link: String) -> i
     view! {
         <div class="flex content-center items-center">
             <a href=link target="_blank" class="text-gray-800">
-                <div class="transform rounded-lg bg-gray-200 dark:bg-gray-800 transition-transform hover:scale-105">
+                <div class="transform rounded-lg bg-gray-200 transition-transform hover:scale-105 dark:bg-gray-800">
                     <div class="p-4">
                         <img
                             src=image
@@ -443,7 +460,7 @@ fn Project(title: String, description: String, image: String, link: String) -> i
 /// Contact me tile
 fn Contact() -> impl IntoView {
     view! {
-        <section class="relative m-6 md:m-44 py-16 lg:py-24">
+        <section class="relative m-6 py-16 md:m-44 lg:py-24">
             <div class="relative">
                 <div class="mb-10 text-center">
                     <h2 class="text-3xl font-bold">Get in Contact</h2>
@@ -492,12 +509,12 @@ fn Contact() -> impl IntoView {
                     <div class="w-full md:w-1/2 lg:w-2/3">
                         <div>
                             <form
-                                class="rounded-lg bg-white dark:bg-stone-800 p-4 shadow-2xl"
+                                class="rounded-lg bg-white p-4 shadow-2xl dark:bg-stone-800"
                                 method="post"
                             >
                                 <div class="mb-4">
                                     <input
-                                        class="form-input w-full rounded border p-3 dark:bg-stone-700 dark:border-black"
+                                        class="form-input w-full rounded border p-3 dark:border-black dark:bg-stone-700"
                                         type="text"
                                         id="name-1"
                                         name="name"
@@ -506,7 +523,7 @@ fn Contact() -> impl IntoView {
                                 </div>
                                 <div class="mb-4">
                                     <input
-                                        class="form-input w-full rounded border p-3 dark:bg-stone-700 dark:border-black"
+                                        class="form-input w-full rounded border p-3 dark:border-black dark:bg-stone-700"
                                         type="email"
                                         id="email-1"
                                         name="email"
@@ -515,7 +532,7 @@ fn Contact() -> impl IntoView {
                                 </div>
                                 <div class="mb-4">
                                     <textarea
-                                        class="form-input w-full rounded border p-3 dark:bg-stone-700 dark:border-black"
+                                        class="form-input w-full rounded border p-3 dark:border-black dark:bg-stone-700"
                                         id="message-1"
                                         name="message"
                                         rows="6"
@@ -547,7 +564,7 @@ fn BlogShowcase() -> impl IntoView {
         |_| async move { blog::browse::get_posts(None, Some(3)).await },
     );
     view! {
-        <div class="bg-cyan-200 dark:bg-cyan-950 py-16 lg:py-24">
+        <div class="bg-cyan-200 py-16 lg:py-24 dark:bg-cyan-950">
             <div class="mb-10 text-center">
                 <div class="font-bold text-gray-600 dark:text-gray-200">
                     <h2 class="mb-2">Blog</h2>
@@ -557,7 +574,7 @@ fn BlogShowcase() -> impl IntoView {
                     </p>
                 </div>
             </div>
-            <div class="m-6 md:m-24 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div class="m-6 grid grid-cols-1 gap-6 md:m-24 md:grid-cols-2 lg:grid-cols-3">
                 <Suspense fallback=move || {
                     view! { <h2>"Loading..."</h2> }
                 }>
@@ -602,7 +619,7 @@ fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoV
                 href=format!("/blog/{}", preview.slug)
                 class="block transform transition-transform hover:scale-105"
             >
-                <div class="overflow-hidden rounded-lg bg-white dark:bg-stone-800 shadow-md">
+                <div class="overflow-hidden rounded-lg bg-white shadow-md dark:bg-stone-800">
                     <img
                         class="h-48 w-full object-cover"
                         src=preview

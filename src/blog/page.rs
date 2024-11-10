@@ -31,11 +31,17 @@ pub fn PageView() -> impl IntoView {
                         highlightAll();
                     });
                 }
-                <div class="flex w-3/4">
+                <div class="flex w-5/6 md:w-3/4">
                     {match once.get() {
                         Some(data) => {
                             match data {
-                                Ok(data) => view! { <Title text=data.1 /> <div inner_html=data.0></div> }.into_view(),
+                                Ok(data) => {
+                                    view! {
+                                        <Title text=data.1 />
+                                        <div inner_html=data.0></div>
+                                    }
+                                        .into_view()
+                                }
                                 Err(e) => {
                                     println!("Unable to get data! {e:?}");
                                     match e {

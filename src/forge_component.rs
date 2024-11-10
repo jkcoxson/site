@@ -157,7 +157,7 @@ fn Folder(name: String) -> impl IntoView {
         <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400 dark:hover:bg-blue-950">
             <a class="flex h-full w-full" href=format!("{}/{}", current_path, name)>
                 <div class="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-green-700"></div>
-                <p>{name}</p>
+                <p class="truncate">{name}</p>
             </a>
         </li>
     }
@@ -186,7 +186,7 @@ fn Back() -> impl IntoView {
             >
 
                 <div class="-icon mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-green-700"></div>
-                <p>".."</p>
+                <p class="truncate">".."</p>
             </a>
         </li>
     }
@@ -206,7 +206,7 @@ fn File(name: String) -> impl IntoView {
                 rel="external"
             >
                 <div class="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-700"></div>
-                <p>{name}</p>
+                <p class="truncate">{name}</p>
             </a>
         </li>
     }

@@ -391,7 +391,7 @@ fn Projects() -> impl IntoView {
                     Here is a small taste of the work {"I've"}done
                 </p>
             </div>
-            <div class="m-24 grid grid-cols-1 justify-center gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div class="m-6 md:m-24 grid grid-cols-1 justify-center gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <Project
                     title="JitStreamer".to_string()
                     description="JitStreamer was a service that enabled users to exploit a loophole in the iOS developer stack."
@@ -443,7 +443,7 @@ fn Project(title: String, description: String, image: String, link: String) -> i
 /// Contact me tile
 fn Contact() -> impl IntoView {
     view! {
-        <section class="relative m-44 py-16 lg:py-24">
+        <section class="relative m-6 md:m-44 py-16 lg:py-24">
             <div class="relative">
                 <div class="mb-10 text-center">
                     <h2 class="text-3xl font-bold">Get in Contact</h2>
@@ -557,7 +557,7 @@ fn BlogShowcase() -> impl IntoView {
                     </p>
                 </div>
             </div>
-            <div class="m-24 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div class="m-6 md:m-24 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <Suspense fallback=move || {
                     view! { <h2>"Loading..."</h2> }
                 }>

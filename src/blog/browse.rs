@@ -6,12 +6,14 @@ use crate::context::Context;
 use crate::error_template::AppError;
 use crate::error_template::ErrorTemplate;
 use leptos::*;
+use leptos_meta::Title;
 
 #[component]
 pub fn BrowseView() -> impl IntoView {
     let once = create_resource(|| (), |_| async move { get_posts(None, None).await });
     view! {
         <NavBar />
+        <Title text="Blog" />
         <div class="flex justify-center">
             <div class="m-6 flex w-5/6 flex-col md:w-3/4">
                 <h1 class="m-6">"Blog Posts"</h1>

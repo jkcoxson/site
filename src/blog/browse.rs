@@ -13,42 +13,42 @@ pub fn BrowseView() -> impl IntoView {
     view! {
         <NavBar />
         <div class="flex justify-center">
-        <div class="m-6 flex w-5/6 flex-col md:w-3/4">
-            <h1 class="m-6">"Blog Posts"</h1>
-            <hr />
-            <Suspense fallback=move || {
-                view! { <h2>"Loading..."</h2> }
-            }>
-                {move || match once.get() {
-                    Some(posts) => {
-                        match posts {
-                            Ok(posts) => {
-                                view! {
-                                    <div>
-                                        {posts
-                                            .into_iter()
-                                            .map(|p| view! { <PostPreviewComponent preview=p /> })
-                                            .collect::<Vec<_>>()
-                                            .into_view()}
+            <div class="m-6 flex w-5/6 flex-col md:w-3/4">
+                <h1 class="m-6">"Blog Posts"</h1>
+                <hr />
+                <Suspense fallback=move || {
+                    view! { <h2>"Loading..."</h2> }
+                }>
+                    {move || match once.get() {
+                        Some(posts) => {
+                            match posts {
+                                Ok(posts) => {
+                                    view! {
+                                        <div>
+                                            {posts
+                                                .into_iter()
+                                                .map(|p| view! { <PostPreviewComponent preview=p /> })
+                                                .collect::<Vec<_>>()
+                                                .into_view()}
 
-                                    </div>
+                                        </div>
+                                    }
+                                        .into_view()
                                 }
-                                    .into_view()
-                            }
-                            Err(e) => {
-                                println!("Error fetching posts: {e:?}");
-                                let mut outside_errors = Errors::default();
-                                outside_errors
-                                    .insert_with_default_key(AppError::InternalServerError);
-                                view! { <ErrorTemplate outside_errors /> }.into_view()
+                                Err(e) => {
+                                    println!("Error fetching posts: {e:?}");
+                                    let mut outside_errors = Errors::default();
+                                    outside_errors
+                                        .insert_with_default_key(AppError::InternalServerError);
+                                    view! { <ErrorTemplate outside_errors /> }.into_view()
+                                }
                             }
                         }
-                    }
-                    None => view! { <h2>"Loading..."</h2> }.into_view(),
-                }}
+                        None => view! { <h2>"Loading..."</h2> }.into_view(),
+                    }}
 
-            </Suspense>
-        </div>
+                </Suspense>
+            </div>
         </div>
         <br />
         <Footer />
@@ -60,7 +60,7 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
     view! {
         <a
             href=format!("/blog/{}", preview.slug)
-            class="flex items-start border-b p-4 transition hover:bg-gray-100"
+            class="flex items-start border-b p-4 transition hover:bg-gray-100 dark:hover:bg-gray-800"
         >
             <div class="">
                 {if let Some(i) = preview.image_path {
@@ -70,7 +70,7 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
                     view! {}.into_view()
                 }} <div class="flex-grow">
                     <h3 class="mb-1 text-lg font-semibold">{preview.post_name}</h3>
-                    <p class="mb-1 text-gray-600">{preview.sneak_peak}</p>
+                    <p class="mb-1 text-gray-600 dark:text-gray-200">{preview.sneak_peak}</p>
                 </div> <div class="text-sm text-gray-500">
                     <small>{preview.relative_date}</small>
                 </div>

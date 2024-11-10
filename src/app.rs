@@ -101,12 +101,12 @@ pub fn NavBar() -> impl IntoView {
                 <div class="hidden lg:flex lg:items-center" id="navcol-2">
                     <ul class="ml-auto flex space-x-4">
                         <li>
-                            <a class="font-alatsi text-gray-800" href="/blog">
+                            <a class="font-alatsi text-gray-800 dark:text-gray-200" href="/blog">
                                 Blog
                             </a>
                         </li>
                         <li>
-                            <a class="font-alatsi text-gray-800" href="/forge">
+                            <a class="font-alatsi text-gray-800 dark:text-gray-200" href="/forge">
                                 Forge
                             </a>
                         </li>
@@ -114,7 +114,7 @@ pub fn NavBar() -> impl IntoView {
                     <div class="px-2">
                         <a href="https://github.com/jkcoxson" target="_blank">
                             <img
-                                class="bg-light h-10 w-10 rounded-full border"
+                                class="bg-light h-10 w-10 rounded-full border dark:bg-white"
                                 src="/cdn/site/img/github-mark.png"
                                 alt="GitHub"
                             />
@@ -273,8 +273,8 @@ fn AboutSection() -> impl IntoView {
 /// Toolbox
 fn Toolbox() -> impl IntoView {
     view! {
-        <div class="m-5 mx-0 bg-gray-200 p-5">
-            <h1 class="text-center text-2xl font-bold">Toolbox</h1>
+        <div class="m-5 mx-0 bg-gray-200 p-5 dark:bg-stone-800">
+            <h1 class="text-center font-bold">Toolbox</h1>
             <div class="flex flex-col">
                 <div class="flex flex-wrap items-center justify-center">
                     <div class="flex w-full justify-center"></div>
@@ -320,7 +320,7 @@ fn Toolbox() -> impl IntoView {
                     </div>
                 </div>
             </div>
-            <small class="pl-0 text-xs">
+            <small class="pl-0 text-xs dark:text-gray-200">
                 Individual logos are trademarked property. I am not affiliated with any
                 of these organizations, nor am I implying any sort of sponsorship. I
                 doubt they know I exist. These are merely tools that I am proficient in.
@@ -372,7 +372,7 @@ fn Toolbox() -> impl IntoView {
 fn Tool(name: String, img_src: String) -> impl IntoView {
     view! {
         <div class="m-6 mx-4 flex flex-wrap items-center justify-center text-center">
-            <h1 class="flex items-center text-center">
+            <h1 class="flex items-center text-center text-4xl">
                 <img src=img_src width="80" class="mr-2" alt="" />
                 {name}
             </h1>
@@ -386,7 +386,7 @@ fn Projects() -> impl IntoView {
     view! {
         <div class="w-screen">
             <div class="mb-5 text-center">
-                <h2 class="text-3xl font-bold">Projects</h2>
+                <h2 class="font-bold">Projects</h2>
                 <p class="mx-auto w-full lg:w-1/2">
                     Here is a small taste of the work {"I've"}done
                 </p>
@@ -423,7 +423,7 @@ fn Project(title: String, description: String, image: String, link: String) -> i
     view! {
         <div class="flex content-center items-center">
             <a href=link target="_blank" class="text-gray-800">
-                <div class="transform rounded-lg bg-gray-200 transition-transform hover:scale-105">
+                <div class="transform rounded-lg bg-gray-200 dark:bg-gray-800 transition-transform hover:scale-105">
                     <div class="p-4">
                         <img
                             src=image
@@ -431,7 +431,7 @@ fn Project(title: String, description: String, image: String, link: String) -> i
                             class="mb-3 max-h-40 rounded-lg object-cover"
                         />
                         <h4 class="text-lg font-semibold">{title}</h4>
-                        <p class="text-gray-600">{description}</p>
+                        <p class="text-gray-600 dark:text-gray-200">{description}</p>
                     </div>
                 </div>
             </a>
@@ -465,8 +465,8 @@ fn Contact() -> impl IntoView {
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h6 class="text-lg font-semibold">Discord</h6>
-                                    <p class="text-gray-600">@jkcoxson</p>
+                                    <h6 class="text-lg font-semibold dark:text-white">Discord</h6>
+                                    <p class="text-gray-600 dark:text-gray-200">@jkcoxson</p>
                                 </div>
                             </div>
                             <div class="flex items-center p-4">
@@ -483,18 +483,18 @@ fn Contact() -> impl IntoView {
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h6 class="text-lg font-semibold">Email</h6>
-                                    <p class="text-gray-600">Loading...</p>
+                                    <h6 class="text-lg font-semibold dark:text-white">Email</h6>
+                                    <p class="text-gray-600 dark:text-gray-200">Loading...</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="w-full md:w-1/2 lg:w-2/3">
                         <div>
-                            <form class="rounded-lg bg-white p-4 shadow-2xl" method="post">
+                            <form class="rounded-lg bg-white dark:bg-stone-800 p-4 shadow-2xl" method="post">
                                 <div class="mb-4">
                                     <input
-                                        class="form-input w-full rounded border p-3"
+                                        class="form-input w-full rounded border p-3 dark:bg-stone-700 dark:border-black"
                                         type="text"
                                         id="name-1"
                                         name="name"
@@ -503,7 +503,7 @@ fn Contact() -> impl IntoView {
                                 </div>
                                 <div class="mb-4">
                                     <input
-                                        class="form-input w-full rounded border p-3"
+                                        class="form-input w-full rounded border p-3 dark:bg-stone-700 dark:border-black"
                                         type="email"
                                         id="email-1"
                                         name="email"
@@ -512,7 +512,7 @@ fn Contact() -> impl IntoView {
                                 </div>
                                 <div class="mb-4">
                                     <textarea
-                                        class="form-input w-full rounded border p-3"
+                                        class="form-input w-full rounded border p-3 dark:bg-stone-700 dark:border-black"
                                         id="message-1"
                                         name="message"
                                         rows="6"
@@ -544,11 +544,11 @@ fn BlogShowcase() -> impl IntoView {
         |_| async move { blog::browse::get_posts(None, Some(3)).await },
     );
     view! {
-        <div class="bg-cyan-200 py-16 lg:py-24">
+        <div class="bg-cyan-200 dark:bg-cyan-950 py-16 lg:py-24">
             <div class="mb-10 text-center">
-                <div class="text-3xl font-bold">
-                    <h2>Blog</h2>
-                    <p class="mx-auto w-full text-gray-600 md:w-1/2">
+                <div class="font-bold text-gray-600 dark:text-gray-200">
+                    <h2 class="mb-2">Blog</h2>
+                    <p class="mx-auto md:w-1/2">
                         Read about my findings and work! I am passionate about technology and
                         not afraid to share my opinion.
                     </p>
@@ -599,7 +599,7 @@ fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoV
                 href=format!("/blog/{}", preview.slug)
                 class="block transform transition-transform hover:scale-105"
             >
-                <div class="overflow-hidden rounded-lg bg-white shadow-md">
+                <div class="overflow-hidden rounded-lg bg-white dark:bg-stone-800 shadow-md">
                     <img
                         class="h-48 w-full object-cover"
                         src=preview

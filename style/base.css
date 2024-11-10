@@ -5,3 +5,12 @@ h1 {
 h2 {
   font-size: 3em;
 }
+
+@media (prefers-color-scheme: dark) {
+  h1, h2, h3, h4, h5, p {
+    color: rgb(168 162 158);
+  }
+  body {
+    background-color: rgb(28 25 23);
+  }
+}

@@ -406,7 +406,7 @@ fn Projects() -> impl IntoView {
             <div class="mb-5 text-center">
                 <h2 class="font-bold">Projects</h2>
                 <p class="mx-auto w-full lg:w-1/2">
-                    Here is a small taste of the work {"I've"}done
+                    Here is a small taste of the work {"I've"} done
                 </p>
             </div>
             <div class="m-6 grid grid-cols-1 justify-center gap-4 md:m-24 md:grid-cols-2 xl:grid-cols-3">

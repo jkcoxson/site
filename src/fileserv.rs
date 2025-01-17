@@ -1,6 +1,5 @@
 // Jackson Coxson
 
-use crate::app::App;
 use crate::context::Context;
 use axum::extract::Request;
 use axum::response::Response as AxumResponse;
@@ -59,7 +58,7 @@ pub async fn file_and_error_handler(
                 move || {
                     provide_context(context.clone());
                 },
-                App,
+                move || crate::app::shell(options.clone()),
             );
             handler(Request::from_parts(parts, body))
                 .await
@@ -77,7 +76,7 @@ pub async fn file_and_error_handler(
                 move || {
                     provide_context(context.clone());
                 },
-                App,
+                move || crate::app::shell(options.clone()),
             );
             handler(Request::from_parts(parts, body))
                 .await

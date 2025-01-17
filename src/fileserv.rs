@@ -2,14 +2,16 @@
 
 use crate::app::App;
 use crate::context::Context;
+use axum::extract::Request;
 use axum::response::Response as AxumResponse;
 use axum::{
     body::Body,
     extract::State,
-    http::{Request, Response, StatusCode},
+    http::{Response, StatusCode},
     response::IntoResponse,
 };
-use leptos::*;
+use leptos::prelude::*;
+use leptos_axum::render_app_to_stream_with_context;
 
 pub async fn file_and_error_handler(
     State(options): State<LeptosOptions>,
@@ -53,9 +55,10 @@ pub async fn file_and_error_handler(
                     .unwrap(),
             }
         } else {
-            let handler = leptos_axum::render_app_to_stream_with_context(
-                options.to_owned(),
-                move || provide_context(context.clone()),
+            let handler = render_app_to_stream_with_context(
+                move || {
+                    provide_context(context.clone());
+                },
                 App,
             );
             handler(Request::from_parts(parts, body))
@@ -70,9 +73,10 @@ pub async fn file_and_error_handler(
         if res.status() == StatusCode::OK {
             res.into_response()
         } else {
-            let handler = leptos_axum::render_app_to_stream_with_context(
-                options.to_owned(),
-                move || provide_context(context.clone()),
+            let handler = render_app_to_stream_with_context(
+                move || {
+                    provide_context(context.clone());
+                },
                 App,
             );
             handler(Request::from_parts(parts, body))

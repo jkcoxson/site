@@ -10,11 +10,11 @@ async fn main() {
     use axum::Router;
     use jkcoxson::fileserv::file_and_error_handler;
     use jkcoxson::{app::*, context::Context};
-    use leptos::*;
+    use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
 
     dotenvy::dotenv().ok();
-    let conf = get_configuration(None).await.unwrap();
+    let conf = get_configuration(None).unwrap();
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
@@ -47,19 +47,20 @@ async fn main() {
     let app_context = context.clone();
 
     // build our application with a route
+    let shell_options = leptos_options.clone();
     let app = Router::new()
         .leptos_routes_with_context(
-            &leptos_options,
+            &leptos_options.clone(),
             routes,
             move || provide_context(app_context.clone()),
-            App,
+            move || shell(shell_options.clone()),
         )
         .route("/favicon.ico", axum::routing::get(get_favicon))
         .fallback(|state, req| file_and_error_handler(state, req, context))
         .with_state(leptos_options);
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-    logging::log!("listening on http://{}", &addr);
+    println!("listening on http://{}", &addr);
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();

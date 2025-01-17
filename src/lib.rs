@@ -17,7 +17,7 @@ pub mod forge;
 pub fn hydrate() {
     use crate::app::*;
     console_error_panic_hook::set_once();
-    leptos::mount_to_body(App);
+    leptos::prelude::hydrate_body(App);
 }
 
 #[cfg(feature = "hydrate")]

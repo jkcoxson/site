@@ -5,12 +5,12 @@ use crate::app::{Footer, NavBar};
 use crate::context::Context;
 use crate::error_template::AppError;
 use crate::error_template::ErrorTemplate;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::Title;
 
 #[component]
 pub fn BrowseView() -> impl IntoView {
-    let once = create_resource(|| (), |_| async move { get_posts(None, None).await });
+    let once = Resource::new(|| (), |_| async move { get_posts(None, None).await });
     view! {
         <NavBar />
         <Title text="Blog" />
@@ -35,18 +35,18 @@ pub fn BrowseView() -> impl IntoView {
 
                                         </div>
                                     }
-                                        .into_view()
+                                        .into_any()
                                 }
                                 Err(e) => {
                                     println!("Error fetching posts: {e:?}");
                                     let mut outside_errors = Errors::default();
                                     outside_errors
                                         .insert_with_default_key(AppError::InternalServerError);
-                                    view! { <ErrorTemplate outside_errors /> }.into_view()
+                                    view! { <ErrorTemplate outside_errors /> }.into_any()
                                 }
                             }
                         }
-                        None => view! { <h2>"Loading..."</h2> }.into_view(),
+                        None => view! { <h2>"Loading..."</h2> }.into_any(),
                     }}
 
                 </Suspense>
@@ -67,9 +67,9 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
             <div class="">
                 {if let Some(i) = preview.image_path {
                     view! { <img src=i alt="Post Image" class="mr-4 h-96 w-full object-cover" /> }
-                        .into_view()
+                        .into_any()
                 } else {
-                    view! {}.into_view()
+                    "".into_any()
                 }} <div class="flex-grow">
                     <h3 class="mb-1 text-lg font-semibold">{preview.post_name}</h3>
                     <p class="mb-1 text-gray-600 dark:text-gray-200">{preview.sneak_peak}</p>

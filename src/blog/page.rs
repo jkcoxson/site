@@ -6,16 +6,16 @@ use crate::context::Context;
 use crate::error_template::AppError;
 use crate::error_template::ErrorTemplate;
 use crate::highlightAll;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::Title;
-use leptos_router::use_params_map;
+use leptos_router::hooks::use_params_map;
 
 #[component]
 pub fn PageView() -> impl IntoView {
     let params = use_params_map();
-    let once = create_resource(
+    let once = Resource::new(
         move || params.get(),
-        |d| async move { get_post_content(d.get("id").cloned().unwrap_or_default()).await },
+        |d| async move { get_post_content(d.get("id").clone().unwrap_or_default()).await },
     );
 
     view! {
@@ -26,13 +26,13 @@ pub fn PageView() -> impl IntoView {
             }>
 
                 {
-                    create_effect(move |_| {
+                    Effect::new(move |_| {
                         let _ = once.get();
                         highlightAll();
                     });
                 }
                 <div class="flex w-5/6 md:w-3/4">
-                    {match once.get() {
+                    {move || match once.get() {
                         Some(data) => {
                             match data {
                                 Ok(data) => {
@@ -40,7 +40,7 @@ pub fn PageView() -> impl IntoView {
                                         <Title text=data.1 />
                                         <div inner_html=data.0></div>
                                     }
-                                        .into_view()
+                                        .into_any()
                                 }
                                 Err(e) => {
                                     println!("Unable to get data! {e:?}");
@@ -48,19 +48,19 @@ pub fn PageView() -> impl IntoView {
                                         ServerFnError::Request(_) => {
                                             let mut outside_errors = Errors::default();
                                             outside_errors.insert_with_default_key(AppError::NotFound);
-                                            view! { <ErrorTemplate outside_errors /> }.into_view()
+                                            view! { <ErrorTemplate outside_errors /> }.into_any()
                                         }
                                         _ => {
                                             let mut outside_errors = Errors::default();
                                             outside_errors
                                                 .insert_with_default_key(AppError::InternalServerError);
-                                            view! { <ErrorTemplate outside_errors /> }.into_view()
+                                            view! { <ErrorTemplate outside_errors /> }.into_any()
                                         }
                                     }
                                 }
                             }
                         }
-                        None => view! { "Loading..." }.into_view(),
+                        None => view! { "Loading..." }.into_any(),
                     }}
                 </div>
                 <p hidden>

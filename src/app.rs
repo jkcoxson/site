@@ -4,15 +4,35 @@ use crate::{
     forge_component::ForgeComponent,
 };
 use chrono::Datelike;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::*;
+use leptos_router::{
+    components::{Route, Router, Routes},
+    path,
+};
 use rand::{rngs::ThreadRng, Rng};
+
+pub fn shell(options: LeptosOptions) -> impl IntoView {
+    view! {
+        <!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <AutoReload options=options.clone() />
+                <HydrationScripts options/>
+                <MetaTags/>
+            </head>
+            <body>
+                <App/>
+            </body>
+        </html>
+    }
+}
 
 #[component]
 /// The root of the application
 pub fn App() -> impl IntoView {
-    // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
     view! {
@@ -29,22 +49,22 @@ pub fn App() -> impl IntoView {
         <Title text="Jackson Coxson" />
 
         // content for this welcome page
-        <Router fallback=|| {
-            let mut outside_errors = Errors::default();
-            outside_errors.insert_with_default_key(AppError::NotFound);
-            view! {
-                <NavBar />
-                <ErrorTemplate outside_errors />
-                <Footer />
-            }
-                .into_view()
-        }>
+        <Router>
             <main class="relative z-0 dark:bg-stone-900">
-                <Routes>
-                    <Route path="" view=HomePage />
-                    <Route path="/forge/*any" view=ForgeComponent />
-                    <Route path="/blog" view=blog::browse::BrowseView />
-                    <Route path="/blog/:id" view=blog::page::PageView />
+                <Routes fallback=|| {
+                    let mut outside_errors = Errors::default();
+                    outside_errors.insert_with_default_key(AppError::NotFound);
+                    view! {
+                        <NavBar />
+                        <ErrorTemplate outside_errors />
+                        <Footer />
+                    }
+                        .into_view()
+                }>
+                    <Route path=path!("") view=HomePage />
+                    <Route path=path!("/forge/*any")  view=ForgeComponent />
+                    <Route path=path!("/blog") view=blog::browse::BrowseView />
+                    <Route path=path!("/blog/:id") view=blog::page::PageView />
                 </Routes>
             </main>
         </Router>
@@ -406,7 +426,7 @@ fn Projects() -> impl IntoView {
             <div class="mb-5 text-center">
                 <h2 class="font-bold">Projects</h2>
                 <p class="mx-auto w-full lg:w-1/2">
-                    Here is a small taste of the work {"I've"} done
+                    Here is a small taste of the work {"I've"}done
                 </p>
             </div>
             <div class="m-6 grid grid-cols-1 justify-center gap-4 md:m-24 md:grid-cols-2 xl:grid-cols-3">
@@ -560,7 +580,7 @@ fn Contact() -> impl IntoView {
 #[component]
 /// Shows a few of the most recent blog posts
 fn BlogShowcase() -> impl IntoView {
-    let once = create_resource(
+    let once = Resource::new(
         || (),
         |_| async move { blog::browse::get_posts(None, Some(3)).await },
     );
@@ -592,18 +612,18 @@ fn BlogShowcase() -> impl IntoView {
                                             .collect::<Vec<_>>()
                                             .into_view()}
                                     }
-                                        .into_view()
+                                        .into_any()
                                 }
                                 Err(e) => {
                                     println!("Error fetching posts: {e:?}");
                                     let mut outside_errors = Errors::default();
                                     outside_errors
                                         .insert_with_default_key(AppError::InternalServerError);
-                                    view! { <ErrorTemplate outside_errors /> }.into_view()
+                                    view! { <ErrorTemplate outside_errors /> }.into_any()
                                 }
                             }
                         }
-                        None => view! { <h2>"Loading..."</h2> }.into_view(),
+                        None => view! { <h2>"Loading..."</h2> }.into_any(),
                     }}
 
                 </Suspense>

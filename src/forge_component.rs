@@ -1,8 +1,9 @@
 // Jackson Coxson
 
-use leptos::*;
+use leptos::prelude::*;
 
 use leptos_meta::Title;
+use leptos_router::hooks::use_location;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -23,8 +24,8 @@ pub fn ForgeComponent() -> impl IntoView {
             <h1>Forge</h1>
 
             {
-                let resource = create_resource(
-                    move || leptos_router::use_location().pathname.get(),
+                let resource = Resource::new(
+                    move || use_location().pathname.get(),
                     |route| async move {
                         let split_route = route
                             .split('/')
@@ -39,21 +40,21 @@ pub fn ForgeComponent() -> impl IntoView {
                         view! { <h2>"Loading..."</h2> }
                     }>
                         {
-                            let path = leptos_router::use_location().pathname.get();
+                            let path = use_location().pathname.get();
                             view! {
                                 <Title text=format!("Forge - {path}") />
                                 <h2 class="text-stone-500">{path}</h2>
                             }
                                 .into_view()
                         }
-                        {match resource.get() {
+                        {move || match resource.get() {
                             Some(data) => {
                                 match data.clone() {
                                     Ok(d) => {
                                         match d {
                                             PrintReturn::File => {
                                                 crate::reload();
-                                                view! { "Reloading..." }.into_view()
+                                                view! { "Reloading..." }.into_any()
                                             }
                                             PrintReturn::Dir((dirs, files)) => {
                                                 view! {
@@ -73,7 +74,7 @@ pub fn ForgeComponent() -> impl IntoView {
                                                         </ul>
                                                     </div>
                                                 }
-                                                    .into_view()
+                                                    .into_any()
                                             }
                                         }
                                     }
@@ -82,13 +83,13 @@ pub fn ForgeComponent() -> impl IntoView {
                                             ServerFnError::Request(_) => {
                                                 let mut outside_errors = Errors::default();
                                                 outside_errors.insert_with_default_key(AppError::NotFound);
-                                                view! { <ErrorTemplate outside_errors /> }.into_view()
+                                                view! { <ErrorTemplate outside_errors /> }.into_any()
                                             }
                                             _ => {
                                                 let mut outside_errors = Errors::default();
                                                 outside_errors
                                                     .insert_with_default_key(AppError::InternalServerError);
-                                                view! { <ErrorTemplate outside_errors /> }.into_view()
+                                                view! { <ErrorTemplate outside_errors /> }.into_any()
                                             }
                                         }
                                     }
@@ -100,7 +101,7 @@ pub fn ForgeComponent() -> impl IntoView {
 
                                     <h2>Loading...</h2>
                                 }
-                                    .into_view()
+                                    .into_any()
                             }
                         }}
 
@@ -149,7 +150,7 @@ pub async fn print_tree(request: Vec<String>) -> Result<PrintReturn, ServerFnErr
 
 #[component]
 fn Folder(name: String) -> impl IntoView {
-    let mut current_path = leptos_router::use_location().pathname.get_untracked();
+    let mut current_path = use_location().pathname.get_untracked();
     if current_path.ends_with('/') {
         current_path.truncate(current_path.len() - 1)
     }
@@ -157,7 +158,7 @@ fn Folder(name: String) -> impl IntoView {
         <li class="m-4 flex items-center justify-center rounded-md p-2 outline outline-2 hover:bg-blue-400 dark:hover:bg-blue-950">
             <a class="flex h-full w-full" href=format!("{}/{}", current_path, name)>
                 <div class="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-green-700"></div>
-                <p class="truncate">{name}</p>
+                <p class="truncate">{name.clone()}</p>
             </a>
         </li>
     }
@@ -173,7 +174,7 @@ fn Back() -> impl IntoView {
                     format!(
                         "/{}",
                         {
-                            let path = leptos_router::use_location().pathname.get();
+                            let path = use_location().pathname.get();
                             let mut path = path
                                 .split("/")
                                 .filter(|s| !s.is_empty())
@@ -194,7 +195,7 @@ fn Back() -> impl IntoView {
 
 #[component]
 fn File(name: String) -> impl IntoView {
-    let mut current_path = leptos_router::use_location().pathname.get_untracked();
+    let mut current_path = use_location().pathname.get_untracked();
     if current_path.ends_with('/') {
         current_path.truncate(current_path.len() - 1)
     }
@@ -206,7 +207,7 @@ fn File(name: String) -> impl IntoView {
                 rel="external"
             >
                 <div class="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-700"></div>
-                <p class="truncate">{name}</p>
+                <p class="truncate">{name.clone()}</p>
             </a>
         </li>
     }

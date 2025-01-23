@@ -14,17 +14,17 @@ use rand::{rngs::ThreadRng, Rng};
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
-        <!DOCTYPE html>
+        <!DOCTYPE html> 
         <html lang="en">
             <head>
-                <meta charset="utf-8"/>
-                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <AutoReload options=options.clone() />
-                <HydrationScripts options/>
-                <MetaTags/>
+                <HydrationScripts options />
+                <MetaTags />
             </head>
             <body>
-                <App/>
+                <App />
             </body>
         </html>
     }
@@ -43,7 +43,7 @@ pub fn App() -> impl IntoView {
         />
         <Script id="main-js" src="/cdn/site/js/main.js" />
 
-        <Eruda />
+        // <Eruda />
 
         // sets the document title
         <Title text="Jackson Coxson" />
@@ -62,9 +62,10 @@ pub fn App() -> impl IntoView {
                         .into_view()
                 }>
                     <Route path=path!("") view=HomePage />
-                    <Route path=path!("/forge/*any")  view=ForgeComponent />
+                    <Route path=path!("/forge/*any") view=ForgeComponent />
                     <Route path=path!("/blog") view=blog::browse::BrowseView />
                     <Route path=path!("/blog/:id") view=blog::page::PageView />
+                    <Route path=path!("/jitstreamer") view=crate::jitstreamer::Page />
                 </Routes>
             </main>
         </Router>
@@ -141,6 +142,14 @@ pub fn NavBar() -> impl IntoView {
                                     href="/forge"
                                 >
                                     Forge
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    class="font-alatsi text-gray-800 dark:text-gray-200"
+                                    href="/jitstreamer"
+                                >
+                                    JitStreamer
                                 </a>
                             </li>
                             <li>

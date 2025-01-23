@@ -16,7 +16,7 @@ leptos_router = { version = "0.7" }
 tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 tower = { version = "0.5.1", features = ["util"], optional = true }
 tower-http = { version = "0.6", features = ["fs"], optional = true }
-wasm-bindgen = "0.2.93"
+wasm-bindgen = { version = "0.2.93", features = ["serde-serialize"] }
 thiserror = "2"
 tracing = { version = "0.1", optional = true }
 http = "1"
@@ -36,7 +36,12 @@ hashlink = { version = "0.10", optional = true }
 rand = { version = "0.8.5" }
 getrandom = { version = "0.2", features = ["js"] }
 chrono = { version = "0.4.38", features = ["serde"] }
-web-sys = { version = "0.3" }
+web-sys = { version = "0.3", features = ["FileList", "File"] }
+reqwest = { version = "0.12", features = [
+  "json",
+  "rustls-tls",
+], default-features = false }
+gloo = { version = "0.11", features = ["file", "futures"] }
 
 [features]
 hydrate = ["leptos/hydrate"]

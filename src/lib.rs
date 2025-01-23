@@ -11,6 +11,7 @@ pub mod context;
 pub mod fileserv;
 #[cfg(feature = "ssr")]
 pub mod forge;
+pub mod jitstreamer;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]

@@ -14,20 +14,32 @@ pub fn Setup() -> impl IntoView {
             <h2 class="text-2xl font-bold mb-4">Setup</h2>
             <Suspense>
                 {move || match res.get() {
-                    Some(Ok(())) => view! {
-                        <div class="bg-green-100 dark:bg-green-800 border-l-4 border-green-500 text-green-700 dark:text-green-100 p-4 mb-4" role="alert">
-                            <p class="font-bold">Success</p>
-                            <p>Your pairing file has been uploaded.</p>
-                        </div>
-                    }.into_any(),
-                    Some(Err(err)) => view! {
-                        <div class="bg-red-100 dark:bg-red-800 border-l-4 border-red-500 text-red-700 dark:text-white p-4 mb-4" role="alert">
-                            <p class="font-bold">Error</p>
-                            <p>{err}</p>
-                        </div>
-                    }.into_any(),
+                    Some(Ok(())) => {
+                        view! {
+                            <div
+                                class="bg-green-100 dark:bg-green-800 border-l-4 border-green-500 text-green-700 dark:text-green-100 p-4 mb-4"
+                                role="alert"
+                            >
+                                <p class="font-bold">Success</p>
+                                <p>Your pairing file has been uploaded.</p>
+                            </div>
+                        }
+                            .into_any()
+                    }
+                    Some(Err(err)) => {
+                        view! {
+                            <div
+                                class="bg-red-100 dark:bg-red-800 border-l-4 border-red-500 text-red-700 dark:text-white p-4 mb-4"
+                                role="alert"
+                            >
+                                <p class="font-bold">Error</p>
+                                <p>{err}</p>
+                            </div>
+                        }
+                            .into_any()
+                    }
                     None => ().into_any(),
-            }}
+                }}
             </Suspense>
             <h3 class="text-xl font-bold mb-4">1. Download Wireguard from the App Store</h3>
             <a
@@ -92,7 +104,7 @@ pub fn Setup() -> impl IntoView {
             </p>
             <h3 class="text-xl font-bold mb-4">5. Download the shortcut</h3>
             <a
-                href="https://www.icloud.com/shortcuts/4ab164a8667f47b89139bfc5358c7c83"
+                href="https://www.icloud.com/shortcuts/89c56af48b704059877d8817048c95ef"
                 target="_blank"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >

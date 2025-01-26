@@ -37,8 +37,10 @@ pub fn PageView() -> impl IntoView {
                             match data {
                                 Ok(data) => {
                                     view! {
-                                        <Title text=data.1 />
-                                        <div inner_html=data.0></div>
+                                        <div class="post">
+                                            <Title text=data.1 />
+                                            <div inner_html=data.0></div>
+                                        </div>
                                     }
                                         .into_any()
                                 }

@@ -9,6 +9,7 @@ use super::EXTERNAL_JITSTREAMER_API;
 #[component]
 pub fn Setup() -> impl IntoView {
     let (res, set_res) = signal(None);
+    let (api, set_api) = signal(EXTERNAL_JITSTREAMER_API.to_string());
     view! {
         <div class="shadow-inner p-6">
             <h2 class="text-2xl font-bold mb-4">Setup</h2>
@@ -66,7 +67,17 @@ pub fn Setup() -> impl IntoView {
             </p>
             <h3 class="text-xl font-bold mb-4">3. Upload the Pairing File</h3>
             <p class="mb-4">Upload the pairing file you generated in the previous step.</p>
-            <form class="shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
+            <select
+                on:change:target=move |ev| {
+                    set_api.set(ev.target().value().parse().unwrap());
+                }
+                prop:value=move || api.get().to_string()
+            >
+                <option value=EXTERNAL_JITSTREAMER_API>"JitStreamer Main (Utah)"</option>
+                // <option value="https://jitstreamer-api-nbg1.jkcoxson.com">"JitStreamer (Germany)"</option>
+                // <option value="https://jitstreamer-api.sidestore.io">"SideStore"</option>
+            </select>
+            <form class="shadow-md rounded px-8 pt-8 pb-8 my-4 w-full max-w-md">
                 <input
                     type="file"
                     name="pairing_file"
@@ -80,7 +91,7 @@ pub fn Setup() -> impl IntoView {
                             .files()
                             .unwrap();
                         leptos::task::spawn_local(async move {
-                            match upload_pairing_file(files).await {
+                            match upload_pairing_file(files, api.get().as_str()).await {
                                 Ok(conf) => {
                                     println!("Received conf: {conf:?}");
                                     set_res.set(Some(Ok(())));
@@ -104,7 +115,7 @@ pub fn Setup() -> impl IntoView {
             </p>
             <h3 class="text-xl font-bold mb-4">5. Download the shortcut</h3>
             <a
-                href="https://www.icloud.com/shortcuts/89c56af48b704059877d8817048c95ef"
+                href="https://www.icloud.com/shortcuts/0a9a7961c8fa4318a44665ef70c8d95c"
                 target="_blank"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >
@@ -114,7 +125,7 @@ pub fn Setup() -> impl IntoView {
     }
 }
 
-async fn upload_pairing_file(files: web_sys::FileList) -> Result<Vec<u8>, String> {
+async fn upload_pairing_file(files: web_sys::FileList, target: &str) -> Result<Vec<u8>, String> {
     let files = gloo::file::FileList::from(files);
     let file = match files.first() {
         Some(file) => file,
@@ -127,7 +138,7 @@ async fn upload_pairing_file(files: web_sys::FileList) -> Result<Vec<u8>, String
 
     let client = reqwest::Client::new();
     let pairing_file = match client
-        .post(format!("{}/register", EXTERNAL_JITSTREAMER_API))
+        .post(format!("{}/register", target))
         .body(data)
         .send()
         .await

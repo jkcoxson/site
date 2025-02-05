@@ -9,7 +9,6 @@ use crate::app::{Footer, NavBar};
 mod setup;
 
 pub const EXTERNAL_JITSTREAMER_API: &str = "https://jitstreamer-api.jkcoxson.com";
-pub const INTERNAL_JITSTREAMER_API: &str = "http://[fd00::]:9172";
 
 #[derive(Debug, Serialize, Deserialize)]
 struct VersionRequest {
@@ -29,7 +28,7 @@ pub fn Page() -> impl IntoView {
         <div class="flex justify-center">
             <div class="flex flex-col items-center">
                 <h1 class="m-6">"JitStreamer"</h1>
-
+                <a href="https://discord.gg/jitstreamer-eb">Join the Discord</a>
                 <setup::Setup />
             </div>
         </div>

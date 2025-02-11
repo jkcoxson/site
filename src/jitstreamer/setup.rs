@@ -115,7 +115,7 @@ pub fn Setup() -> impl IntoView {
             </p>
             <h3 class="text-xl font-bold mb-4">5. Download the shortcut</h3>
             <a
-                href="https://www.icloud.com/shortcuts/0a9a7961c8fa4318a44665ef70c8d95c"
+                href="https://www.icloud.com/shortcuts/c19d3ca719074dc09e140e3e3298b771"
                 target="_blank"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >

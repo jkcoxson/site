@@ -28,7 +28,12 @@ pub fn PageView() -> impl IntoView {
                 {
                     Effect::new(move |_| {
                         let _ = once.get();
-                        highlightAll();
+                        set_timeout(
+                            || {
+                                highlightAll();
+                            },
+                            std::time::Duration::from_millis(100),
+                        )
                     });
                 }
                 <div class="flex w-5/6 md:w-3/4">

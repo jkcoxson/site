@@ -74,8 +74,9 @@ pub fn Setup() -> impl IntoView {
                 prop:value=move || api.get().to_string()
             >
                 <option value=EXTERNAL_JITSTREAMER_API>"JitStreamer Main (Utah)"</option>
-                <option value="https://jitstreamer-de-api.jkcoxson.com">"JitStreamer (Germany)"</option>
-                // <option value="https://jitstreamer-api.sidestore.io">"SideStore"</option>
+                // <option value="https://jitstreamer-de-api.jkcoxson.com">
+                //     "JitStreamer (Germany)"
+                // </option>
             </select>
             <form class="shadow-md rounded px-8 pt-8 pb-8 my-4 w-full max-w-md">
                 <input

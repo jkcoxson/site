@@ -10,6 +10,7 @@ use super::EXTERNAL_JITSTREAMER_API;
 pub fn Setup() -> impl IntoView {
     let (res, set_res) = signal(None);
     let (api, set_api) = signal(EXTERNAL_JITSTREAMER_API.to_string());
+    let (uploading, set_uploading) = signal(false);
     view! {
         <div class="shadow-inner p-6">
             <h2 class="text-2xl font-bold mb-4">Setup</h2>
@@ -73,40 +74,57 @@ pub fn Setup() -> impl IntoView {
                 }
                 prop:value=move || api.get().to_string()
             >
-                <option value=EXTERNAL_JITSTREAMER_API>"JitStreamer Main (Utah)"</option>
+                <option value="https://jitstreamer-ash.jkcoxson.com">
+                    "JitStreamer (Virginia)"
+                </option>
                 <option value="https://jitstreamer-de-api.jkcoxson.com">
                     "JitStreamer (Germany)"
                 </option>
+                <option value=EXTERNAL_JITSTREAMER_API>"JitStreamer (Utah)"</option>
             </select>
-            <form class="shadow-md rounded px-8 pt-8 pb-8 my-4 w-full max-w-md">
-                <input
-                    type="file"
-                    name="pairing_file"
-                    accept=".plist,.mobiledevicepairing"
-                    class="mb-4 border rounded w-full py-2 px-3"
-                    on:input=move |ev| {
-                        let files = ev
-                            .target()
-                            .unwrap()
-                            .unchecked_ref::<web_sys::HtmlInputElement>()
-                            .files()
-                            .unwrap();
-                        leptos::task::spawn_local(async move {
-                            match upload_pairing_file(files, api.get().as_str()).await {
-                                Ok(conf) => {
-                                    println!("Received conf: {conf:?}");
-                                    set_res.set(Some(Ok(())));
-                                    download_file("jitstreamer.conf", conf).unwrap_throw();
-                                }
-                                Err(err) => {
-                                    error!("Error uploading file: {err}");
-                                    set_res.set(Some(Err(err)));
-                                }
+            <Suspense>
+                {{
+                    move || match uploading.get() {
+                        false => {
+                            view! {
+                                <form class="shadow-md rounded px-8 pt-8 pb-8 my-4 w-full max-w-md">
+                                    <input
+                                        type="file"
+                                        name="pairing_file"
+                                        accept=".plist,.mobiledevicepairing"
+                                        class="mb-4 border rounded w-full py-2 px-3"
+                                        on:input=move |ev| {
+                                            let files = ev
+                                                .target()
+                                                .unwrap()
+                                                .unchecked_ref::<web_sys::HtmlInputElement>()
+                                                .files()
+                                                .unwrap();
+                                            leptos::task::spawn_local(async move {
+                                                set_uploading.set(true);
+                                                match upload_pairing_file(files, api.get().as_str()).await {
+                                                    Ok(conf) => {
+                                                        println!("Received conf: {conf:?}");
+                                                        set_res.set(Some(Ok(())));
+                                                        set_uploading.set(false);
+                                                        download_file("jitstreamer.conf", conf).unwrap_throw();
+                                                    }
+                                                    Err(err) => {
+                                                        error!("Error uploading file: {err}");
+                                                        set_res.set(Some(Err(err)));
+                                                    }
+                                                }
+                                            })
+                                        }
+                                    />
+                                </form>
                             }
-                        })
+                                .into_any()
+                        }
+                        true => view! { <p>Uploading...</p> }.into_any(),
                     }
-                />
-            </form>
+                }}
+            </Suspense>
             <p class="mb-4">
                 The pairing file should download automatically. Transfer it to your iOS device.
             </p>

@@ -9,7 +9,7 @@ use super::EXTERNAL_JITSTREAMER_API;
 #[component]
 pub fn Setup() -> impl IntoView {
     let (res, set_res) = signal(None);
-    let (api, set_api) = signal(EXTERNAL_JITSTREAMER_API.to_string());
+    let (api, set_api) = signal("https://jitstreamer-ash.jkcoxson.com".to_string());
     let (uploading, set_uploading) = signal(false);
     view! {
         <div class="shadow-inner p-6">

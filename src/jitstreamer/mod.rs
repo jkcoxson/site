@@ -28,7 +28,7 @@ pub fn Page() -> impl IntoView {
         <div class="flex justify-center">
             <div class="flex flex-col items-center">
                 <h1 class="m-6">"JitStreamer"</h1>
-                <a href="https://discord.gg/jitstreamer-eb">Join the Discord</a>
+                <a href="https://discord.gg/qtgv6QtYbV">Join the Discord</a>
                 <setup::Setup />
             </div>
         </div>

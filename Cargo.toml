@@ -37,11 +37,6 @@ rand = { version = "0.8.5" }
 getrandom = { version = "0.2", features = ["js"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 web-sys = { version = "0.3", features = ["FileList", "File"] }
-reqwest = { version = "0.12", features = [
-  "json",
-  "rustls-tls",
-], default-features = false }
-gloo = { version = "0.11", features = ["file", "futures"] }
 
 [features]
 hydrate = ["leptos/hydrate"]

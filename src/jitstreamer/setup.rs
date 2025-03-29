@@ -32,7 +32,7 @@ pub fn Setup() -> impl IntoView {
             </p>
             <h3 class="text-xl font-bold mb-4">3. Upload the Pairing File</h3>
             <a
-                href="https://discord.com/channels/1329314147434758175/1333185738962894953/1355665948450885762"
+                href="https://www.icloud.com/shortcuts/3d2b0b9c981440029d909b9028ccab1c"
                 target="_blank"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >

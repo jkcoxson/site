@@ -38,7 +38,8 @@ pub fn Setup() -> impl IntoView {
             >
                 {"Download Shortcut"}
             </a>
-            <h3 class="text-xl font-bold mb-4">5. Download the shortcut</h3>
+            <p>Run this shortcut and it will add a configuration to Wireguard</p>
+            <h3 class="text-xl font-bold mb-4">4. Download the shortcut</h3>
             <a
                 href="https://www.icloud.com/shortcuts/13eb20918ad34998a30f9f1422c26196"
                 target="_blank"

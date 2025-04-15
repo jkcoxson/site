@@ -6,6 +6,12 @@ use leptos::prelude::*;
 pub fn Setup() -> impl IntoView {
     view! {
         <div class="shadow-inner p-6">
+            <h1>Attention! Please use StikJIT instead!</h1>
+            <p>
+                StikJIT uses the same backend as JitStreamer, but runs on-device.
+                Virginia and Utah have been taken offline. Only Germany is live
+                for the time being.
+            </p>
             <h2 class="text-2xl font-bold mb-4">Setup</h2>
             <h3 class="text-xl font-bold mb-4">1. Download Wireguard from the App Store</h3>
             <a

@@ -59,6 +59,19 @@ tr:hover {
   background-color: #e9ecef;
 }
 
+ul {
+  padding: 0;              /* Removes default padding */
+  margin: 0;               /* Removes default margin */
+}
+
+li {
+  list-style: disc; 
+  padding: 0.5rem 1rem;     /* Adds space inside each list item */
+  border-bottom: 1px solid #eee; /* Adds a subtle separator */
+  transition: background 0.3s ease;
+}
+
+
 @media (prefers-color-scheme: dark) {
   h1, h2, h3, h4, h5, p, li {
     color: rgb(168 162 158);

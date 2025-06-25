@@ -1,8 +1,6 @@
 // Jackson Coxson
 
-// import is deprecated? didn't ask
-@import "hljs";
-@import "manual";
-@import "output";
-@import "base";
-// @import "styles";
+@use "hljs";
+@use "manual";
+@use "output";
+@use "base";

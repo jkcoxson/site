@@ -18,6 +18,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <html lang="en">
             <head>
                 <meta charset="utf-8" />
+                <script defer src="https://analytics.jkcoxson.com/script.js" data-website-id="2b9d06df-c74f-42a7-b6f8-76be381cb4d9"></script>
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <AutoReload options=options.clone() />
                 <HydrationScripts options />

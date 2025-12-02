@@ -23,3 +23,5 @@ playwright/.cache/
 .env
 
 style/output.css
+
+.DS_Store

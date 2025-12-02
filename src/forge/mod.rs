@@ -232,6 +232,9 @@ impl Forge {
                 if path.file_name().unwrap_or_default() == "forge.toml" {
                     continue;
                 }
+                if path.file_name().unwrap_or_default().to_string_lossy().starts_with("._") {
+                    continue;
+                }
                 files.push((
                     path.file_name()
                         .ok_or::<std::io::Error>(std::io::ErrorKind::InvalidInput.into())?

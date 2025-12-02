@@ -59,6 +59,18 @@ tr:hover {
   background-color: #e9ecef;
 }
 
+.post ul {
+  padding: 0;
+  margin: 0;
+}
+
+.post li {
+  list-style: disc;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #eee;
+  transition: background 0.3s ease;
+}
+
 @media (prefers-color-scheme: dark) {
   h1, h2, h3, h4, h5, p, li {
     color: rgb(168 162 158);

@@ -1,3 +1,4 @@
+#![recursion_limit = "256"]
 // Jackson Coxson
 
 pub mod app;

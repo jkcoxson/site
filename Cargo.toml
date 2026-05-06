@@ -16,7 +16,7 @@ leptos_router = { version = "0.8.12" }
 tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 tower = { version = "0.5.1", features = ["util"], optional = true }
 tower-http = { version = "0.6", features = ["fs"], optional = true }
-wasm-bindgen = { version = "0.2.93", features = ["serde-serialize"] }
+wasm-bindgen = { version = "0.2.120", features = ["serde-serialize"] }
 thiserror = "2"
 tracing = { version = "0.1", optional = true }
 http = "1"

@@ -1,3 +1,5 @@
+#![recursion_limit = "256"] // https://github.com/rust-lang/rust/issues/152942
+
 // Jackson Coxson
 
 #[cfg(feature = "ssr")]

@@ -16,7 +16,7 @@ async fn main() {
     use leptos_axum::{generate_route_list, LeptosRoutes};
 
     dotenvy::dotenv().ok();
-    let conf = get_configuration(None).unwrap();
+    let conf = get_configuration(Some("Cargo.toml")).unwrap();
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);

@@ -81,7 +81,7 @@ fn PostPreviewComponent(preview: crate::blog::structures::PostPreview) -> impl I
     }
 }
 
-#[server(GetPosts, "/api", "Url", "get_posts")]
+#[server(GetPosts, "/api", "getjson", "get_posts")]
 pub async fn get_posts(
     page: Option<u16>,
     limit: Option<u16>,

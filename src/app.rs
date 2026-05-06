@@ -10,8 +10,7 @@ use leptos_router::{
     components::{Route, Router, Routes},
     path,
 };
-use rand::{rngs::ThreadRng, Rng};
-
+use rand::RngExt;
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
         <!DOCTYPE html> 
@@ -218,7 +217,7 @@ fn HeroSection() -> impl IntoView {
 
 #[component]
 fn TraceSvg() -> impl IntoView {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     view! {
         <svg
             class="absolute left-0 right-0 top-0 -z-50"
@@ -266,18 +265,18 @@ fn TraceSvg() -> impl IntoView {
     }
 }
 
-fn generate_trace(rng: &mut ThreadRng) -> String {
+fn generate_trace(rng: &mut impl RngExt) -> String {
     let mut x = 400;
     let mut y = 400;
     let mut trace = "M 400 400".to_string();
 
-    let movements: u16 = rng.gen_range(120..=200);
-    let start = rng.gen_range(0..=1);
+    let movements: u16 = rng.random_range(120..=200);
+    let start = rng.random_range(0..=1);
     for m in start..movements {
         if m % 2 == 0 {
-            x = rng.gen_range((x / 50) - 6..(x / 50) + 6) * 50;
+            x = rng.random_range((x / 50) - 6..(x / 50) + 6) * 50;
         } else {
-            y = rng.gen_range((y / 50) - 2..(y / 50) + 2) * 50;
+            y = rng.random_range((y / 50) - 2..(y / 50) + 2) * 50;
         }
         trace = format!(" {trace} L {x}, {y}");
     }

@@ -13,7 +13,7 @@ use leptos_router::{
 use rand::RngExt;
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
-        <!DOCTYPE html> 
+        <!DOCTYPE html>
         <html lang="en">
             <head>
                 <meta charset="utf-8" />
@@ -367,48 +367,50 @@ fn Toolbox() -> impl IntoView {
                     </div>
                 </div>
             </div>
-            <small class="pl-0 text-xs dark:text-gray-200">
-                Individual logos are trademarked property. I am not affiliated with any
-                of these organizations, nor am I implying any sort of sponsorship. I
-                doubt they know I exist. These are merely tools that I am proficient in.
-                Rust logo:
+            <small class="mx-auto block max-w-3xl pl-0 text-xs dark:text-gray-200">
+                "Individual logos are trademarked property. I am not affiliated with any of these organizations, nor am I implying any sort of sponsorship. I doubt they know I exist. These are merely tools that I am proficient in. Rust logo: "
                 <a
                     href="https://foundation.rust-lang.org/policies/logo-policy-and-media-guide/"
                     target="_blank"
                     class="text-blue-600 underline"
                 >
-                    Rust Foundation
-                </a>- Python logo:
+                    "Rust Foundation"
+                </a>
+                " - Python logo: "
                 <a
                     href="https://www.python.org/psf/trademarks/"
                     target="_blank"
                     class="text-blue-600 underline"
                 >
-                    PSF
-                </a>-
+                    "PSF"
+                </a>
+                " - "
                 <a
                     href="https://github.com/sveltejs/branding"
                     target="_blank"
                     class="text-blue-600 underline"
                 >
-                    Svelte
-                </a>- Git logo:
+                    "Svelte"
+                </a>
+                " - Git logo: "
                 <a
                     href="https://git-scm.com/downloads/logos"
                     target="_blank"
                     class="text-blue-600 underline"
                 >
-                    Jason Long
-                </a>- Go:
+                    "Jason Long"
+                </a>
+                " - Go: "
                 <a href="https://go.dev/brand" target="_blank" class="text-blue-600 underline">
-                    Google
-                </a>-
+                    "Google"
+                </a>
+                " - "
                 <a
                     href="https://commons.wikimedia.org/wiki/File:MySQL_textlogo.svg"
                     target="_blank"
                     class="text-blue-600 underline"
                 >
-                    MySQL
+                    "MySQL"
                 </a>
             </small>
         </div>
@@ -435,7 +437,7 @@ fn Projects() -> impl IntoView {
             <div class="mb-5 text-center">
                 <h2 class="font-bold">Projects</h2>
                 <p class="mx-auto w-full lg:w-1/2">
-                    Here is a small taste of the work {"I've"}done
+                    Here is a small taste of the work {" I've "}done
                 </p>
             </div>
             <div class="m-6 grid grid-cols-1 justify-center gap-4 md:m-24 md:grid-cols-2 xl:grid-cols-3">
@@ -594,7 +596,7 @@ fn BlogShowcase() -> impl IntoView {
         |_| async move { blog::browse::get_posts(None, Some(3)).await },
     );
     view! {
-        <div class="bg-cyan-200 py-16 lg:py-24 dark:bg-cyan-950">
+        <div class="bg-gray-200 py-16 lg:py-24 dark:bg-stone-800">
             <div class="mb-10 text-center">
                 <div class="font-bold text-gray-600 dark:text-gray-200">
                     <h2 class="mb-2">Blog</h2>
@@ -649,7 +651,7 @@ fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoV
                 href=format!("/blog/{}", preview.slug)
                 class="block transform transition-transform hover:scale-105"
             >
-                <div class="overflow-hidden rounded-lg bg-white shadow-md dark:bg-stone-800">
+                <div class="overflow-hidden rounded-lg bg-white shadow-md dark:bg-stone-900">
                     <img
                         class="h-48 w-full object-cover"
                         src=preview
@@ -667,8 +669,8 @@ fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoV
                             }}
 
                         </p>
-                        <h4 class="mb-2 text-xl font-semibold">{preview.post_name}</h4>
-                        <p class="text-gray-600">{preview.sneak_peak}</p>
+                        <h4 class="mb-2 text-xl font-semibold dark:text-white">{preview.post_name}</h4>
+                        <p class="text-gray-600 dark:text-gray-300">{preview.sneak_peak}</p>
                     </div>
                 </div>
             </a>

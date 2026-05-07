@@ -75,8 +75,10 @@ output-name = "jkcoxson"
 site-root = "target/site"
 
 # The site-root relative folder where all compiled output (JS, WASM and CSS) is written
-# Defaults to pkg
-site-pkg-dir = "cdn/site/pkg"
+# Defaults to pkg. Kept as the default so the symlink at forge/site exposes files
+# under forge/site/pkg/...; main.rs then overrides site_pkg_dir at runtime to
+# "cdn/site/pkg" so generated HTML references the forge-served URL prefix.
+site-pkg-dir = "pkg"
 
 # [Optional] The source CSS file. If it ends with .sass or .scss then it will be compiled by dart-sass into CSS. The CSS is optimized by Lightning CSS before being written to <site-root>/<site-pkg>/app.css
 style-file = "style/main.scss"

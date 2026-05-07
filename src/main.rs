@@ -17,7 +17,9 @@ async fn main() {
 
     dotenvy::dotenv().ok();
     let conf = get_configuration(Some("Cargo.toml")).unwrap();
-    let leptos_options = conf.leptos_options;
+    let mut leptos_options = conf.leptos_options;
+    // Files build to <site-root>/pkg/, but they're served via the forge under /cdn/...
+    leptos_options.site_pkg_dir = "cdn/site/pkg".into();
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 

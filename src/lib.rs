@@ -12,6 +12,7 @@ pub mod context;
 pub mod fileserv;
 #[cfg(feature = "ssr")]
 pub mod forge;
+pub mod idevice_tools;
 pub mod jitstreamer;
 
 #[cfg(feature = "hydrate")]

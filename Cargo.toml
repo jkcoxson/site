@@ -18,7 +18,7 @@ tower = { version = "0.5.1", features = ["util"], optional = true }
 tower-http = { version = "0.6", features = ["fs"], optional = true }
 wasm-bindgen = { version = "0.2.120", features = ["serde-serialize"] }
 thiserror = "2"
-tracing = { version = "0.1", optional = true }
+tracing = { version = "0.1" }
 http = "1"
 serde = { version = "1.0.204", features = ["derive"] }
 toml = { version = "0.8", optional = true }
@@ -36,7 +36,63 @@ hashlink = { version = "0.11", optional = true }
 rand = { version = "0.10" }
 getrandom = { version = "0.4", features = ["wasm_js"] }
 chrono = { version = "0.4.38", features = ["serde"] }
-web-sys = { version = "0.3", features = ["FileList", "File"] }
+web-sys = { version = "0.3", features = [
+  "FileList",
+  "File",
+  "Blob",
+  "BlobPropertyBag",
+  "Url",
+  "FileReader",
+  "HtmlAnchorElement",
+  "HtmlInputElement",
+  "Navigator",
+  "Storage",
+  "Usb",
+  "UsbDeviceFilter",
+  "UsbDeviceRequestOptions",
+] }
+plist = "1.8"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+netmuxd = { path = "../netmuxd", default-features = false, features = ["wasm"] }
+idevice = { version = "0.1.60", default-features = false, features = [
+  "wasm",
+  "pair",
+  "heartbeat",
+  "installation_proxy",
+  "afc",
+  "amfi",
+  "house_arrest",
+  "crashreportcopymobile",
+  "syslog_relay",
+  "diagnostics_relay",
+  "misagent",
+  "mobile_image_mounter",
+  "screenshotr",
+  "location_simulation",
+  "debug_proxy",
+  "notification_proxy",
+  "core_device",
+  "core_device_proxy",
+  "tunnel_tcp_stack",
+  "rsd",
+  "xpc",
+  "dvt",
+  "network_monitor",
+  "energy_monitor",
+  "graphics",
+  "remote_pairing",
+] }
+nusb = { git = "https://github.com/jkcoxson/nusb", branch = "webusb", default-features = false }
+wasm-bindgen-futures = "0.4"
+futures = { version = "0.3", default-features = false, features = ["std"] }
+js-sys = "0.3"
+uuid = { version = "1", features = ["v4", "js"] }
+tokio = { version = "1", default-features = false, features = [
+  "sync",
+  "macros",
+  "io-util",
+] }
 
 [features]
 hydrate = ["leptos/hydrate"]
@@ -48,7 +104,6 @@ ssr = [
   "dep:leptos_axum",
   "leptos/ssr",
   "leptos_router/ssr",
-  "dep:tracing",
   "dep:toml",
   "dep:once_cell",
   "dep:notify",

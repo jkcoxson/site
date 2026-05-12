@@ -7,17 +7,21 @@ use chrono::Datelike;
 use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::{
-    components::{Route, Router, Routes},
+    components::{ParentRoute, Route, Router, Routes},
     path,
 };
 use rand::RngExt;
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
-        <!DOCTYPE html>
+        <!DOCTYPE html> 
         <html lang="en">
             <head>
                 <meta charset="utf-8" />
-                <script defer src="https://analytics.jkcoxson.com/script.js" data-website-id="2b9d06df-c74f-42a7-b6f8-76be381cb4d9"></script>
+                <script
+                    defer
+                    src="https://analytics.jkcoxson.com/script.js"
+                    data-website-id="2b9d06df-c74f-42a7-b6f8-76be381cb4d9"
+                ></script>
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <AutoReload options=options.clone() />
                 <HydrationScripts options />
@@ -66,6 +70,91 @@ pub fn App() -> impl IntoView {
                     <Route path=path!("/blog") view=blog::browse::BrowseView />
                     <Route path=path!("/blog/:id") view=blog::page::PageView />
                     <Route path=path!("/jitstreamer") view=crate::jitstreamer::Page />
+                    <ParentRoute path=path!("/idevice-tools") view=crate::idevice_tools::Layout>
+                        <Route path=path!("") view=crate::idevice_tools::ToolHome />
+                        <Route
+                            path=path!("idevice_id")
+                            view=crate::idevice_tools::tools::idevice_id::Page
+                        />
+                        <Route path=path!("afc") view=crate::idevice_tools::tools::afc::Page />
+                        <Route path=path!("amfi") view=crate::idevice_tools::tools::amfi::Page />
+                        <Route
+                            path=path!("ideviceinfo")
+                            view=crate::idevice_tools::tools::ideviceinfo::Page
+                        />
+                        <Route
+                            path=path!("installation_proxy")
+                            view=crate::idevice_tools::tools::installation_proxy::Page
+                        />
+                        <Route
+                            path=path!("lockdown")
+                            view=crate::idevice_tools::tools::lockdown::Page
+                        />
+                        <Route
+                            path=path!("app_service")
+                            view=crate::idevice_tools::tools::app_service::Page
+                        />
+                        <Route
+                            path=path!("debug_proxy")
+                            view=crate::idevice_tools::tools::debug_proxy::Page
+                        />
+                        <Route
+                            path=path!("diagnostics")
+                            view=crate::idevice_tools::tools::diagnostics::Page
+                        />
+                        <Route
+                            path=path!("diagnosticsservice")
+                            view=crate::idevice_tools::tools::diagnosticsservice::Page
+                        />
+                        <Route
+                            path=path!("energy_monitor")
+                            view=crate::idevice_tools::tools::energy_monitor::Page
+                        />
+                        <Route
+                            path=path!("graphics")
+                            view=crate::idevice_tools::tools::graphics::Page
+                        />
+                        <Route
+                            path=path!("location_simulation")
+                            view=crate::idevice_tools::tools::location_simulation::Page
+                        />
+                        <Route
+                            path=path!("misagent")
+                            view=crate::idevice_tools::tools::misagent::Page
+                        />
+                        <Route
+                            path=path!("mounter")
+                            view=crate::idevice_tools::tools::mounter::Page
+                        />
+                        <Route
+                            path=path!("network_monitor")
+                            view=crate::idevice_tools::tools::network_monitor::Page
+                        />
+                        <Route
+                            path=path!("notifications")
+                            view=crate::idevice_tools::tools::notifications::Page
+                        />
+                        <Route
+                            path=path!("os_trace_relay")
+                            view=crate::idevice_tools::tools::os_trace_relay::Page
+                        />
+                        <Route
+                            path=path!("process_control")
+                            view=crate::idevice_tools::tools::process_control::Page
+                        />
+                        <Route
+                            path=path!("rppairing")
+                            view=crate::idevice_tools::tools::rppairing::Page
+                        />
+                        <Route
+                            path=path!("screenshot")
+                            view=crate::idevice_tools::tools::screenshot::Page
+                        />
+                        <Route
+                            path=path!("syslog_relay")
+                            view=crate::idevice_tools::tools::syslog_relay::Page
+                        />
+                    </ParentRoute>
                 </Routes>
             </main>
         </Router>
@@ -147,9 +236,9 @@ pub fn NavBar() -> impl IntoView {
                             <li>
                                 <a
                                     class="font-alatsi text-gray-800 dark:text-gray-200"
-                                    href="/jitstreamer"
+                                    href="/idevice-tools"
                                 >
-                                    JitStreamer
+                                    idevice
                                 </a>
                             </li>
                             <li>
@@ -375,36 +464,31 @@ fn Toolbox() -> impl IntoView {
                     class="text-blue-600 underline"
                 >
                     "Rust Foundation"
-                </a>
-                " - Python logo: "
+                </a> " - Python logo: "
                 <a
                     href="https://www.python.org/psf/trademarks/"
                     target="_blank"
                     class="text-blue-600 underline"
                 >
                     "PSF"
-                </a>
-                " - "
+                </a> " - "
                 <a
                     href="https://github.com/sveltejs/branding"
                     target="_blank"
                     class="text-blue-600 underline"
                 >
                     "Svelte"
-                </a>
-                " - Git logo: "
+                </a> " - Git logo: "
                 <a
                     href="https://git-scm.com/downloads/logos"
                     target="_blank"
                     class="text-blue-600 underline"
                 >
                     "Jason Long"
-                </a>
-                " - Go: "
+                </a> " - Go: "
                 <a href="https://go.dev/brand" target="_blank" class="text-blue-600 underline">
                     "Google"
-                </a>
-                " - "
+                </a> " - "
                 <a
                     href="https://commons.wikimedia.org/wiki/File:MySQL_textlogo.svg"
                     target="_blank"
@@ -669,7 +753,9 @@ fn BlogShowcaseItem(preview: crate::blog::structures::PostPreview) -> impl IntoV
                             }}
 
                         </p>
-                        <h4 class="mb-2 text-xl font-semibold dark:text-white">{preview.post_name}</h4>
+                        <h4 class="mb-2 text-xl font-semibold dark:text-white">
+                            {preview.post_name}
+                        </h4>
                         <p class="text-gray-600 dark:text-gray-300">{preview.sneak_peak}</p>
                     </div>
                 </div>

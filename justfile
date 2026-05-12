@@ -24,5 +24,5 @@ _send-bin:
 rsync-site:
   rsync -r target/site $DEPLOY_HOST:$DEPLOY_PATH
 
-deploy: _remote-stop _remote-build _send-bin rsync-site _remote-start
+deploy: _remote-build _remote-stop _send-bin rsync-site _remote-start
 

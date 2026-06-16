@@ -138,7 +138,7 @@ fn DeveloperModeSection() -> impl IntoView {
         <Section title="Developer Mode">
             <p class="text-xs text-stone-500 dark:text-stone-400">
                 "Show the Developer Mode option in Settings -> Privacy & Security. Show is the only action that works with a passcode set."
-                "Enable will reboot the device, and accept will finish enablingn developer mode."
+                "Enable will reboot the device, and accept will finish enabling developer mode."
             </p>
             <div class="flex flex-wrap gap-2">
                 {action_button(DevModeAction::Show)} {action_button(DevModeAction::Enable)}

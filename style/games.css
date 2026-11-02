@@ -1,0 +1,102 @@
+/* Light Beams animations and table reset, recovered from the 2026-10-11 build. */
+
+@keyframes beam-breathe {
+  0%,
+  to {
+    box-shadow: 0 0 0 0 var(--beam-color);
+    filter: brightness(0.9);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px var(--beam-color);
+    filter: brightness(1.15);
+    transform: scale(1.12);
+  }
+}
+
+.beam-breathe {
+  animation: 1.8s ease-in-out infinite beam-breathe;
+}
+
+@keyframes beam-loop {
+  0%,
+  to {
+    box-shadow: 0 0 0 0 var(--beam-color);
+    transform: rotate(0) scale(1);
+  }
+  25% {
+    transform: rotate(-12deg) scale(1.1);
+  }
+  50% {
+    box-shadow: 0 0 12px 3px var(--beam-color);
+    transform: rotate(0) scale(1.15);
+  }
+  75% {
+    transform: rotate(12deg) scale(1.1);
+  }
+}
+
+.beam-loop {
+  animation: 1s ease-in-out infinite beam-loop;
+}
+
+@keyframes row-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.row-appear {
+  animation: 0.35s ease-out row-appear;
+}
+
+@keyframes piece-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.piece-pop {
+  animation: 0.25s ease-out piece-pop;
+}
+
+.game-table {
+  margin: 0;
+}
+
+.game-table,
+.game-table thead,
+.game-table tr,
+.game-table th,
+.game-table td,
+.game-table tr:nth-child(2n),
+.game-table tr:hover {
+  background-color: transparent;
+}
+
+.game-table th,
+.game-table td {
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam-breathe,
+  .beam-loop,
+  .row-appear,
+  .piece-pop {
+    animation: none;
+  }
+}

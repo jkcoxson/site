@@ -14,6 +14,7 @@ use crate::games::cards::{
     TAG_DARK, TAG_GOLD,
 };
 use cards::Standing;
+use crate::games::rules::{RulesButton, RulesSection};
 use logic::{
     best_meld, hand_size, rank_label, sort_for_display, Card, ClientMsg, GameView, Meld,
     RoundResult, Stage, Suit, ROUNDS,
@@ -501,14 +502,71 @@ fn FinalResults(
 
 // ── Pages ─────────────────────────────────────────────────────────────────────
 
+fn rules_button() -> AnyView {
+    view! {
+        <RulesButton title="How to play Five Crowns">
+            <FiveCrownsRules />
+        </RulesButton>
+    }
+    .into_any()
+}
+
+#[component]
+fn FiveCrownsRules() -> impl IntoView {
+    let b = "font-medium text-white";
+    view! {
+        <RulesSection heading="Goal">
+            <p>
+                "Turn your whole hand into books and runs before anyone else, and keep the \
+                points left in your hand low. Lowest total after eleven rounds wins."
+            </p>
+        </RulesSection>
+        <RulesSection heading="The cards">
+            <p>
+                "Two decks of five suits (★ ♥ ♣ ♠ ♦), ranks 3 to King, plus jokers. Round \
+                one deals three cards, round two four, up to thirteen in the last round."
+            </p>
+            <p>
+                "The "<span class=b>"wild card"</span>" changes every round: it's the rank \
+                matching the number of cards dealt, so 3s are wild in round one and Kings \
+                in the last. Jokers are always wild."
+            </p>
+        </RulesSection>
+        <RulesSection heading="Your turn">
+            <p>
+                "Draw the top card of the deck or the discard pile, then discard one card."
+            </p>
+            <ul class="list-disc space-y-1 pl-5">
+                <li><span class=b>"Books"</span>": three or more cards of the same rank, like 7♥ 7♣ 7♠."</li>
+                <li><span class=b>"Runs"</span>": three or more cards in a row of one suit, like 9♦ 10♦ J♦."</li>
+                <li>"Wild cards stand in for anything in a book or run."</li>
+            </ul>
+            <p>
+                "When everything but your discard fits into books and runs, you can "
+                <span class=b>"go out"</span>
+                ". Everyone else then gets one last turn, and their hands are laid down as \
+                well as they can be. The table works out the best lay-down for you."
+            </p>
+        </RulesSection>
+        <RulesSection heading="Scoring">
+            <p>
+                "Cards left over count against you: face value for 3 to 10, 11 for Jacks, 12 \
+                for Queens, 13 for Kings, 20 for the round's wild cards and 50 for jokers."
+            </p>
+        </RulesSection>
+    }
+}
+
 #[component]
 pub fn FiveCrownsLobby() -> impl IntoView {
-    cards::lobby_page(GameKind::FiveCrowns, ().into_any(), ().into_any())
+    cards::lobby_page(GameKind::FiveCrowns, ().into_any(), rules_button)
 }
 
 #[component]
 pub fn FiveCrownsRoom() -> impl IntoView {
-    cards::room_page::<GameView>(GameKind::FiveCrowns, |game| {
-        view! { <TableView game /> }.into_any()
-    })
+    cards::room_page::<GameView>(
+        GameKind::FiveCrowns,
+        |game| view! { <TableView game /> }.into_any(),
+        rules_button,
+    )
 }

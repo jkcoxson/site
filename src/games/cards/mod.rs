@@ -448,11 +448,15 @@ fn connect_ws<V: TableView>(
 /// A game's table, drawn from the latest view.
 pub type TableFn<V> = fn(Memo<V>) -> AnyView;
 
+/// A game's "How to play" button (see `games::rules::RulesButton`).
+pub type RulesFn = fn() -> AnyView;
+
 fn game_room<V: TableView>(
     kind: GameKind,
     room_id: String,
     room_passcode: String,
     table: TableFn<V>,
+    rules: RulesFn,
 ) -> impl IntoView {
     let state = RwSignal::new(UiState::<V> {
         phase: Phase::Connecting,
@@ -496,7 +500,10 @@ fn game_room<V: TableView>(
     view! {
         <div class="mx-auto max-w-5xl">
             <div class="mb-3 flex items-center justify-between">
-                <h1 class="text-xl font-bold sm:text-2xl dark:text-white">{kind.title()}</h1>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-xl font-bold sm:text-2xl dark:text-white">{kind.title()}</h1>
+                    {rules()}
+                </div>
                 <span class="rounded bg-stone-100 px-3 py-1 font-mono text-sm dark:bg-stone-700 dark:text-white">
                     {room_id}
                 </span>
@@ -679,7 +686,7 @@ struct RoomParams {
 
 /// The page for one room: checks it exists, asks for the passcode, then
 /// joins the table.
-pub fn room_page<V: TableView>(kind: GameKind, table: TableFn<V>) -> impl IntoView {
+pub fn room_page<V: TableView>(kind: GameKind, table: TableFn<V>, rules: RulesFn) -> impl IntoView {
     use crate::app::{Footer, NavBar};
     let params = use_params::<RoomParams>();
     let code = move || {
@@ -711,7 +718,7 @@ pub fn room_page<V: TableView>(kind: GameKind, table: TableFn<V>) -> impl IntoVi
                         let c = code();
                         match exists.get() {
                             Some(Ok(true)) if entered.get() => {
-                                game_room(kind, c, passcode.get_untracked(), table).into_any()
+                                game_room(kind, c, passcode.get_untracked(), table, rules).into_any()
                             }
                             Some(Ok(true)) => {
                                 view! {
@@ -778,8 +785,8 @@ pub fn room_page<V: TableView>(kind: GameKind, table: TableFn<V>) -> impl IntoVi
 
 /// A game's lobby page: open rooms and a form to create one. `options` goes
 /// inside the form; it should hold an input named `options` when the game
-/// has settings. `extra` is shown below the form (rules, say).
-pub fn lobby_page(kind: GameKind, options: AnyView, extra: AnyView) -> impl IntoView {
+/// has settings.
+pub fn lobby_page(kind: GameKind, options: AnyView, rules: RulesFn) -> impl IntoView {
     use crate::app::{Footer, NavBar};
 
     let create = ServerAction::<CreateCardRoom>::new();
@@ -797,7 +804,10 @@ pub fn lobby_page(kind: GameKind, options: AnyView, extra: AnyView) -> impl Into
             <GameGate>
                 <div class="space-y-6">
                     <div>
-                        <h1 class="text-3xl font-bold dark:text-white">{kind.title()}</h1>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-3xl font-bold dark:text-white">{kind.title()}</h1>
+                            {rules()}
+                        </div>
                         <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">{kind.blurb()}</p>
                     </div>
                     <div class="rounded-lg border border-stone-200 bg-white p-5 dark:border-stone-700 dark:bg-stone-800">
@@ -876,7 +886,6 @@ pub fn lobby_page(kind: GameKind, options: AnyView, extra: AnyView) -> impl Into
                             }}
                         </ActionForm>
                     </div>
-                    {extra}
                 </div>
             </GameGate>
         </div>

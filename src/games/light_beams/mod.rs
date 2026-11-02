@@ -3060,39 +3060,19 @@ fn legend_item(piece: Piece, label: &'static str) -> impl IntoView {
     }
 }
 
-/// A round "?" book button that opens the rules overlay. Self-contained, drop
-/// it anywhere (lobby, single player, game room) to give players a rule book.
+/// The "?" rules button for Light Beams. Drop it anywhere (lobby, single
+/// player, game room) to give players a rule book.
 #[component]
 pub fn RulesButton() -> impl IntoView {
-    let show = RwSignal::new(false);
     view! {
-        <button
-            title="How to play"
-            aria-label="How to play"
-            on:click=move |_| show.set(true)
-            class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-200 dark:hover:bg-stone-600 transition-colors shadow-sm"
-        >
-            <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="h-5 w-5"
-            >
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            </svg>
-            <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold leading-none">
-                "?"
-            </span>
-        </button>
-        <RulesOverlay show=show />
+        <crate::games::rules::RulesButton title="How to play Light Beams">
+            <LightBeamsRules />
+        </crate::games::rules::RulesButton>
     }
 }
 
 #[component]
-fn RulesOverlay(show: RwSignal<bool>) -> impl IntoView {
+fn LightBeamsRules() -> impl IntoView {
     let example = Signal::derive(example_board);
 
     // (call, exit, color, explanation)
@@ -3130,243 +3110,194 @@ fn RulesOverlay(show: RwSignal<bool>) -> impl IntoView {
         ),
     ];
 
-    move || {
-        if !show.get() {
-            return view! { <span /> }.into_any();
-        }
-        view! {
-            <div
-                class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm"
-                on:click=move |_| show.set(false)
-            >
-                <div
-                    class="my-6 w-full max-w-2xl rounded-2xl bg-stone-800 text-stone-200 shadow-2xl ring-1 ring-stone-700"
-                    on:click=move |ev| ev.stop_propagation()
-                >
-                    // Header, sticky so the close button is always reachable.
-                    <div class="sticky top-0 flex items-center justify-between rounded-t-2xl border-b border-stone-700 bg-stone-800/95 px-5 py-3 backdrop-blur">
-                        <h2 class="text-lg font-bold text-white">"How to play Light Beams"</h2>
-                        <button
-                            title="Close"
-                            aria-label="Close"
-                            on:click=move |_| show.set(false)
-                            class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 hover:bg-stone-700 hover:text-white"
-                        >
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                class="h-5 w-5"
-                            >
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                            </svg>
-                        </button>
-                    </div>
+    view! {
+        <section class="space-y-2">
+            <h3 class="font-semibold text-white">"Goal"</h3>
+            <p>
+                "You and your opponent each hide pieces on a grid (4×4 in the classic "
+                "game). Shoot beams of light through the ports and read where they exit "
+                "and what color they become to deduce the hidden layout. Be the first to "
+                "call your opponent's entire board correctly."
+            </p>
+        </section>
 
-                    <div class="space-y-6 px-5 py-5 text-sm leading-relaxed">
-                        <section class="space-y-2">
-                            <h3 class="font-semibold text-white">"Goal"</h3>
-                            <p>
-                                "You and your opponent each hide pieces on a grid (4×4 in the classic "
-                                "game). Shoot beams of light through the ports and read where they exit "
-                                "and what color they become to deduce the hidden layout. Be the first to "
-                                "call your opponent's entire board correctly."
-                            </p>
-                        </section>
+        <section class="space-y-2">
+            <h3 class="font-semibold text-white">"Ports"</h3>
+            <p>
+                "Numbered ports ring the grid — sixteen on a 4×4 board, more on bigger "
+                "ones. Light enters one and exits another. You call a port, and your "
+                "opponent answers with the exit port and the color."
+            </p>
+        </section>
 
-                        <section class="space-y-2">
-                            <h3 class="font-semibold text-white">"Ports"</h3>
-                            <p>
-                                "Numbered ports ring the grid — sixteen on a 4×4 board, more on bigger "
-                                "ones. Light enters one and exits another. You call a port, and your "
-                                "opponent answers with the exit port and the color."
-                            </p>
-                        </section>
-
-                        <section class="space-y-3">
-                            <h3 class="font-semibold text-white">"The pieces"</h3>
-                            <p>
-                                "In the classic game each player places seven pieces: the three colored "
-                                "glasses, the black absorber, an arrow mirror, and two slash mirrors. "
-                                "Custom games can change how many of each appear."
-                            </p>
-                            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                                {legend_item(Piece::Red, "Red glass")}
-                                {legend_item(Piece::Yellow, "Yellow glass")}
-                                {legend_item(Piece::Blue, "Blue glass")}
-                                {legend_item(Piece::Black, "Black absorbs light")}
-                                {legend_item(Piece::Slash(SlashDir::Forward), "Slash mirror (turns 90°)")}
-                                {legend_item(Piece::Arrow(ArrowDir::UpRight), "Arrow mirror")}
-                                {legend_item(Piece::FourArrow, "4-way mirror")}
-                            </div>
-                            <ul class="ml-4 list-disc space-y-1 text-stone-300">
-                                <li>
-                                    <span class="font-medium text-white">"Colored glass"</span>
-                                    " tints the beam. Colors mix as they stack (see below)."
-                                </li>
-                                <li>
-                                    <span class="font-medium text-white">"Black"</span>
-                                    " absorbs the beam. Any beam touching it exits black, no matter "
-                                    "what else it passed through."
-                                </li>
-                                <li>
-                                    <span class="font-medium text-white">"Slash mirror"</span>
-                                    " (/ or \\) bends light 90°. A flip can rotate it during play."
-                                </li>
-                                <li>
-                                    <span class="font-medium text-white">"Arrow mirror"</span>
-                                    " is a corner of two arrows. A beam hitting an arrow point "
-                                    "head-on bounces straight back; beams from the other directions "
-                                    "pass straight through. Its orientation is fixed at setup."
-                                </li>
-                                <li>
-                                    <span class="font-medium text-white">"4-way mirror"</span>
-                                    " is four arrows in one. A beam entering from any side bounces "
-                                    "straight back out the port it came in. (Ruleset B and custom games.)"
-                                </li>
-                            </ul>
-                        </section>
-
-                        <section class="space-y-2">
-                            <h3 class="font-semibold text-white">"Mixing colors"</h3>
-                            <div class="divide-y divide-stone-700 overflow-hidden rounded-lg ring-1 ring-stone-700">
-                                <div class="grid grid-cols-2 bg-stone-700/60 text-xs font-medium text-stone-300">
-                                    <div class="px-3 py-1.5">"Passes through"</div>
-                                    <div class="px-3 py-1.5">"Result"</div>
-                                </div>
-                                {[
-                                    ("Red + Yellow", "Orange", "bg-orange-500"),
-                                    ("Red + Blue", "Purple", "bg-purple-500"),
-                                    ("Yellow + Blue", "Green", "bg-green-500"),
-                                    ("Red + Yellow + Blue", "Brown", "bg-amber-800"),
-                                ]
-                                    .into_iter()
-                                    .map(|(mix, result, swatch)| {
-                                        view! {
-                                            <div class="grid grid-cols-2 items-center bg-stone-800">
-                                                <div class="px-3 py-1.5 text-stone-200">{mix}</div>
-                                                <div class="px-3 py-1.5">
-                                                    <span class=format!(
-                                                        "rounded px-2 py-0.5 text-xs font-semibold text-white {swatch}",
-                                                    )>{result}</span>
-                                                </div>
-                                            </div>
-                                        }
-                                    })
-                                    .collect_view()}
-                            </div>
-                        </section>
-
-                        <section class="space-y-3">
-                            <h3 class="font-semibold text-white">"Example board"</h3>
-                            <p>
-                                "Here is a filled board. Try following each beam below to see how the "
-                                "pieces shape the light."
-                            </p>
-                            <div class="flex justify-center">
-                                <BoardWithPorts
-                                    board=example
-                                    on_port=|_| {}
-                                    port_active=false
-                                    on_cell=|_, _| {}
-                                    cell_interactive=false
-                                />
-                            </div>
-                            <div class="divide-y divide-stone-700 overflow-hidden rounded-lg ring-1 ring-stone-700">
-                                <div class="grid grid-cols-[2.5rem_2.5rem_4rem_1fr] bg-stone-700/60 text-xs font-medium text-stone-300">
-                                    <div class="px-3 py-1.5">"Call"</div>
-                                    <div class="px-3 py-1.5">"Exit"</div>
-                                    <div class="px-3 py-1.5">"Color"</div>
-                                    <div class="px-3 py-1.5">"Why"</div>
-                                </div>
-                                {worked
-                                    .iter()
-                                    .map(|(call, exit, color, why)| {
-                                        view! {
-                                            <div class="grid grid-cols-[2.5rem_2.5rem_4rem_1fr] items-baseline bg-stone-800">
-                                                <div class="px-3 py-1.5 font-mono text-stone-200">{*call}</div>
-                                                <div class="px-3 py-1.5 font-mono text-stone-200">{*exit}</div>
-                                                <div class="px-3 py-1.5 text-stone-200">{*color}</div>
-                                                <div class="px-3 py-1.5 text-stone-300">{*why}</div>
-                                            </div>
-                                        }
-                                    })
-                                    .collect_view()}
-                            </div>
-                        </section>
-
-                        <section class="space-y-2">
-                            <h3 class="font-semibold text-white">"Taking a turn"</h3>
-                            <ul class="ml-4 list-disc space-y-1 text-stone-300">
-                                <li>
-                                    "Optionally "
-                                    <span class="font-medium text-white">"flip"</span>
-                                    " one cell on the opponent's board. If it holds a slash mirror "
-                                    "it rotates (/ ↔ \\). They're told which cell you flipped."
-                                </li>
-                                <li>
-                                    <span class="font-medium text-white">"Shoot a beam"</span>
-                                    " through a port. The exit port and color are revealed. This "
-                                    "ends your turn."
-                                </li>
-                                <li>
-                                    "When you're sure, "
-                                    <span class="font-medium text-white">"call the game"</span>
-                                    " with your full guess. An exact match wins; otherwise play "
-                                    "continues."
-                                </li>
-                            </ul>
-                        </section>
-
-                        <section class="space-y-2">
-                            <h3 class="font-semibold text-white">"Rulesets & variations"</h3>
-                            <ul class="ml-4 list-disc space-y-1 text-stone-300">
-                                <li>
-                                    <span class="font-medium text-white">"Ruleset A"</span>
-                                    " is the classic 4×4 game above. "
-                                    <span class="font-medium text-white">"Ruleset B"</span>
-                                    " is 5×5 and adds the 4-way mirror. "
-                                    <span class="font-medium text-white">"Custom"</span>
-                                    " lets you set the board size (up to 10×10) and how many of each "
-                                    "piece appear."
-                                </li>
-                                <li>
-                                    <span class="font-medium text-white">"Computer-generated"</span>
-                                    " games hide one board that both players race to guess, instead "
-                                    "of designing boards for each other."
-                                </li>
-                                <li>
-                                    <span class="font-medium text-white">"Asynchronous"</span>
-                                    " games drop turns: each player solves independently and the "
-                                    "lower score wins once both finish. Score is beams used, or "
-                                    "solve time in a "
-                                    <span class="font-medium text-white">"timed"</span>
-                                    " game."
-                                </li>
-                                <li>
-                                    "With enough mirrors a beam can get stuck bouncing forever. A "
-                                    "trapped beam is reported as a "
-                                    <span class="font-medium text-white">"loop (∞)"</span>
-                                    " with no exit."
-                                </li>
-                            </ul>
-                        </section>
-
-                        <div class="flex justify-end pt-1">
-                            <button
-                                on:click=move |_| show.set(false)
-                                class="rounded-xl bg-blue-500 px-5 py-2 font-semibold text-white hover:bg-blue-600 touch-manipulation"
-                            >
-                                "Got it"
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <section class="space-y-3">
+            <h3 class="font-semibold text-white">"The pieces"</h3>
+            <p>
+                "In the classic game each player places seven pieces: the three colored "
+                "glasses, the black absorber, an arrow mirror, and two slash mirrors. "
+                "Custom games can change how many of each appear."
+            </p>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {legend_item(Piece::Red, "Red glass")}
+                {legend_item(Piece::Yellow, "Yellow glass")}
+                {legend_item(Piece::Blue, "Blue glass")}
+                {legend_item(Piece::Black, "Black absorbs light")}
+                {legend_item(Piece::Slash(SlashDir::Forward), "Slash mirror (turns 90°)")}
+                {legend_item(Piece::Arrow(ArrowDir::UpRight), "Arrow mirror")}
+                {legend_item(Piece::FourArrow, "4-way mirror")}
             </div>
-        }
-            .into_any()
+            <ul class="ml-4 list-disc space-y-1 text-stone-300">
+                <li>
+                    <span class="font-medium text-white">"Colored glass"</span>
+                    " tints the beam. Colors mix as they stack (see below)."
+                </li>
+                <li>
+                    <span class="font-medium text-white">"Black"</span>
+                    " absorbs the beam. Any beam touching it exits black, no matter "
+                    "what else it passed through."
+                </li>
+                <li>
+                    <span class="font-medium text-white">"Slash mirror"</span>
+                    " (/ or \\) bends light 90°. A flip can rotate it during play."
+                </li>
+                <li>
+                    <span class="font-medium text-white">"Arrow mirror"</span>
+                    " is a corner of two arrows. A beam hitting an arrow point "
+                    "head-on bounces straight back; beams from the other directions "
+                    "pass straight through. Its orientation is fixed at setup."
+                </li>
+                <li>
+                    <span class="font-medium text-white">"4-way mirror"</span>
+                    " is four arrows in one. A beam entering from any side bounces "
+                    "straight back out the port it came in. (Ruleset B and custom games.)"
+                </li>
+            </ul>
+        </section>
+
+        <section class="space-y-2">
+            <h3 class="font-semibold text-white">"Mixing colors"</h3>
+            <div class="divide-y divide-stone-700 overflow-hidden rounded-lg ring-1 ring-stone-700">
+                <div class="grid grid-cols-2 bg-stone-700/60 text-xs font-medium text-stone-300">
+                    <div class="px-3 py-1.5">"Passes through"</div>
+                    <div class="px-3 py-1.5">"Result"</div>
+                </div>
+                {[
+                    ("Red + Yellow", "Orange", "bg-orange-500"),
+                    ("Red + Blue", "Purple", "bg-purple-500"),
+                    ("Yellow + Blue", "Green", "bg-green-500"),
+                    ("Red + Yellow + Blue", "Brown", "bg-amber-800"),
+                ]
+                    .into_iter()
+                    .map(|(mix, result, swatch)| {
+                        view! {
+                            <div class="grid grid-cols-2 items-center bg-stone-800">
+                                <div class="px-3 py-1.5 text-stone-200">{mix}</div>
+                                <div class="px-3 py-1.5">
+                                    <span class=format!(
+                                        "rounded px-2 py-0.5 text-xs font-semibold text-white {swatch}",
+                                    )>{result}</span>
+                                </div>
+                            </div>
+                        }
+                    })
+                    .collect_view()}
+            </div>
+        </section>
+
+        <section class="space-y-3">
+            <h3 class="font-semibold text-white">"Example board"</h3>
+            <p>
+                "Here is a filled board. Try following each beam below to see how the "
+                "pieces shape the light."
+            </p>
+            <div class="flex justify-center">
+                <BoardWithPorts
+                    board=example
+                    on_port=|_| {}
+                    port_active=false
+                    on_cell=|_, _| {}
+                    cell_interactive=false
+                />
+            </div>
+            <div class="divide-y divide-stone-700 overflow-hidden rounded-lg ring-1 ring-stone-700">
+                <div class="grid grid-cols-[2.5rem_2.5rem_4rem_1fr] bg-stone-700/60 text-xs font-medium text-stone-300">
+                    <div class="px-3 py-1.5">"Call"</div>
+                    <div class="px-3 py-1.5">"Exit"</div>
+                    <div class="px-3 py-1.5">"Color"</div>
+                    <div class="px-3 py-1.5">"Why"</div>
+                </div>
+                {worked
+                    .iter()
+                    .map(|(call, exit, color, why)| {
+                        view! {
+                            <div class="grid grid-cols-[2.5rem_2.5rem_4rem_1fr] items-baseline bg-stone-800">
+                                <div class="px-3 py-1.5 font-mono text-stone-200">{*call}</div>
+                                <div class="px-3 py-1.5 font-mono text-stone-200">{*exit}</div>
+                                <div class="px-3 py-1.5 text-stone-200">{*color}</div>
+                                <div class="px-3 py-1.5 text-stone-300">{*why}</div>
+                            </div>
+                        }
+                    })
+                    .collect_view()}
+            </div>
+        </section>
+
+        <section class="space-y-2">
+            <h3 class="font-semibold text-white">"Taking a turn"</h3>
+            <ul class="ml-4 list-disc space-y-1 text-stone-300">
+                <li>
+                    "Optionally "
+                    <span class="font-medium text-white">"flip"</span>
+                    " one cell on the opponent's board. If it holds a slash mirror "
+                    "it rotates (/ ↔ \\). They're told which cell you flipped."
+                </li>
+                <li>
+                    <span class="font-medium text-white">"Shoot a beam"</span>
+                    " through a port. The exit port and color are revealed. This "
+                    "ends your turn."
+                </li>
+                <li>
+                    "When you're sure, "
+                    <span class="font-medium text-white">"call the game"</span>
+                    " with your full guess. An exact match wins; otherwise play "
+                    "continues."
+                </li>
+            </ul>
+        </section>
+
+        <section class="space-y-2">
+            <h3 class="font-semibold text-white">"Rulesets & variations"</h3>
+            <ul class="ml-4 list-disc space-y-1 text-stone-300">
+                <li>
+                    <span class="font-medium text-white">"Ruleset A"</span>
+                    " is the classic 4×4 game above. "
+                    <span class="font-medium text-white">"Ruleset B"</span>
+                    " is 5×5 and adds the 4-way mirror. "
+                    <span class="font-medium text-white">"Custom"</span>
+                    " lets you set the board size (up to 10×10) and how many of each "
+                    "piece appear."
+                </li>
+                <li>
+                    <span class="font-medium text-white">"Computer-generated"</span>
+                    " games hide one board that both players race to guess, instead "
+                    "of designing boards for each other."
+                </li>
+                <li>
+                    <span class="font-medium text-white">"Asynchronous"</span>
+                    " games drop turns: each player solves independently and the "
+                    "lower score wins once both finish. Score is beams used, or "
+                    "solve time in a "
+                    <span class="font-medium text-white">"timed"</span>
+                    " game."
+                </li>
+                <li>
+                    "With enough mirrors a beam can get stuck bouncing forever. A "
+                    "trapped beam is reported as a "
+                    <span class="font-medium text-white">"loop (∞)"</span>
+                    " with no exit."
+                </li>
+            </ul>
+        </section>
+
     }
 }

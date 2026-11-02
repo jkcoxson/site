@@ -4,6 +4,7 @@ pub mod cards;
 pub mod five_crowns;
 pub mod light_beams;
 pub mod pirates_wager;
+pub mod rules;
 #[cfg(feature = "ssr")]
 pub mod rooms;
 #[cfg(feature = "ssr")]

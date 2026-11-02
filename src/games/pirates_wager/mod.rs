@@ -13,6 +13,7 @@ use crate::games::cards::{
     self, final_standings, hand_view, seat_strip, table_talk, GameKind, HandOrder, Motion,
     SeatChip, Spot, TAG_DARK, TAG_GREEN, TAG_RED, TAG_SOFT,
 };
+use crate::games::rules::{RulesButton, RulesSection};
 use logic::{
     can_play, Card, ClientMsg, Crew, Face, GameView, Length, Options, Played, RoundResult, Stage,
     Suit, TrickView, GHOST,
@@ -138,72 +139,91 @@ fn mini_cards(cards: Vec<Card>) -> impl IntoView {
 
 // ── Lobby ─────────────────────────────────────────────────────────────────────
 
-fn rules_panel() -> impl IntoView {
+fn rules_button() -> AnyView {
     view! {
-        <details class="rounded-lg border border-stone-200 bg-white p-4 text-sm text-stone-600 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300">
-            <summary class="cursor-pointer font-semibold text-stone-800 dark:text-stone-100">
-                "How to play"
-            </summary>
-            <div class="mt-3 space-y-2">
-                <p>
-                    "Round one deals one card each, round two two cards, up to ten. After looking \
-                    at your hand, everyone bids at once how many tricks they'll take."
-                </p>
-                <p>
-                    "Whoever leads plays any card; the others must follow the suit led if they can \
-                    and want to play a numbered card. Special cards can always be played. Highest \
-                    card of the suit led wins, but "
-                    <b>"⚔️ cutlasses"</b>
-                    " are trumps and beat the other suits."
-                </p>
-                <ul class="list-disc space-y-1 pl-5">
-                    <li><b>"☠️ Pirates"</b> " beat every number. The first pirate played wins between them."</li>
-                    <li><b>"👑 The Captain"</b> " beats every pirate."</li>
-                    <li><b>"🧜 Mermaids"</b> " beat numbers and the Captain, but lose to pirates."</li>
-                    <li><b>"🏳️ Flags"</b> " always lose. If everyone plays one, the first wins."</li>
-                    <li><b>"🎭 The Turncoat"</b> " plays as a pirate or a flag, your choice."</li>
-                    <li>
-                        "A flag lead lets the next card set the suit. A character lead means \
-                        there's no suit to follow."
-                    </li>
-                </ul>
-                <p class="font-semibold text-stone-800 dark:text-stone-100">"Scoring"</p>
-                <ul class="list-disc space-y-1 pl-5">
-                    <li>"Make a bid of one or more: 20 points per trick. Miss: −10 per trick you were off."</li>
-                    <li>"Bid zero and take nothing: 10 × cards dealt. Take any: −10 × cards dealt."</li>
-                    <li>
-                        "Bonuses, only when you make your bid: 10 per 14 you capture (20 for the \
-                        cutlass 14), 20 per mermaid taken by a pirate, 30 per pirate taken by the \
-                        Captain, 40 for a mermaid taking the Captain."
-                    </li>
-                </ul>
-                <p class="font-semibold text-stone-800 dark:text-stone-100">"Optional cards"</p>
-                <ul class="list-disc space-y-1 pl-5">
-                    <li><b>"🐙 Kraken"</b> ": nobody wins the trick. Whoever would have won leads next."</li>
-                    <li>
-                        <b>"🐋 White Whale"</b>
-                        ": special cards are wiped out and the highest number wins, ignoring suits. \
-                        If both beasts are played, the later one counts."
-                    </li>
-                    <li>
-                        <b>"💰 Loot"</b>
-                        ": plays as a flag and allies you with the trick's winner. If you both make \
-                        your bids, you each get 20."
-                    </li>
-                    <li>
-                        <b>"Crew abilities"</b>
-                        ": win a trick with a pirate to use its power. Navigator: choose who leads. \
-                        Smuggler: draw two, discard two. Gambler: bet 10 or 20 on your bid. Seer: \
-                        peek at the undealt cards. Brute: change your bid by one (even after the \
-                        last trick)."
-                    </li>
-                </ul>
-                <p>
-                    "With two players, a ghost hand plays second in every trick, flipping its top \
-                    card. Most points after the last round wins; a tie plays one more round."
-                </p>
-            </div>
-        </details>
+        <RulesButton title="How to play Pirate's Wager">
+            <PiratesWagerRules />
+        </RulesButton>
+    }
+    .into_any()
+}
+
+#[component]
+fn PiratesWagerRules() -> impl IntoView {
+    let b = "font-medium text-white";
+    view! {
+        <RulesSection heading="Goal">
+            <p>
+                "Each round, bid exactly how many tricks you'll win. Hit your bid and you \
+                score; miss and you lose points. Most points after the last round wins."
+            </p>
+        </RulesSection>
+        <RulesSection heading="A round">
+            <p>
+                "Round one deals one card each, round two two cards, and so on up to ten. \
+                After looking at your hand, everyone bids at once; bids stay hidden until \
+                everyone is in."
+            </p>
+            <p>
+                "The leader plays any card. If it's a numbered card, everyone who plays a \
+                numbered card must follow that suit if they can. Special cards can always \
+                be played. The highest card of the suit led wins, but "
+                <span class=b>"⚔️ cutlasses"</span>
+                " are trumps and beat the other suits. The winner leads the next trick."
+            </p>
+        </RulesSection>
+        <RulesSection heading="Special cards">
+            <ul class="list-disc space-y-1 pl-5">
+                <li><span class=b>"☠️ Pirates"</span>" beat every number. Between pirates, the first one played wins."</li>
+                <li><span class=b>"👑 The Captain"</span>" beats every pirate."</li>
+                <li><span class=b>"🧜 Mermaids"</span>" beat numbers and the Captain, but lose to pirates."</li>
+                <li><span class=b>"🏳️ Flags"</span>" always lose. If everyone plays one, the first wins."</li>
+                <li><span class=b>"🎭 The Turncoat"</span>" plays as a pirate or a flag, your choice."</li>
+                <li>
+                    "A flag lead lets the next card set the suit. A character lead means \
+                    there's no suit to follow."
+                </li>
+            </ul>
+        </RulesSection>
+        <RulesSection heading="Scoring">
+            <ul class="list-disc space-y-1 pl-5">
+                <li>"Bid one or more and make it: 20 points per trick. Miss: −10 per trick you were off."</li>
+                <li>"Bid zero and take nothing: 10 × cards dealt. Take any: −10 × cards dealt."</li>
+                <li>
+                    "Bonuses, only when you make your bid: 10 per 14 you capture (20 for the \
+                    cutlass 14), 20 per mermaid taken by a pirate, 30 per pirate taken by the \
+                    Captain, 40 for a mermaid taking the Captain."
+                </li>
+            </ul>
+        </RulesSection>
+        <RulesSection heading="Optional cards">
+            <ul class="list-disc space-y-1 pl-5">
+                <li><span class=b>"🐙 Kraken"</span>": nobody wins the trick. Whoever would have won leads next."</li>
+                <li>
+                    <span class=b>"🐋 White Whale"</span>
+                    ": special cards are wiped out and the highest number wins, ignoring \
+                    suits. If both beasts are played, the later one counts."
+                </li>
+                <li>
+                    <span class=b>"💰 Loot"</span>
+                    ": plays as a flag and allies you with the trick's winner. If you both \
+                    make your bids, you each get 20."
+                </li>
+                <li>
+                    <span class=b>"Crew abilities"</span>
+                    ": win a trick with a pirate to use its power. Navigator: choose who \
+                    leads. Smuggler: draw two, discard two. Gambler: bet 10 or 20 on your \
+                    bid. Seer: peek at the undealt cards. Brute: change your bid by one (even \
+                    after the last trick)."
+                </li>
+            </ul>
+        </RulesSection>
+        <RulesSection heading="Two players and ties">
+            <p>
+                "With two players, a ghost hand plays second in every trick, flipping its \
+                top card. A tie for the lead after the last round plays one more round."
+            </p>
+        </RulesSection>
     }
 }
 
@@ -441,7 +461,6 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                             })
                         }}
                     </span>
-                    <span class="rounded bg-stone-900 px-3 py-1 text-white">"⚔️ trumps"</span>
                 </div>
 
                 {seat_strip(seats)}
@@ -558,7 +577,6 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
 
             <div class="space-y-3 lg:self-start">
                 {table_talk(move || game.with(|g| g.log.clone()))}
-                {rules_panel()}
             </div>
         </div>
     }
@@ -994,13 +1012,15 @@ pub fn PiratesWagerLobby() -> impl IntoView {
     cards::lobby_page(
         GameKind::PiratesWager,
         options_form().into_any(),
-        rules_panel().into_any(),
+        rules_button,
     )
 }
 
 #[component]
 pub fn PiratesWagerRoom() -> impl IntoView {
-    cards::room_page::<GameView>(GameKind::PiratesWager, |game| {
-        view! { <TableView game /> }.into_any()
-    })
+    cards::room_page::<GameView>(
+        GameKind::PiratesWager,
+        |game| view! { <TableView game /> }.into_any(),
+        rules_button,
+    )
 }

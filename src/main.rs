@@ -38,11 +38,22 @@ async fn main() {
     let forge_ring = jkcoxson::forge::buffer::ForgeRing::new(forges);
     forge_ring.watch();
 
-    // Connect to MySQL database
-    let pool = MySqlPoolOptions::new()
-        .connect(&std::env::var("DATABASE_URL").expect("DATABASE_URL not set"))
-        .await
-        .expect("Unable to connect to MySQL database!");
+    // Connect to MySQL database. Without DATABASE_URL the server still starts
+    // (handy for working on pages that don't need it); the pool then never
+    // connects and anything that queries it returns an error.
+    let pool = match std::env::var("DATABASE_URL") {
+        Ok(url) => MySqlPoolOptions::new()
+            .connect(&url)
+            .await
+            .expect("Unable to connect to MySQL database!"),
+        Err(_) => {
+            eprintln!("DATABASE_URL not set: running without a database, blog pages will fail");
+            MySqlPoolOptions::new()
+                .acquire_timeout(std::time::Duration::from_secs(1))
+                .connect_lazy("mysql://localhost/no_database")
+                .expect("placeholder database URL parses")
+        }
+    };
 
     let game_state = Arc::new(jkcoxson::games::server::GameState::new());
     game_state.clone().spawn_reaper();

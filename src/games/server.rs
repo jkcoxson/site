@@ -1,29 +1,25 @@
 // Jackson Coxson
-// Game server: WebSocket room manager with lobby, passcodes, reconnect support.
+// Light Beams game server, plus the websocket and room-list entry points for
+// every game. Rooms, seats and reconnects are handled by `rooms`.
 
-use std::{
-    collections::HashMap,
-    sync::Arc,
-    time::{Duration, Instant},
-};
+use std::{sync::Arc, time::Instant};
 
 use axum::{
-    extract::{
-        ws::{Message, WebSocket, WebSocketUpgrade},
-        Extension, Path, Query,
-    },
+    extract::{ws::WebSocketUpgrade, Extension, Path, Query},
     response::IntoResponse,
 };
-use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
-use tokio::sync::{mpsc, Mutex, RwLock};
 
-use crate::games::light_beams::{
-    beam_tracing::trace_beam,
-    logic::{
-        boards_match, is_slash, random_board, rotate_piece, validate_board, Board, BoardSource,
-        Color, LobbyPlayer, PlayerResult, Resolution, ResyncPhase, ResyncShot, Rules,
+use crate::games::{
+    light_beams::{
+        beam_tracing::trace_beam,
+        logic::{
+            boards_match, is_slash, random_board, rotate_piece, validate_board, Board,
+            BoardSource, Color, LobbyPlayer, PlayerResult, Resolution, ResyncPhase, ResyncShot,
+            Rules,
+        },
     },
+    rooms::{self, RoomGame, Rooms, Seats},
 };
 
 // ── Wire messages ─────────────────────────────────────────────────────────────
@@ -131,79 +127,23 @@ struct ShotRecord {
     color: Color,
 }
 
-struct Player {
-    nickname: String,
-    /// Rejoin token, generated when the slot is first claimed.
-    token: String,
-    sender: Option<mpsc::UnboundedSender<String>>,
-    connected: bool,
-}
-
-/// Disconnected lobby slots are released after this long so others can join.
-const LOBBY_GRACE: Duration = Duration::from_secs(30);
-const MAX_NICKNAME: usize = 20;
-
-struct Match {
+pub struct LightBeams {
     phase: MatchPhase,
     rules: Rules,
-    players: Vec<Player>,
     shot_history: Vec<ShotRecord>,
-    /// When the room last became empty (no connected players). `None` while at
-    /// least one player is connected. Used by the reaper to clear abandoned rooms.
-    empty_since: Option<Instant>,
 }
 
-impl Match {
-    fn new(rules: Rules) -> Self {
+impl LightBeams {
+    pub fn new(rules: Rules) -> Self {
         Self {
             phase: MatchPhase::Lobby,
             rules,
-            players: Vec::new(),
             shot_history: Vec::new(),
-            empty_since: Some(Instant::now()),
         }
     }
 
-    /// Refresh the empty-room timer based on the current connection state:
-    /// clears it while anyone is connected, and starts it the moment the room
-    /// becomes empty.
-    fn touch_empty(&mut self) {
-        if self.players.iter().any(|p| p.connected) {
-            self.empty_since = None;
-        } else if self.empty_since.is_none() {
-            self.empty_since = Some(Instant::now());
-        }
-    }
-
-    fn index_of(&self, token: &str) -> Option<usize> {
-        self.players.iter().position(|p| p.token == token)
-    }
-
-    fn send(&self, player: usize, msg: &ServerMsg) {
-        if let Some(Some(tx)) = self.players.get(player).map(|p| &p.sender) {
-            let _ = tx.send(serde_json::to_string(msg).unwrap_or_default());
-        }
-    }
-
-    fn send_others(&self, player: usize, msg: &ServerMsg) {
-        for p in 0..self.players.len() {
-            if p != player {
-                self.send(p, msg);
-            }
-        }
-    }
-
-    fn broadcast(&self, msg: &ServerMsg) {
-        let json = serde_json::to_string(msg).unwrap_or_default();
-        for p in &self.players {
-            if let Some(tx) = &p.sender {
-                let _ = tx.send(json.clone());
-            }
-        }
-    }
-
-    fn roster(&self) -> Vec<LobbyPlayer> {
-        self.players
+    fn roster(seats: &Seats) -> Vec<LobbyPlayer> {
+        seats
             .iter()
             .enumerate()
             .map(|(i, p)| LobbyPlayer {
@@ -215,10 +155,10 @@ impl Match {
     }
 
     /// Send every player the roster, each with their own `you`.
-    fn broadcast_lobby(&self) {
-        let players = self.roster();
-        for p in 0..self.players.len() {
-            self.send(
+    fn broadcast_lobby(&self, seats: &Seats) {
+        let players = Self::roster(seats);
+        for p in 0..seats.len() {
+            seats.send(
                 p,
                 &ServerMsg::Lobby {
                     players: players.clone(),
@@ -228,10 +168,6 @@ impl Match {
                 },
             );
         }
-    }
-
-    fn capacity(&self) -> usize {
-        self.rules.max_players()
     }
 
     fn shots_for(&self, player: usize, all: bool) -> Vec<ResyncShot> {
@@ -299,11 +235,11 @@ impl Match {
         }
     }
 
-    fn game_resync(&self, player: usize) -> ServerMsg {
+    fn game_resync(&self, seats: &Seats, player: usize) -> ServerMsg {
         ServerMsg::GameResync {
             player: player as u8,
             rules: self.rules,
-            players: self.roster(),
+            players: Self::roster(seats),
             host: 0,
             phase: self.resync(player),
         }
@@ -311,13 +247,13 @@ impl Match {
 
     /// Final standings. Finished players rank by score (lower is better, ties
     /// share a place); everyone who didn't finish ranks after them.
-    fn standings(&self) -> Vec<PlayerResult> {
+    fn standings(&self, seats: &Seats) -> Vec<PlayerResult> {
         let scores: Vec<Option<u32>> = match &self.phase {
             MatchPhase::Independent { score, .. } => score.clone(),
-            _ => vec![None; self.players.len()],
+            _ => vec![None; seats.len()],
         };
         let finished = scores.iter().filter(|s| s.is_some()).count() as u8;
-        self.players
+        seats
             .iter()
             .enumerate()
             .map(|(i, p)| {
@@ -336,11 +272,11 @@ impl Match {
     }
 
     /// An async game ends once every connected player has finished.
-    fn async_ready(&self) -> bool {
+    fn async_ready(&self, seats: &Seats) -> bool {
         match &self.phase {
             MatchPhase::Independent { done, .. } => {
                 matches!(self.rules.resolution, Resolution::Async)
-                    && self.players.iter().zip(done).all(|(p, &d)| d || !p.connected)
+                    && seats.iter().zip(done).all(|(p, &d)| d || !p.connected)
             }
             _ => false,
         }
@@ -359,15 +295,15 @@ impl Match {
 
     /// End an independent game. `winner` is the racer who called it first; an
     /// async game picks the best score instead.
-    fn finish_independent(&mut self, winner: Option<usize>) {
+    fn finish_independent(&mut self, seats: &Seats, winner: Option<usize>) {
         let winner = winner.or_else(|| self.async_winner());
-        let results = self.standings();
+        let results = self.standings(seats);
         let (own, targets) = match &self.phase {
             MatchPhase::Independent { own, targets, .. } => (own.clone(), targets.clone()),
             _ => return,
         };
-        for p in 0..self.players.len() {
-            self.send(
+        for p in 0..seats.len() {
+            seats.send(
                 p,
                 &ServerMsg::GameOver {
                     you_win: winner == Some(p),
@@ -387,54 +323,51 @@ impl Match {
         };
     }
 
-    fn handle(&mut self, player: usize, msg: ClientMsg) {
+    fn dispatch(&mut self, seats: &mut Seats, player: usize, msg: ClientMsg) {
         match msg {
-            ClientMsg::SetNickname { name } => self.on_set_nickname(player, name),
-            ClientMsg::StartGame => self.on_start(player),
-            ClientMsg::LockBoard { board } => self.on_lock_board(player, board),
-            ClientMsg::ShootBeam { port } => self.on_shoot(player, port),
-            ClientMsg::CallGame { guess } => self.on_call_game(player, guess),
-            ClientMsg::RequestRotate { row, col } => self.on_request_rotate(player, row, col),
-            ClientMsg::PlayAgain => self.on_play_again(),
+            ClientMsg::SetNickname { name } => self.on_set_nickname(seats, player, name),
+            ClientMsg::StartGame => self.on_start(seats, player),
+            ClientMsg::LockBoard { board } => self.on_lock_board(seats, player, board),
+            ClientMsg::ShootBeam { port } => self.on_shoot(seats, player, port),
+            ClientMsg::CallGame { guess } => self.on_call_game(seats, player, guess),
+            ClientMsg::RequestRotate { row, col } => self.on_request_rotate(seats, player, row, col),
+            ClientMsg::PlayAgain => self.on_play_again(seats),
         }
     }
 
-    fn on_set_nickname(&mut self, player: usize, name: String) {
+    fn on_set_nickname(&mut self, seats: &mut Seats, player: usize, name: String) {
         if !matches!(self.phase, MatchPhase::Lobby) {
             return;
         }
-        let name: String = name.trim().chars().take(MAX_NICKNAME).collect();
-        if name.is_empty() {
-            return;
+        if seats.set_nickname(player, &name) {
+            self.broadcast_lobby(seats);
         }
-        self.players[player].nickname = name;
-        self.broadcast_lobby();
     }
 
-    fn on_start(&mut self, player: usize) {
+    fn on_start(&mut self, seats: &Seats, player: usize) {
         if player != 0 || !matches!(self.phase, MatchPhase::Lobby) {
             return;
         }
-        if self.players.len() < 2 {
-            self.send(
+        if seats.len() < 2 {
+            seats.send(
                 player,
                 &ServerMsg::Error("Need at least two players to start.".into()),
             );
             return;
         }
-        if self.players.len() > self.capacity() {
-            self.send(player, &ServerMsg::Error("Too many players for this mode.".into()));
+        if seats.len() > self.capacity() {
+            seats.send(player, &ServerMsg::Error("Too many players for this mode.".into()));
             return;
         }
         self.shot_history.clear();
-        self.broadcast(&ServerMsg::GameStart { rules: self.rules });
+        seats.broadcast(&ServerMsg::GameStart { rules: self.rules });
         self.phase = match self.rules.source {
             BoardSource::Versus => MatchPhase::Setup {
                 locked: [false; 2],
                 boards: [None, None],
             },
             BoardSource::Computer => {
-                let n = self.players.len();
+                let n = seats.len();
                 let answer = random_board(&self.rules);
                 MatchPhase::Independent {
                     own: vec![Board::new(self.rules.size); n],
@@ -449,12 +382,12 @@ impl Match {
         };
     }
 
-    fn on_lock_board(&mut self, player: usize, board: Board) {
+    fn on_lock_board(&mut self, seats: &Seats, player: usize, board: Board) {
         if !matches!(self.phase, MatchPhase::Setup { .. }) {
             return;
         }
         if !validate_board(&board, &self.rules) {
-            self.send(player, &ServerMsg::Error("Invalid board.".into()));
+            seats.send(player, &ServerMsg::Error("Invalid board.".into()));
             return;
         }
         enum Outcome {
@@ -474,17 +407,17 @@ impl Match {
             Outcome::Locked { other: 1 - player }
         };
         match outcome {
-            Outcome::Locked { other } => self.send(other, &ServerMsg::OpponentLocked),
+            Outcome::Locked { other } => seats.send(other, &ServerMsg::OpponentLocked),
             Outcome::BothLocked { boards } => {
-                self.broadcast(&ServerMsg::OpponentLocked);
+                seats.broadcast(&ServerMsg::OpponentLocked);
                 if self.rules.turn_based() {
                     self.phase = MatchPhase::Playing {
                         boards,
                         current: 0,
                         rotated: false,
                     };
-                    self.send(0, &ServerMsg::YourTurn);
-                    self.send(1, &ServerMsg::OpponentTurn);
+                    seats.send(0, &ServerMsg::YourTurn);
+                    seats.send(1, &ServerMsg::OpponentTurn);
                 } else {
                     // Each player solves the board their opponent designed.
                     let [a, b] = boards;
@@ -497,7 +430,7 @@ impl Match {
                         score: vec![None; 2],
                         start: Instant::now(),
                     };
-                    self.broadcast(&ServerMsg::BeginPlay);
+                    seats.broadcast(&ServerMsg::BeginPlay);
                 }
             }
         }
@@ -507,7 +440,7 @@ impl Match {
         (1..=4 * self.rules.size as u32).contains(&(port as u32))
     }
 
-    fn on_shoot(&mut self, player: usize, port: u8) {
+    fn on_shoot(&mut self, seats: &Seats, player: usize, port: u8) {
         let valid_port = self.valid_port(port);
         enum Outcome {
             Ignore,
@@ -549,8 +482,8 @@ impl Match {
         };
         match outcome {
             Outcome::Ignore => {}
-            Outcome::NotYourTurn => self.send(player, &ServerMsg::Error("Not your turn.".into())),
-            Outcome::InvalidPort => self.send(player, &ServerMsg::Error("Invalid port.".into())),
+            Outcome::NotYourTurn => seats.send(player, &ServerMsg::Error("Not your turn.".into())),
+            Outcome::InvalidPort => seats.send(player, &ServerMsg::Error("Invalid port.".into())),
             Outcome::Shot { other, exit, color } => {
                 self.shot_history.push(ShotRecord {
                     player,
@@ -558,9 +491,9 @@ impl Match {
                     exit,
                     color,
                 });
-                self.send(player, &ServerMsg::BeamResult { call: port, exit, color });
-                self.send(other, &ServerMsg::OpponentShot { call: port, exit, color });
-                self.send(other, &ServerMsg::YourTurn);
+                seats.send(player, &ServerMsg::BeamResult { call: port, exit, color });
+                seats.send(other, &ServerMsg::OpponentShot { call: port, exit, color });
+                seats.send(other, &ServerMsg::YourTurn);
             }
             Outcome::Solo { exit, color } => {
                 self.shot_history.push(ShotRecord {
@@ -569,12 +502,12 @@ impl Match {
                     exit,
                     color,
                 });
-                self.send(player, &ServerMsg::BeamResult { call: port, exit, color });
+                seats.send(player, &ServerMsg::BeamResult { call: port, exit, color });
             }
         }
     }
 
-    fn on_call_game(&mut self, player: usize, guess: Board) {
+    fn on_call_game(&mut self, seats: &Seats, player: usize, guess: Board) {
         let timed = self.rules.timed;
         let race = matches!(self.rules.resolution, Resolution::Live);
         let beams = self.shot_history.iter().filter(|s| s.player == player).count() as u32;
@@ -635,17 +568,17 @@ impl Match {
         let other = 1 - player.min(1);
         match outcome {
             Outcome::Ignore => {}
-            Outcome::NotYourTurn => self.send(
+            Outcome::NotYourTurn => seats.send(
                 player,
                 &ServerMsg::Error("You can only call the game on your turn.".into()),
             ),
             Outcome::Correct { boards } => {
-                let results = self.standings();
+                let results = self.standings(seats);
                 let own = vec![boards[0].clone(), boards[1].clone()];
                 let targets = vec![boards[1].clone(), boards[0].clone()];
                 for p in 0..2 {
                     // Each player sees the opponent's actual board, the answer.
-                    self.send(
+                    seats.send(
                         p,
                         &ServerMsg::GameOver {
                             you_win: p == player,
@@ -665,19 +598,19 @@ impl Match {
                 };
             }
             Outcome::Wrong => {
-                self.send(player, &ServerMsg::GuessIncorrect);
-                self.send(other, &ServerMsg::OpponentCalledGame);
-                self.send(other, &ServerMsg::YourTurn);
+                seats.send(player, &ServerMsg::GuessIncorrect);
+                seats.send(other, &ServerMsg::OpponentCalledGame);
+                seats.send(other, &ServerMsg::YourTurn);
             }
             Outcome::Solved { score } => {
                 if race {
-                    self.finish_independent(Some(player));
-                } else if self.async_ready() {
+                    self.finish_independent(seats, Some(player));
+                } else if self.async_ready(seats) {
                     // The last solver goes straight to the results.
-                    self.finish_independent(None);
+                    self.finish_independent(seats, None);
                 } else {
-                    self.send(player, &ServerMsg::YouFinished { score });
-                    self.send_others(
+                    seats.send(player, &ServerMsg::YouFinished { score });
+                    seats.send_others(
                         player,
                         &ServerMsg::PlayerFinished {
                             player: player as u8,
@@ -685,13 +618,13 @@ impl Match {
                     );
                 }
             }
-            Outcome::Missed => self.send(player, &ServerMsg::GuessIncorrect),
+            Outcome::Missed => seats.send(player, &ServerMsg::GuessIncorrect),
         }
     }
 
-    fn on_request_rotate(&mut self, player: usize, row: u8, col: u8) {
+    fn on_request_rotate(&mut self, seats: &Seats, player: usize, row: u8, col: u8) {
         if row >= self.rules.size || col >= self.rules.size {
-            self.send(player, &ServerMsg::Error("Invalid coordinates.".into()));
+            seats.send(player, &ServerMsg::Error("Invalid coordinates.".into()));
             return;
         }
         let (r, c) = (row as usize, col as usize);
@@ -758,62 +691,102 @@ impl Match {
         };
         match outcome {
             Outcome::Ignore => {}
-            Outcome::NotYourTurn => self.send(
+            Outcome::NotYourTurn => seats.send(
                 player,
                 &ServerMsg::Error("You can only flip a mirror on your turn.".into()),
             ),
-            Outcome::AlreadyFlipped => self.send(
+            Outcome::AlreadyFlipped => seats.send(
                 player,
                 &ServerMsg::Error("You can only flip once per turn.".into()),
             ),
             Outcome::Done { accepted } => {
-                self.send(player, &ServerMsg::RotateResult { row, col, accepted });
+                seats.send(player, &ServerMsg::RotateResult { row, col, accepted });
                 if accepted {
-                    self.send(other, &ServerMsg::YourMirrorRotated { row, col, accepted });
+                    seats.send(other, &ServerMsg::YourMirrorRotated { row, col, accepted });
                 } else {
                     // Turn passed to the opponent. Send YourTurn first, its
                     // client handler clears the last-mirror notice, then the
                     // flip-attempt notice so the opponent still sees it.
-                    self.send(other, &ServerMsg::YourTurn);
-                    self.send(other, &ServerMsg::YourMirrorRotated { row, col, accepted });
+                    seats.send(other, &ServerMsg::YourTurn);
+                    seats.send(other, &ServerMsg::YourMirrorRotated { row, col, accepted });
                 }
             }
             Outcome::IndependentDone { accepted } => {
-                self.send(player, &ServerMsg::RotateResult { row, col, accepted })
+                seats.send(player, &ServerMsg::RotateResult { row, col, accepted })
             }
         }
     }
 
-    fn on_play_again(&mut self) {
+    fn on_play_again(&mut self, seats: &mut Seats) {
         if !matches!(self.phase, MatchPhase::Over { .. }) {
             return;
         }
-        // Whoever left during the game gives up their seat.
-        self.players.retain(|p| p.connected);
+        seats.drop_disconnected();
         self.shot_history.clear();
         self.phase = MatchPhase::Lobby;
-        self.broadcast_lobby();
+        self.broadcast_lobby(seats);
+    }
+}
+
+impl RoomGame for LightBeams {
+    type ClientMsg = ClientMsg;
+
+    fn capacity(&self) -> usize {
+        self.rules.max_players()
     }
 
-    /// Mark a player gone. Returns true when the slot should be pruned later.
-    fn on_disconnect(&mut self, player: usize) -> bool {
-        self.players[player].connected = false;
-        self.players[player].sender = None;
-        self.touch_empty();
-        if matches!(self.phase, MatchPhase::Lobby) {
-            self.broadcast_lobby();
-            return true;
+    fn in_lobby(&self) -> bool {
+        matches!(self.phase, MatchPhase::Lobby)
+    }
+
+    fn is_over(&self) -> bool {
+        matches!(self.phase, MatchPhase::Over { .. })
+    }
+
+    fn mode(&self) -> String {
+        mode_label(&self.rules)
+    }
+
+    fn joined(&mut self, seats: &Seats, _player: usize) {
+        self.broadcast_lobby(seats);
+    }
+
+    fn rejoined(&mut self, seats: &Seats, player: usize) {
+        seats.send(player, &self.game_resync(seats, player));
+        if self.in_lobby() {
+            self.broadcast_lobby(seats);
+        } else {
+            seats.send_others(
+                player,
+                &ServerMsg::PlayerConnected {
+                    player: player as u8,
+                },
+            );
         }
-        self.send_others(
+    }
+
+    fn handle(&mut self, seats: &mut Seats, player: usize, msg: ClientMsg) {
+        self.dispatch(seats, player, msg);
+    }
+
+    fn left(&mut self, seats: &Seats, player: usize) {
+        if self.in_lobby() {
+            self.broadcast_lobby(seats);
+            return;
+        }
+        seats.send_others(
             player,
             &ServerMsg::PlayerDisconnected {
                 player: player as u8,
             },
         );
-        if self.async_ready() {
-            self.finish_independent(None);
+        if self.async_ready(seats) {
+            self.finish_independent(seats, None);
         }
-        false
+    }
+
+    fn pruned(&mut self, seats: &Seats) {
+        self.broadcast_lobby(seats);
     }
 }
 
@@ -829,10 +802,17 @@ pub struct RoomInfo {
     pub mode: String,
 }
 
-struct LobbyRoom {
-    name: String,
-    passcode: String,
-    game: Arc<Mutex<Match>>,
+impl From<rooms::RoomSummary> for RoomInfo {
+    fn from(r: rooms::RoomSummary) -> Self {
+        Self {
+            id: r.id,
+            name: r.name,
+            players: r.players,
+            capacity: r.capacity,
+            in_progress: r.in_progress,
+            mode: r.mode,
+        }
+    }
 }
 
 /// Short description of a room's rules for the room list, e.g. `5×5 · async`.
@@ -853,7 +833,7 @@ pub fn mode_label(rules: &Rules) -> String {
 // ── Global state ──────────────────────────────────────────────────────────────
 
 pub struct GameState {
-    rooms: RwLock<HashMap<String, LobbyRoom>>,
+    light_beams: Arc<Rooms<LightBeams>>,
 }
 
 impl Default for GameState {
@@ -865,196 +845,28 @@ impl Default for GameState {
 impl GameState {
     pub fn new() -> Self {
         Self {
-            rooms: RwLock::new(HashMap::new()),
+            light_beams: Arc::new(Rooms::new()),
         }
+    }
+
+    /// Spawn the background tasks that reap abandoned rooms.
+    pub fn spawn_reaper(self: Arc<Self>) {
+        self.light_beams.clone().spawn_reaper();
     }
 
     pub async fn create_room(&self, id: String, name: String, passcode: String, rules: Rules) {
-        let mut w = self.rooms.write().await;
-        w.insert(
-            id,
-            LobbyRoom {
-                name,
-                passcode,
-                game: Arc::new(Mutex::new(Match::new(rules))),
-            },
-        );
+        self.light_beams
+            .create(id, name, passcode, LightBeams::new(rules))
+            .await;
     }
 
     pub async fn list_rooms(&self) -> Vec<RoomInfo> {
-        let r = self.rooms.read().await;
-        let mut infos = Vec::new();
-        for (id, room) in r.iter() {
-            if let Ok(game) = room.game.try_lock() {
-                infos.push(RoomInfo {
-                    id: id.clone(),
-                    name: room.name.clone(),
-                    players: game.players.iter().filter(|p| p.connected).count() as u8,
-                    capacity: game.capacity() as u8,
-                    in_progress: !matches!(game.phase, MatchPhase::Lobby),
-                    mode: mode_label(&game.rules),
-                });
-            }
-        }
-        infos.sort_by(|a, b| a.name.cmp(&b.name));
-        infos
+        let rooms = self.light_beams.list().await;
+        rooms.into_iter().map(RoomInfo::from).collect()
     }
 
     pub async fn room_exists(&self, id: &str) -> bool {
-        self.rooms.read().await.contains_key(id)
-    }
-
-    async fn get_room(&self, id: &str) -> Option<(Arc<Mutex<Match>>, String)> {
-        let r = self.rooms.read().await;
-        r.get(id)
-            .map(|room| (room.game.clone(), room.passcode.clone()))
-    }
-
-    async fn remove_if_over(&self, id: &str) {
-        let should_remove = {
-            let r = self.rooms.read().await;
-            r.get(id)
-                .and_then(|room| room.game.try_lock().ok())
-                .map(|game| {
-                    matches!(game.phase, MatchPhase::Over { .. })
-                        && game.players.iter().all(|p| !p.connected)
-                })
-                .unwrap_or(false)
-        };
-        if should_remove {
-            self.rooms.write().await.remove(id);
-        }
-    }
-
-    /// Drop a lobby slot whose player never came back, so the seat opens up.
-    async fn prune_lobby_slot(&self, id: &str, token: &str) {
-        let Some((game, _)) = self.get_room(id).await else {
-            return;
-        };
-        let mut r = game.lock().await;
-        if !matches!(r.phase, MatchPhase::Lobby) {
-            return;
-        }
-        if let Some(idx) = r.index_of(token) {
-            if !r.players[idx].connected {
-                r.players.remove(idx);
-                r.broadcast_lobby();
-            }
-        }
-    }
-
-    /// Remove rooms that have had no connected players for at least `idle_ttl`.
-    /// Covers rooms abandoned before the game finishes (created-but-never-joined,
-    /// quit mid-match) which `remove_if_over` never reaps.
-    async fn reap_idle_rooms(&self, idle_ttl: Duration) {
-        let stale: Vec<String> = {
-            let r = self.rooms.read().await;
-            r.iter()
-                .filter_map(|(id, room)| {
-                    let game = room.game.try_lock().ok()?;
-                    match game.empty_since {
-                        Some(t) if t.elapsed() >= idle_ttl => Some(id.clone()),
-                        _ => None,
-                    }
-                })
-                .collect()
-        };
-        if stale.is_empty() {
-            return;
-        }
-        let mut w = self.rooms.write().await;
-        for id in stale {
-            // Re-check under the write lock: a player may have reconnected
-            // between the read scan and acquiring the write lock.
-            let still_idle = w
-                .get(&id)
-                .and_then(|room| room.game.try_lock().ok())
-                .map(|game| game.empty_since.is_some_and(|t| t.elapsed() >= idle_ttl))
-                .unwrap_or(false);
-            if still_idle {
-                w.remove(&id);
-            }
-        }
-    }
-
-    /// Spawn a background task that periodically reaps idle rooms. Rooms empty
-    /// for more than 5 minutes are removed.
-    pub fn spawn_reaper(self: Arc<Self>) {
-        const IDLE_TTL: Duration = Duration::from_secs(5 * 60);
-        const SCAN_INTERVAL: Duration = Duration::from_secs(60);
-        tokio::spawn(async move {
-            let mut ticker = tokio::time::interval(SCAN_INTERVAL);
-            loop {
-                ticker.tick().await;
-                self.reap_idle_rooms(IDLE_TTL).await;
-            }
-        });
-    }
-}
-
-// ── Slot assignment ───────────────────────────────────────────────────────────
-
-enum SlotResult {
-    New { player_id: usize, token: String },
-    Reconnected { player_id: usize, token: String },
-    InProgress,
-    Full,
-}
-
-fn assign_new_slot(r: &mut Match, tx: mpsc::UnboundedSender<String>) -> SlotResult {
-    if !matches!(r.phase, MatchPhase::Lobby) {
-        return SlotResult::InProgress;
-    }
-    if r.players.len() >= r.capacity() {
-        return SlotResult::Full;
-    }
-    let token = gen_token();
-    let nickname = gen_nickname(r);
-    r.players.push(Player {
-        nickname,
-        token: token.clone(),
-        sender: Some(tx),
-        connected: true,
-    });
-    r.touch_empty();
-    SlotResult::New {
-        player_id: r.players.len() - 1,
-        token,
-    }
-}
-
-// ── Token generation ──────────────────────────────────────────────────────────
-
-fn gen_token() -> String {
-    use rand::RngExt;
-    let mut rng = rand::rng();
-    (0..8)
-        .map(|_| format!("{:02x}", rng.random_range(0u8..=255)))
-        .collect()
-}
-
-const ADJECTIVES: [&str; 16] = [
-    "Bright", "Clever", "Swift", "Brave", "Calm", "Lucky", "Mighty", "Gentle", "Bold", "Sunny",
-    "Quiet", "Witty", "Eager", "Jolly", "Keen", "Nimble",
-];
-const ANIMALS: [&str; 16] = [
-    "Otter", "Falcon", "Badger", "Lynx", "Heron", "Fox", "Panda", "Wolf", "Raven", "Tiger",
-    "Moose", "Hawk", "Bison", "Crane", "Seal", "Owl",
-];
-
-/// A friendly default nickname that nobody else in the room is using.
-fn gen_nickname(r: &Match) -> String {
-    use rand::RngExt;
-    let mut rng = rand::rng();
-    loop {
-        let name = format!(
-            "{} {}",
-            ADJECTIVES[rng.random_range(0..ADJECTIVES.len())],
-            ANIMALS[rng.random_range(0..ANIMALS.len())]
-        );
-        if r.players.iter().all(|p| p.nickname != name) {
-            return name;
-        }
+        self.light_beams.exists(id).await
     }
 }
 
@@ -1073,143 +885,6 @@ pub async fn ws_handler(
     Query(query): Query<WsQuery>,
     Extension(state): Extension<Arc<GameState>>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_socket(socket, room_id, passcode, query.token, state))
-}
-
-async fn handle_socket(
-    socket: WebSocket,
-    room_id: String,
-    passcode: String,
-    reconnect_token: Option<String>,
-    state: Arc<GameState>,
-) {
-    let (mut sink, mut stream) = socket.split();
-    let (tx, mut rx) = mpsc::unbounded_channel::<String>();
-
-    let reject = |msg: &str| serde_json::to_string(&ServerMsg::Error(msg.into())).unwrap();
-
-    let Some((game, expected_passcode)) = state.get_room(&room_id).await else {
-        let _ = sink.send(Message::Text(reject("Room not found.").into())).await;
-        return;
-    };
-
-    if passcode != expected_passcode {
-        let _ = sink.send(Message::Text(reject("Wrong passcode.").into())).await;
-        return;
-    }
-
-    // ── Assign/reclaim player slot ─────────────────────────────────────────
-    let slot_result = {
-        let mut r = game.lock().await;
-        // Try to reclaim a slot by token; an unknown token is just a new player.
-        match reconnect_token.as_deref().and_then(|tok| r.index_of(tok)) {
-            Some(idx) => {
-                r.players[idx].sender = Some(tx.clone());
-                r.players[idx].connected = true;
-                r.touch_empty();
-                SlotResult::Reconnected {
-                    player_id: idx,
-                    token: r.players[idx].token.clone(),
-                }
-            }
-            None => assign_new_slot(&mut r, tx.clone()),
-        }
-    };
-
-    // Player ids shift when a lobby slot is pruned, so the socket remembers
-    // its token and looks its index up fresh each time.
-    let token = match slot_result {
-        SlotResult::Full => {
-            let _ = sink.send(Message::Text(reject("Room is full.").into())).await;
-            return;
-        }
-        SlotResult::InProgress => {
-            let _ = sink
-                .send(Message::Text(reject("Game already in progress.").into()))
-                .await;
-            return;
-        }
-        SlotResult::New { player_id, token } => {
-            let r = game.lock().await;
-            r.send(
-                player_id,
-                &ServerMsg::Welcome {
-                    player: player_id as u8,
-                    token: token.clone(),
-                },
-            );
-            r.broadcast_lobby();
-            token
-        }
-        SlotResult::Reconnected { player_id, token } => {
-            let r = game.lock().await;
-            r.send(
-                player_id,
-                &ServerMsg::Welcome {
-                    player: player_id as u8,
-                    token: token.clone(),
-                },
-            );
-            r.send(player_id, &r.game_resync(player_id));
-            if matches!(r.phase, MatchPhase::Lobby) {
-                r.broadcast_lobby();
-            } else {
-                r.send_others(
-                    player_id,
-                    &ServerMsg::PlayerConnected {
-                        player: player_id as u8,
-                    },
-                );
-            }
-            token
-        }
-    };
-
-    // ── Forward channel messages to WebSocket sink ─────────────────────────
-    let send_task = tokio::spawn(async move {
-        while let Some(msg) = rx.recv().await {
-            if sink.send(Message::Text(msg.into())).await.is_err() {
-                break;
-            }
-        }
-    });
-
-    while let Some(Ok(msg)) = stream.next().await {
-        let text = match msg {
-            Message::Text(t) => t.to_string(),
-            Message::Close(_) => break,
-            _ => continue,
-        };
-        if let Ok(client_msg) = serde_json::from_str::<ClientMsg>(&text) {
-            let mut r = game.lock().await;
-            if let Some(idx) = r.index_of(&token) {
-                r.handle(idx, client_msg);
-            }
-        }
-    }
-
-    send_task.abort();
-
-    // Mark slot as disconnected (keep game state alive)
-    let prune = {
-        let mut r = game.lock().await;
-        match r.index_of(&token) {
-            // A newer socket may have reclaimed this slot already.
-            Some(idx) if r.players[idx].sender.as_ref().is_some_and(|s| s.same_channel(&tx)) => {
-                r.on_disconnect(idx)
-            }
-            _ => false,
-        }
-    };
-    if prune {
-        let state = state.clone();
-        let room_id = room_id.clone();
-        tokio::spawn(async move {
-            tokio::time::sleep(LOBBY_GRACE).await;
-            state.prune_lobby_slot(&room_id, &token).await;
-        });
-    }
-
-    // Only remove the room if the game is over AND everyone disconnected
-    state.remove_if_over(&room_id).await;
+    let rooms = state.light_beams.clone();
+    ws.on_upgrade(move |socket| rooms::serve(socket, rooms, room_id, passcode, query.token))
 }

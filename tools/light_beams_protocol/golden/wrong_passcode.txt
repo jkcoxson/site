@@ -1,0 +1,5 @@
+A == connect raw
+A <- {"type":"Error","data":"Wrong passcode."}
+A xx ConnectionClosedError
+== end
+rooms: [{"id": "<room>", "name": "sc-wrong_passcode", "players": 0, "capacity": 2, "in_progress": false, "mode": "4\u00d74"}]

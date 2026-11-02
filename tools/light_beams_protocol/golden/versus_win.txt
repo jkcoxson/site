@@ -1,0 +1,43 @@
+A == connect 
+A <- {"type":"Welcome","data":{"player":0,"token":"<tok>"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B == connect 
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B <- {"type":"Welcome","data":{"player":1,"token":"<tok>"}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+A -> {"type":"StartGame"}
+A <- {"type":"GameStart","data":{"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B <- {"type":"GameStart","data":{"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+A -> {"type":"LockBoard","data":{"board":{"size":4,"cells":["Red",null,null,"Yellow",null,"Blue",{"Slash":"Forward"},null,null,null,"Black",null,{"Slash":"Backward"},null,null,{"Arrow":"UpLeft"}]}}}
+B <- {"type":"OpponentLocked"}
+B -> {"type":"LockBoard","data":{"board":{"size":4,"cells":[null,"Red",{"Slash":"Backward"},null,"Yellow",null,null,{"Arrow":"DownRight"},null,{"Slash":"Forward"},null,"Blue",null,null,"Black",null]}}}
+A <- {"type":"OpponentLocked"}
+A <- {"type":"YourTurn"}
+B <- {"type":"OpponentLocked"}
+B <- {"type":"OpponentTurn"}
+A -> {"type":"ShootBeam","data":{"port":4}}
+A <- {"type":"BeamResult","data":{"call":4,"exit":9,"color":"Blue"}}
+B <- {"type":"OpponentShot","data":{"call":4,"exit":9,"color":"Blue"}}
+B <- {"type":"YourTurn"}
+B -> {"type":"CallGame","data":{"guess":{"size":4,"cells":["Red",null,null,"Yellow",null,"Blue",{"Slash":"Forward"},null,null,null,"Black",null,{"Slash":"Backward"},null,null,{"Arrow":"UpLeft"}]}}}
+A <- {"type":"GameOver","data":{"you_win":false,"your_board":{"size":4,"cells":["Red",null,null,"Yellow",null,"Blue",{"Slash":"Forward"},null,null,null,"Black",null,{"Slash":"Backward"},null,null,{"Arrow":"UpLeft"}]},"answer_board":{"size":4,"cells":[null,"Red",{"Slash":"Backward"},null,"Yellow",null,null,{"Arrow":"DownRight"},null,{"Slash":"Forward"},null,"Blue",null,null,"Black",null]},"results":[{"id":0,"nickname":"<nick0>","score":null,"place":1},{"id":1,"nickname":"<nick1>","score":null,"place":1}],"winner":1}}
+B <- {"type":"GameOver","data":{"you_win":true,"your_board":{"size":4,"cells":[null,"Red",{"Slash":"Backward"},null,"Yellow",null,null,{"Arrow":"DownRight"},null,{"Slash":"Forward"},null,"Blue",null,null,"Black",null]},"answer_board":{"size":4,"cells":["Red",null,null,"Yellow",null,"Blue",{"Slash":"Forward"},null,null,null,"Black",null,{"Slash":"Backward"},null,null,{"Arrow":"UpLeft"}]},"results":[{"id":0,"nickname":"<nick0>","score":null,"place":1},{"id":1,"nickname":"<nick1>","score":null,"place":1}],"winner":1}}
+B == close
+A <- {"type":"PlayerDisconnected","data":{"player":1}}
+B xx ConnectionClosedError
+B == connect ?token=<tok>
+A <- {"type":"PlayerConnected","data":{"player":1}}
+B <- {"type":"Welcome","data":{"player":1,"token":"<tok>"}}
+B <- {"type":"GameResync","data":{"player":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false},"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"phase":{"type":"Over","data":{"you_win":true,"your_board":{"size":4,"cells":[null,"Red",{"Slash":"Backward"},null,"Yellow",null,null,{"Arrow":"DownRight"},null,{"Slash":"Forward"},null,"Blue",null,null,"Black",null]},"opponent_board":{"size":4,"cells":["Red",null,null,"Yellow",null,"Blue",{"Slash":"Forward"},null,null,null,"Black",null,{"Slash":"Backward"},null,null,{"Arrow":"UpLeft"}]},"shots":[{"mine":false,"call":4,"exit":9,"color":"Blue"}],"results":[{"id":0,"nickname":"<nick0>","score":null,"place":1},{"id":1,"nickname":"<nick1>","score":null,"place":1}],"winner":1}}}}
+A -> {"type":"PlayAgain"}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B -> {"type":"PlayAgain"}
+C == connect 
+C <- {"type":"Error","data":"Room is full."}
+C xx ConnectionClosedError
+== end
+A xx ConnectionClosedError
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":false},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B xx ConnectionClosedError
+rooms: [{"id": "<room>", "name": "sc-versus_win", "players": 0, "capacity": 2, "in_progress": false, "mode": "4\u00d74"}]

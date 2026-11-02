@@ -1,0 +1,26 @@
+A == connect 
+A <- {"type":"Welcome","data":{"player":0,"token":"<tok>"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true}],"host":0,"you":0,"rules":{"size":5,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":1},"source":"Computer","resolution":"Async","timed":false}}}
+B == connect 
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":0,"rules":{"size":5,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":1},"source":"Computer","resolution":"Async","timed":false}}}
+B <- {"type":"Welcome","data":{"player":1,"token":"<tok>"}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":5,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":1},"source":"Computer","resolution":"Async","timed":false}}}
+A -> {"type":"StartGame"}
+A <- {"type":"GameStart","data":{"rules":{"size":5,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":1},"source":"Computer","resolution":"Async","timed":false}}}
+B <- {"type":"GameStart","data":{"rules":{"size":5,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":1},"source":"Computer","resolution":"Async","timed":false}}}
+A -> {"type":"ShootBeam","data":{"port":20}}
+A <- {"type":"BeamResult","data":{"call":20,"exit":<n>,"color":<c>}}
+A -> {"type":"ShootBeam","data":{"port":21}}
+A <- {"type":"Error","data":"Invalid port."}
+A == close
+A xx ConnectionClosedError
+B <- {"type":"PlayerDisconnected","data":{"player":0}}
+A == connect ?token=<tok>
+A <- {"type":"Welcome","data":{"player":0,"token":"<tok>"}}
+A <- {"type":"GameResync","data":{"player":0,"rules":{"size":5,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":1},"source":"Computer","resolution":"Async","timed":false},"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"phase":{"type":"Independent","data":{"your_board":{"size":5,"cells":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"shots":[{"mine":true,"call":20,"exit":<n>,"color":<c>}],"score":<n>,"you_done":false,"done":[false,false]}}}}
+B <- {"type":"PlayerConnected","data":{"player":0}}
+== end
+A xx ConnectionClosedError
+B <- {"type":"PlayerDisconnected","data":{"player":0}}
+B xx ConnectionClosedError
+rooms: []

@@ -17,20 +17,33 @@ pub struct RoomInfo {
     pub id: String,
     pub name: String,
     pub players: u8,
+    pub capacity: u8,
     pub in_progress: bool,
+    pub mode: String,
 }
 
 // ── Server functions ──────────────────────────────────────────────────────────
 
 #[server(CreateRoom)]
-pub async fn create_room(name: String, passcode: String) -> Result<String, ServerFnError> {
+pub async fn create_room(
+    name: String,
+    passcode: String,
+    rules: String,
+) -> Result<String, ServerFnError> {
     use crate::context::Context;
+    use crate::games::light_beams::logic::Rules;
     use rand::RngExt;
     if name.trim().is_empty() {
         return Err(ServerFnError::ServerError("Room name is required.".into()));
     }
     if passcode.trim().is_empty() {
         return Err(ServerFnError::ServerError("Passcode is required.".into()));
+    }
+    let rules: Rules = serde_json::from_str(&rules).unwrap_or_default();
+    if !rules.is_valid() {
+        return Err(ServerFnError::ServerError(
+            "Invalid rules: check the board size and piece counts.".into(),
+        ));
     }
     // Generate id in a scope so ThreadRng is dropped before .await
     let id = {
@@ -45,7 +58,7 @@ pub async fn create_room(name: String, passcode: String) -> Result<String, Serve
             "No context".to_string(),
         )
     })?;
-    ctx.game_state.create_room(id.clone(), name, passcode).await;
+    ctx.game_state.create_room(id.clone(), name, passcode, rules).await;
     Ok(id)
 }
 
@@ -75,7 +88,9 @@ pub async fn list_rooms() -> Result<Vec<RoomInfo>, ServerFnError> {
             id: r.id,
             name: r.name,
             players: r.players,
+            capacity: r.capacity,
             in_progress: r.in_progress,
+            mode: r.mode,
         })
         .collect())
 }

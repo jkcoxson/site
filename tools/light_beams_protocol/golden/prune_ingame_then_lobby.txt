@@ -1,0 +1,25 @@
+A == connect 
+A <- {"type":"Welcome","data":{"player":0,"token":"<tok>"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B == connect 
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B <- {"type":"Welcome","data":{"player":1,"token":"<tok>"}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+A -> {"type":"StartGame"}
+A <- {"type":"GameStart","data":{"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B <- {"type":"GameStart","data":{"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B == close
+A <- {"type":"PlayerDisconnected","data":{"player":1}}
+B xx ConnectionClosedError
+C == connect 
+C <- {"type":"Error","data":"Game already in progress."}
+C xx ConnectionClosedError
+B == connect ?token=<tok>
+A <- {"type":"PlayerConnected","data":{"player":1}}
+B <- {"type":"Welcome","data":{"player":1,"token":"<tok>"}}
+B <- {"type":"GameResync","data":{"player":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false},"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"phase":{"type":"Setup","data":{"your_board":null,"you_locked":false,"opponent_locked":false}}}}
+== end
+A xx ConnectionClosedError
+B <- {"type":"PlayerDisconnected","data":{"player":0}}
+B xx ConnectionClosedError
+rooms: [{"id": "<room>", "name": "sc-prune_ingame_then_lobby", "players": 0, "capacity": 2, "in_progress": true, "mode": "4\u00d74"}]

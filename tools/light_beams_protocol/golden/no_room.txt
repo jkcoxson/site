@@ -1,0 +1,5 @@
+A == connect raw
+A <- {"type":"Error","data":"Room not found."}
+A xx ConnectionClosedError
+== end
+rooms: [{"id": "<room>", "name": "sc-no_room", "players": 0, "capacity": 2, "in_progress": false, "mode": "4\u00d74"}]

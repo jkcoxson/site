@@ -1,0 +1,36 @@
+A == connect 
+A <- {"type":"Welcome","data":{"player":0,"token":"<tok>"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B == connect 
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B <- {"type":"Welcome","data":{"player":1,"token":"<tok>"}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C == connect 
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C <- {"type":"Welcome","data":{"player":2,"token":"<tok>"}}
+C <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":2,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+A -> {"type":"StartGame"}
+A <- {"type":"GameStart","data":{"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B <- {"type":"GameStart","data":{"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C <- {"type":"GameStart","data":{"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+A -> {"type":"ShootBeam","data":{"port":1}}
+A <- {"type":"BeamResult","data":{"call":1,"exit":<n>,"color":<c>}}
+B -> CallGame x<n> (solved)
+A <- {"type":"GameOver","data":{"you_win":false,"your_board":{"size":4,"cells":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"answer_board":<board4>,"results":[{"id":0,"nickname":"<nick0>","score":null,"place":2},{"id":1,"nickname":"<nick1>","score":<n>,"place":1},{"id":2,"nickname":"<nick2>","score":null,"place":2}],"winner":1}}
+B <- {"type":"GameOver","data":{"you_win":true,"your_board":{"size":4,"cells":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"answer_board":<board4>,"results":[{"id":0,"nickname":"<nick0>","score":null,"place":2},{"id":1,"nickname":"<nick1>","score":<n>,"place":1},{"id":2,"nickname":"<nick2>","score":null,"place":2}],"winner":1}}
+C <- {"type":"GameOver","data":{"you_win":false,"your_board":{"size":4,"cells":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"answer_board":<board4>,"results":[{"id":0,"nickname":"<nick0>","score":null,"place":2},{"id":1,"nickname":"<nick1>","score":<n>,"place":1},{"id":2,"nickname":"<nick2>","score":null,"place":2}],"winner":1}}
+A -> {"type":"ShootBeam","data":{"port":2}}
+C -> {"type":"PlayAgain"}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":2,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+A -> {"type":"PlayAgain"}
+== end
+A xx ConnectionClosedError
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":false},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B xx ConnectionClosedError
+C <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":false},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":2,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":false},{"id":1,"nickname":"<nick1>","connected":false},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":2,"rules":{"size":4,"counts":{"red":0,"yellow":0,"blue":0,"black":1,"slash":0,"arrow":0,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C xx ConnectionClosedError
+rooms: [{"id": "<room>", "name": "sc-computer_live_race", "players": 0, "capacity": 8, "in_progress": false, "mode": "4\u00d74 \u00b7 computer"}]

@@ -1,0 +1,24 @@
+A == connect 
+A <- {"type":"Welcome","data":{"player":0,"token":"<tok>"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B == connect 
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B <- {"type":"Welcome","data":{"player":1,"token":"<tok>"}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C == connect 
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C <- {"type":"Welcome","data":{"player":2,"token":"<tok>"}}
+C <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"<nick2>","connected":true}],"host":0,"you":2,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C -> {"type":"SetNickname","data":{"name":"Cy"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"Cy","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"Cy","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"Cy","connected":true}],"host":0,"you":2,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+== end
+A xx ConnectionClosedError
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":false},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"Cy","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+B xx ConnectionClosedError
+C <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":false},{"id":1,"nickname":"<nick1>","connected":true},{"id":2,"nickname":"Cy","connected":true}],"host":0,"you":2,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":false},{"id":1,"nickname":"<nick1>","connected":false},{"id":2,"nickname":"Cy","connected":true}],"host":0,"you":2,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Computer","resolution":"Live","timed":false}}}
+C xx ConnectionClosedError
+rooms: [{"id": "<room>", "name": "sc-computer_lobby3", "players": 0, "capacity": 8, "in_progress": false, "mode": "4\u00d74 \u00b7 computer"}]

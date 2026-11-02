@@ -1,0 +1,8 @@
+A == connect 
+A <- {"type":"Welcome","data":{"player":0,"token":"<tok>"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+A -> {"type":"StartGame"}
+A <- {"type":"Error","data":"Need at least two players to start."}
+== end
+A xx ConnectionClosedError
+rooms: [{"id": "<room>", "name": "sc-solo_start", "players": 0, "capacity": 2, "in_progress": false, "mode": "4\u00d74"}]

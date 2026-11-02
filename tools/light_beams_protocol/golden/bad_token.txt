@@ -1,0 +1,16 @@
+A == connect 
+A <- {"type":"Welcome","data":{"player":0,"token":"<tok>"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B == connect 
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B <- {"type":"Welcome","data":{"player":1,"token":"<tok>"}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B == close
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":false}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B xx ConnectionClosedError
+B == connect ?token=nope
+B <- {"type":"Error","data":"Room is full."}
+B xx ConnectionClosedError
+== end
+A xx ConnectionClosedError
+rooms: [{"id": "<room>", "name": "sc-bad_token", "players": 0, "capacity": 2, "in_progress": false, "mode": "4\u00d74"}]

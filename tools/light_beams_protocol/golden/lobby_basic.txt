@@ -1,0 +1,27 @@
+A == connect 
+A <- {"type":"Welcome","data":{"player":0,"token":"<tok>"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B == connect 
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B <- {"type":"Welcome","data":{"player":1,"token":"<tok>"}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"<nick0>","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+A -> {"type":"SetNickname","data":{"name":"Alice"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"Alice","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"Alice","connected":true},{"id":1,"nickname":"<nick1>","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B -> {"type":"SetNickname","data":{"name":"  "}}
+B -> {"type":"SetNickname","data":{"name":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}}
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"Alice","connected":true},{"id":1,"nickname":"XXXXXXXXXXXXXXXXXXXX","connected":true}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"Alice","connected":true},{"id":1,"nickname":"XXXXXXXXXXXXXXXXXXXX","connected":true}],"host":0,"you":1,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B -> {"type":"StartGame"}
+B == close
+A <- {"type":"Lobby","data":{"players":[{"id":0,"nickname":"Alice","connected":true},{"id":1,"nickname":"XXXXXXXXXXXXXXXXXXXX","connected":false}],"host":0,"you":0,"rules":{"size":4,"counts":{"red":1,"yellow":1,"blue":1,"black":1,"slash":2,"arrow":1,"four_arrow":0},"source":"Versus","resolution":"Live","timed":false}}}
+B xx ConnectionClosedError
+C == connect 
+C <- {"type":"Error","data":"Room is full."}
+C xx ConnectionClosedError
+D == connect 
+D <- {"type":"Error","data":"Room is full."}
+D xx ConnectionClosedError
+== end
+A xx ConnectionClosedError
+rooms: [{"id": "<room>", "name": "sc-lobby_basic", "players": 0, "capacity": 2, "in_progress": false, "mode": "4\u00d74"}]

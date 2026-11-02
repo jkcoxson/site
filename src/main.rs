@@ -62,8 +62,8 @@ async fn main() {
             axum::routing::get(jkcoxson::games::server::ws_handler),
         )
         .route(
-            "/games/five-crowns/ws/{room_id}/{passcode}",
-            axum::routing::get(jkcoxson::games::server::five_crowns_ws_handler),
+            "/games/{game}/ws/{room_id}/{passcode}",
+            axum::routing::get(jkcoxson::games::server::card_ws_handler),
         )
         .leptos_routes_with_context(
             &leptos_options.clone(),

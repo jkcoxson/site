@@ -4,6 +4,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::games::cards::{HandCard, Motion, Spot, Standing, TableView};
+
 pub const ROUNDS: u8 = 11;
 pub const MIN_PLAYERS: usize = 2;
 /// Two decks hold 116 cards; seven players at 13 cards each still leaves a
@@ -248,13 +250,6 @@ pub fn sort_for_display(cards: &mut [Card], wild: u8) {
 // ── Wire messages ─────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SeatInfo {
-    pub id: u8,
-    pub nickname: String,
-    pub connected: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PlayerView {
     pub id: u8,
     pub nickname: String,
@@ -269,14 +264,6 @@ pub struct RoundResult {
     pub player: u8,
     pub meld: Meld,
     pub went_out: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Standing {
-    pub player: u8,
-    pub total: u32,
-    /// 1-based, ties share a place.
-    pub place: u8,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -340,21 +327,74 @@ pub struct GameView {
     pub last: Option<Action>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type", content = "data")]
-pub enum ServerMsg {
-    /// Sent immediately on connect. `token` is used to reclaim this seat on reconnect.
-    Welcome {
-        player: u8,
-        token: String,
-    },
-    Lobby {
-        players: Vec<SeatInfo>,
-        host: u8,
-        you: u8,
-    },
-    Game(Box<GameView>),
-    Error(String),
+pub type ServerMsg = crate::games::cards::ServerMsg<GameView>;
+
+impl HandCard for Card {
+    fn id(&self) -> u8 {
+        self.id
+    }
+}
+
+impl TableView for GameView {
+    fn you(&self) -> u8 {
+        self.you
+    }
+
+    fn last_move(&self) -> Option<(u32, bool)> {
+        self.last.map(|a| (a.seq, a.kind == ActionKind::Deal))
+    }
+
+    fn placeholder() -> Self {
+        GameView {
+            you: 0,
+            host: 0,
+            round: 1,
+            wild: 3,
+            dealer: 0,
+            current: 0,
+            hand: Vec::new(),
+            discard_top: None,
+            deck_size: 0,
+            players: Vec::new(),
+            out: None,
+            stage: Stage::Playing { drawn: false },
+            log: Vec::new(),
+            last: None,
+        }
+    }
+
+    /// The discard pile's top card carries `data-card`, so cards moving
+    /// between a hand and the pile slide on their own.
+    fn motion(&self) -> Motion {
+        let Some(a) = self.last else {
+            return Motion::default();
+        };
+        let mine = a.player == self.you;
+        match a.kind {
+            ActionKind::Deal => Motion {
+                arrive_from: Some(Spot::Pile("deck")),
+                deal: true,
+                ..Motion::default()
+            },
+            ActionKind::DrewDeck if mine => Motion {
+                arrive_from: Some(Spot::Pile("deck")),
+                ..Motion::default()
+            },
+            ActionKind::DrewDeck => Motion {
+                leave: vec![(Spot::Pile("deck"), Some(a.player))],
+                ..Motion::default()
+            },
+            ActionKind::DrewDiscard { card } if !mine => Motion {
+                leave: vec![(Spot::Card(card.id), Some(a.player))],
+                ..Motion::default()
+            },
+            ActionKind::Discarded { .. } if !mine => Motion {
+                arrive_from: Some(Spot::Seat(a.player)),
+                ..Motion::default()
+            },
+            _ => Motion::default(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

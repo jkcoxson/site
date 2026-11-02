@@ -1,7 +1,9 @@
 // Jackson Coxson
 
+pub mod cards;
 pub mod five_crowns;
 pub mod light_beams;
+pub mod pirates_wager;
 #[cfg(feature = "ssr")]
 pub mod rooms;
 #[cfg(feature = "ssr")]
@@ -164,6 +166,19 @@ pub fn GamesLobby() -> impl IntoView {
                 </p>
                 <A
                     href="/games/five-crowns"
+                    attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                >
+                    "Play"
+                </A>
+            </div>
+            <div class="mt-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6">
+                <h2 class="text-xl font-semibold mb-2 dark:text-stone-100">"Pirate's Wager"</h2>
+                <p class="text-stone-600 dark:text-stone-400 mb-4 text-sm">
+                    "A trick-taking card game for two to eight players. Bid how many tricks you'll \
+                    win each round, then fight for them with pirates, mermaids and the Captain."
+                </p>
+                <A
+                    href="/games/pirates-wager"
                     attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                 >
                     "Play"

@@ -92,25 +92,25 @@
   border: 0;
 }
 
-/* Five Crowns table. --cw is the card width; --n (set inline) is the number
+/* Card tables (Five Crowns, Pirate's Wager). --cw is the card width; --n (set inline) is the number
    of cards in hand, used to overlap them so a full hand fits a phone. */
 
-.fc-table {
+.card-table {
   --cw: 3.5rem;
 }
 
 @media (min-width: 640px) {
-  .fc-table {
+  .card-table {
     --cw: 4.25rem;
   }
 }
 
-.fc-card {
+.card-face {
   width: var(--cw, 3.5rem);
   height: calc(var(--cw, 3.5rem) * 1.4);
 }
 
-.fc-hand {
+.card-hand {
   display: flex;
   position: relative;
   touch-action: none;
@@ -119,26 +119,26 @@
   -webkit-touch-callout: none;
 }
 
-.fc-hand > * {
+.card-hand > * {
   flex: none;
   position: relative;
   transition: translate 150ms ease-out;
   -webkit-tap-highlight-color: transparent;
 }
 
-.fc-hand > * + * {
+.card-hand > * + * {
   margin-left: min(0.375rem, calc((100% - var(--n) * var(--cw)) / (var(--n) - 1)));
 }
 
-.fc-hand > .fc-lift {
+.card-hand > .card-lift {
   translate: 0 -0.9rem;
 }
 
-.fc-hand > .fc-lift > .fc-card {
+.card-hand > .card-lift > .card-face {
   box-shadow: 0 0 0 3px rgb(59 130 246);
 }
 
-.fc-hand > .fc-dragging {
+.card-hand > .card-dragging {
   z-index: 40;
   cursor: grabbing;
   transition: none;
@@ -146,13 +146,23 @@
   filter: drop-shadow(0 10px 12px rgb(0 0 0 / 0.45));
 }
 
+/* Cards you can't play right now. */
+.card-hand > .card-dim > .card-face {
+  filter: brightness(0.55) saturate(0.6);
+}
+
+/* The card that took the trick. */
+.card-won > .card-face {
+  box-shadow: 0 0 0 3px rgb(251 191 36), 0 0 18px 4px rgb(251 191 36 / 0.7);
+}
+
 @media (hover: hover) {
-  .fc-hand > :not(.fc-lift):not(.fc-dragging):hover {
+  .card-hand > :not(.card-lift):not(.card-dragging):hover {
     translate: 0 -0.25rem;
   }
 }
 
-@keyframes fc-glow {
+@keyframes card-glow {
   0%,
   to {
     box-shadow: 0 0 0 0 rgb(251 191 36 / 0);
@@ -162,9 +172,9 @@
   }
 }
 
-.fc-glow {
+.card-glow {
   border-radius: 0.5rem;
-  animation: 1.6s ease-in-out infinite fc-glow;
+  animation: 1.6s ease-in-out infinite card-glow;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -172,7 +182,7 @@
   .beam-loop,
   .row-appear,
   .piece-pop,
-  .fc-glow {
+  .card-glow {
     animation: none;
   }
 }

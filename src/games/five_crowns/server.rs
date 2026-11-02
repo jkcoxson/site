@@ -1,15 +1,14 @@
 // Jackson Coxson
 // Five Crowns game server, running on the shared room engine.
 
+use crate::games::cards::server::{broadcast_lobby, error, name, shuffle, standings, Log};
+use crate::games::cards::Standing;
 use crate::games::rooms::{RoomGame, Seats};
 
 use super::logic::{
     best_meld, full_deck, hand_size, rank_label, Action, ActionKind, Card, ClientMsg, GameView,
-    Meld, PlayerView, RoundResult, SeatInfo, ServerMsg, Stage, Standing, MAX_PLAYERS, MIN_PLAYERS,
-    ROUNDS,
+    Meld, PlayerView, RoundResult, ServerMsg, Stage, MAX_PLAYERS, MIN_PLAYERS, ROUNDS,
 };
-
-const LOG_LEN: usize = 8;
 
 struct Round {
     deck: Vec<Card>,
@@ -38,7 +37,7 @@ pub struct FiveCrowns {
     /// Points scored by each player in each finished round.
     scores: Vec<Vec<u32>>,
     hand: Option<Round>,
-    log: Vec<String>,
+    log: Log,
     last: Option<Action>,
 }
 
@@ -55,15 +54,6 @@ fn card_label(card: &Card) -> String {
     }
 }
 
-fn shuffle(cards: &mut [Card]) {
-    use rand::RngExt;
-    let mut rng = rand::rng();
-    for i in (1..cards.len()).rev() {
-        let j = rng.random_range(0..=i);
-        cards.swap(i, j);
-    }
-}
-
 impl FiveCrowns {
     pub fn new() -> Self {
         Self {
@@ -72,7 +62,7 @@ impl FiveCrowns {
             dealer: 0,
             scores: Vec::new(),
             hand: None,
-            log: Vec::new(),
+            log: Log::default(),
             last: None,
         }
     }
@@ -82,10 +72,7 @@ impl FiveCrowns {
     }
 
     fn note(&mut self, line: String) {
-        self.log.push(line);
-        if self.log.len() > LOG_LEN {
-            self.log.remove(0);
-        }
+        self.log.note(line);
     }
 
     fn act(&mut self, player: usize, kind: ActionKind) {
@@ -97,33 +84,8 @@ impl FiveCrowns {
         });
     }
 
-    fn name(seats: &Seats, player: usize) -> String {
-        seats
-            .get(player)
-            .map(|s| s.nickname.clone())
-            .unwrap_or_default()
-    }
-
     fn broadcast_lobby(&self, seats: &Seats) {
-        let players: Vec<SeatInfo> = seats
-            .iter()
-            .enumerate()
-            .map(|(i, s)| SeatInfo {
-                id: i as u8,
-                nickname: s.nickname.clone(),
-                connected: s.connected,
-            })
-            .collect();
-        for p in 0..seats.len() {
-            seats.send(
-                p,
-                &ServerMsg::Lobby {
-                    players: players.clone(),
-                    host: 0,
-                    you: p as u8,
-                },
-            );
-        }
+        broadcast_lobby::<GameView>(seats, "Eleven rounds, 3s wild up to kings wild.");
     }
 
     fn view(&self, seats: &Seats, you: usize) -> GameView {
@@ -163,7 +125,7 @@ impl FiveCrowns {
                 .collect(),
             out: hand.and_then(|h| h.out.map(|o| o as u8)),
             stage,
-            log: self.log.clone(),
+            log: self.log.lines(),
             last: self.last,
         }
     }
@@ -173,10 +135,6 @@ impl FiveCrowns {
         for p in 0..seats.len() {
             seats.send(p, &ServerMsg::Game(Box::new(self.view(seats, p))));
         }
-    }
-
-    fn error(seats: &Seats, player: usize, msg: &str) {
-        seats.send(player, &ServerMsg::Error(msg.into()));
     }
 
     fn deal(&mut self, players: usize) {
@@ -205,11 +163,11 @@ impl FiveCrowns {
             return;
         }
         if seats.len() < MIN_PLAYERS {
-            Self::error(seats, player, "Need at least two players to start.");
+            error(seats, player, "Need at least two players to start.");
             return;
         }
         if seats.len() > MAX_PLAYERS {
-            Self::error(seats, player, "Too many players for this game.");
+            error(seats, player, "Too many players for this game.");
             return;
         }
         self.round = 1;
@@ -228,7 +186,7 @@ impl FiveCrowns {
         }
         let round = self.hand.as_mut()?;
         if round.current != player {
-            Self::error(seats, player, "It's not your turn.");
+            error(seats, player, "It's not your turn.");
             return None;
         }
         Some(round)
@@ -239,12 +197,12 @@ impl FiveCrowns {
             return;
         };
         if round.drawn {
-            Self::error(seats, player, "You already drew this turn.");
+            error(seats, player, "You already drew this turn.");
             return;
         }
         let card = if from_discard {
             let Some(card) = round.discard.pop() else {
-                Self::error(seats, player, "The discard pile is empty.");
+                error(seats, player, "The discard pile is empty.");
                 return;
             };
             card
@@ -257,7 +215,7 @@ impl FiveCrowns {
                 round.discard.extend(top);
             }
             let Some(card) = round.deck.pop() else {
-                Self::error(seats, player, "There are no cards left to draw.");
+                error(seats, player, "There are no cards left to draw.");
                 return;
             };
             card
@@ -275,11 +233,11 @@ impl FiveCrowns {
         let line = if from_discard {
             format!(
                 "{} took {} from the discard pile.",
-                Self::name(seats, player),
+                name(seats, player),
                 card_label(&card)
             )
         } else {
-            format!("{} drew from the deck.", Self::name(seats, player))
+            format!("{} drew from the deck.", name(seats, player))
         };
         self.note(line);
         self.sync(seats);
@@ -293,12 +251,12 @@ impl FiveCrowns {
             return;
         };
         if !round.drawn {
-            Self::error(seats, player, "Draw a card first.");
+            error(seats, player, "Draw a card first.");
             return;
         }
         let hand = &mut round.hands[player];
         let Some(pos) = hand.iter().position(|c| c.id == card) else {
-            Self::error(seats, player, "That card isn't in your hand.");
+            error(seats, player, "That card isn't in your hand.");
             return;
         };
         let mut rest = hand.clone();
@@ -306,12 +264,12 @@ impl FiveCrowns {
         let final_turn = round.out.is_some();
         let meld = (go_out || final_turn).then(|| best_meld(&rest, wild));
         if go_out && meld.as_ref().is_some_and(|m| m.points > 0) {
-            Self::error(seats, player, "Those cards can't all be laid down yet.");
+            error(seats, player, "Those cards can't all be laid down yet.");
             return;
         }
         *hand = rest;
         round.discard.push(discarded);
-        let name = Self::name(seats, player);
+        let name = name(seats, player);
         let line = match &meld {
             Some(m) if m.points == 0 && round.out.is_none() => {
                 round.out = Some(player);
@@ -353,20 +311,16 @@ impl FiveCrowns {
             self.scores[r.player as usize].push(r.meld.points);
         }
         if self.round >= ROUNDS {
-            let totals: Vec<u32> = self.scores.iter().map(|s| s.iter().sum()).collect();
-            let standings: Vec<Standing> = totals
+            let totals: Vec<i32> = self
+                .scores
                 .iter()
-                .enumerate()
-                .map(|(i, &total)| Standing {
-                    player: i as u8,
-                    total,
-                    place: 1 + totals.iter().filter(|&&t| t < total).count() as u8,
-                })
+                .map(|s| s.iter().sum::<u32>() as i32)
                 .collect();
+            let standings: Vec<Standing> = standings(&totals, true);
             let best = totals.iter().min().copied().unwrap_or_default();
             let winners: Vec<String> = (0..totals.len())
                 .filter(|&i| totals[i] == best)
-                .map(|i| Self::name(seats, i))
+                .map(|i| name(seats, i))
                 .collect();
             self.note(format!(
                 "Game over! {} won with {best} points.",

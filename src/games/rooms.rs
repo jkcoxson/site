@@ -103,6 +103,13 @@ impl Seats {
         self.seats.retain(|s| s.connected);
     }
 
+    /// Seat a player with no connection, for driving a game in tests.
+    #[cfg(test)]
+    pub fn add_for_test(&mut self) -> usize {
+        let (tx, _rx) = mpsc::unbounded_channel();
+        self.add(tx).0
+    }
+
     fn add(&mut self, tx: mpsc::UnboundedSender<String>) -> (usize, String) {
         let token = gen_token();
         let nickname = gen_nickname(self);

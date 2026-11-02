@@ -11,7 +11,9 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use crate::games::{
+    cards::GameKind,
     five_crowns::server::FiveCrowns,
+    pirates_wager::{logic::Options as WagerOptions, server::PiratesWager},
     light_beams::{
         beam_tracing::trace_beam,
         logic::{
@@ -836,6 +838,7 @@ pub fn mode_label(rules: &Rules) -> String {
 pub struct GameState {
     light_beams: Arc<Rooms<LightBeams>>,
     five_crowns: Arc<Rooms<FiveCrowns>>,
+    pirates_wager: Arc<Rooms<PiratesWager>>,
 }
 
 impl Default for GameState {
@@ -849,6 +852,7 @@ impl GameState {
         Self {
             light_beams: Arc::new(Rooms::new()),
             five_crowns: Arc::new(Rooms::new()),
+            pirates_wager: Arc::new(Rooms::new()),
         }
     }
 
@@ -856,6 +860,7 @@ impl GameState {
     pub fn spawn_reaper(self: Arc<Self>) {
         self.light_beams.clone().spawn_reaper();
         self.five_crowns.clone().spawn_reaper();
+        self.pirates_wager.clone().spawn_reaper();
     }
 
     pub async fn create_room(&self, id: String, name: String, passcode: String, rules: Rules) {
@@ -873,19 +878,44 @@ impl GameState {
         self.light_beams.exists(id).await
     }
 
-    pub async fn create_five_crowns_room(&self, id: String, name: String, passcode: String) {
-        self.five_crowns
-            .create(id, name, passcode, FiveCrowns::new())
-            .await;
+    /// Open a card game room. `options` is the game's settings as JSON.
+    pub async fn create_card_room(
+        &self,
+        kind: GameKind,
+        id: String,
+        name: String,
+        passcode: String,
+        options: &str,
+    ) -> Result<(), String> {
+        match kind {
+            GameKind::FiveCrowns => {
+                self.five_crowns
+                    .create(id, name, passcode, FiveCrowns::new())
+                    .await
+            }
+            GameKind::PiratesWager => {
+                let options: WagerOptions = serde_json::from_str(options).unwrap_or_default();
+                self.pirates_wager
+                    .create(id, name, passcode, PiratesWager::new(options))
+                    .await
+            }
+        }
+        Ok(())
     }
 
-    pub async fn list_five_crowns_rooms(&self) -> Vec<RoomInfo> {
-        let rooms = self.five_crowns.list().await;
+    pub async fn list_card_rooms(&self, kind: GameKind) -> Vec<RoomInfo> {
+        let rooms = match kind {
+            GameKind::FiveCrowns => self.five_crowns.list().await,
+            GameKind::PiratesWager => self.pirates_wager.list().await,
+        };
         rooms.into_iter().map(RoomInfo::from).collect()
     }
 
-    pub async fn five_crowns_room_exists(&self, id: &str) -> bool {
-        self.five_crowns.exists(id).await
+    pub async fn card_room_exists(&self, kind: GameKind, id: &str) -> bool {
+        match kind {
+            GameKind::FiveCrowns => self.five_crowns.exists(id).await,
+            GameKind::PiratesWager => self.pirates_wager.exists(id).await,
+        }
     }
 }
 
@@ -908,12 +938,25 @@ pub async fn ws_handler(
     ws.on_upgrade(move |socket| rooms::serve(socket, rooms, room_id, passcode, query.token))
 }
 
-pub async fn five_crowns_ws_handler(
+/// The websocket for any card game, by its slug: `/games/{game}/ws/...`.
+pub async fn card_ws_handler(
     ws: WebSocketUpgrade,
-    Path((room_id, passcode)): Path<(String, String)>,
+    Path((game, room_id, passcode)): Path<(String, String, String)>,
     Query(query): Query<WsQuery>,
     Extension(state): Extension<Arc<GameState>>,
 ) -> impl IntoResponse {
-    let rooms = state.five_crowns.clone();
-    ws.on_upgrade(move |socket| rooms::serve(socket, rooms, room_id, passcode, query.token))
+    let kind = GameKind::from_slug(&game);
+    ws.on_upgrade(move |socket| async move {
+        match kind {
+            Some(GameKind::FiveCrowns) => {
+                let rooms = state.five_crowns.clone();
+                rooms::serve(socket, rooms, room_id, passcode, query.token).await
+            }
+            Some(GameKind::PiratesWager) => {
+                let rooms = state.pirates_wager.clone();
+                rooms::serve(socket, rooms, room_id, passcode, query.token).await
+            }
+            None => {}
+        }
+    })
 }

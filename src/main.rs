@@ -44,15 +44,23 @@ async fn main() {
         .await
         .expect("Unable to connect to MySQL database!");
 
+    let game_state = Arc::new(jkcoxson::games::server::GameState::new());
+    game_state.clone().spawn_reaper();
+
     let context = Context {
         forge: forge_ring.clone(),
         sql_pool: pool,
+        game_state: game_state.clone(),
     };
     let app_context = context.clone();
 
     // build our application with a route
     let shell_options = leptos_options.clone();
     let app = Router::new()
+        .route(
+            "/games/ws/{room_id}/{passcode}",
+            axum::routing::get(jkcoxson::games::server::ws_handler),
+        )
         .leptos_routes_with_context(
             &leptos_options.clone(),
             routes,
@@ -61,7 +69,8 @@ async fn main() {
         )
         .route("/favicon.ico", axum::routing::get(get_favicon))
         .fallback(|state, req| file_and_error_handler(state, req, context))
-        .with_state(leptos_options);
+        .with_state(leptos_options)
+        .layer(axum::Extension(game_state));
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     println!("listening on http://{}", &addr);

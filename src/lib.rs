@@ -12,6 +12,7 @@ pub mod context;
 pub mod fileserv;
 #[cfg(feature = "ssr")]
 pub mod forge;
+pub mod games;
 pub mod idevice_tools;
 pub mod jitstreamer;
 

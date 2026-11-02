@@ -66,6 +66,19 @@ pub fn App() -> impl IntoView {
                         .into_view()
                 }>
                     <Route path=path!("") view=HomePage />
+                    <Route path=path!("/games") view=crate::games::GamesLobby />
+                    <Route
+                        path=path!("/games/rays-of-light")
+                        view=crate::games::RaysOfLightLobby
+                    />
+                    <Route
+                        path=path!("/games/rays-of-light/single-player")
+                        view=crate::games::RaysOfLightSinglePlayer
+                    />
+                    <Route
+                        path=path!("/games/rays-of-light/:code")
+                        view=crate::games::RaysOfLightRoom
+                    />
                     <Route path=path!("/forge/*any") view=ForgeComponent />
                     <Route path=path!("/blog") view=blog::browse::BrowseView />
                     <Route path=path!("/blog/:id") view=blog::page::PageView />
@@ -223,6 +236,14 @@ pub fn NavBar() -> impl IntoView {
                                     href="/blog"
                                 >
                                     Blog
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    class="font-alatsi text-gray-800 dark:text-gray-200"
+                                    href="/games"
+                                >
+                                    Games
                                 </a>
                             </li>
                             <li>

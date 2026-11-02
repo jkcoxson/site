@@ -92,11 +92,87 @@
   border: 0;
 }
 
+/* Five Crowns table. --cw is the card width; --n (set inline) is the number
+   of cards in hand, used to overlap them so a full hand fits a phone. */
+
+.fc-table {
+  --cw: 3.5rem;
+}
+
+@media (min-width: 640px) {
+  .fc-table {
+    --cw: 4.25rem;
+  }
+}
+
+.fc-card {
+  width: var(--cw, 3.5rem);
+  height: calc(var(--cw, 3.5rem) * 1.4);
+}
+
+.fc-hand {
+  display: flex;
+  position: relative;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.fc-hand > * {
+  flex: none;
+  position: relative;
+  transition: translate 150ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fc-hand > * + * {
+  margin-left: min(0.375rem, calc((100% - var(--n) * var(--cw)) / (var(--n) - 1)));
+}
+
+.fc-hand > .fc-lift {
+  translate: 0 -0.9rem;
+}
+
+.fc-hand > .fc-lift > .fc-card {
+  box-shadow: 0 0 0 3px rgb(59 130 246);
+}
+
+.fc-hand > .fc-dragging {
+  z-index: 40;
+  cursor: grabbing;
+  transition: none;
+  scale: 1.08;
+  filter: drop-shadow(0 10px 12px rgb(0 0 0 / 0.45));
+}
+
+@media (hover: hover) {
+  .fc-hand > :not(.fc-lift):not(.fc-dragging):hover {
+    translate: 0 -0.25rem;
+  }
+}
+
+@keyframes fc-glow {
+  0%,
+  to {
+    box-shadow: 0 0 0 0 rgb(251 191 36 / 0);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px rgb(251 191 36 / 0.8);
+  }
+}
+
+.fc-glow {
+  border-radius: 0.5rem;
+  animation: 1.6s ease-in-out infinite fc-glow;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .beam-breathe,
   .beam-loop,
   .row-appear,
-  .piece-pop {
+  .piece-pop,
+  .fc-glow {
     animation: none;
   }
 }

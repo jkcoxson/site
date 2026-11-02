@@ -187,7 +187,10 @@ pub fn best_meld(cards: &[Card], wild: u8) -> Meld {
         if !(3..=5).contains(&size) {
             continue;
         }
-        let members: Vec<Card> = (0..n).filter(|i| mask & (1 << i) != 0).map(|i| cards[i]).collect();
+        let members: Vec<Card> = (0..n)
+            .filter(|i| mask & (1 << i) != 0)
+            .map(|i| cards[i])
+            .collect();
         if is_valid_group(&members, wild) {
             groups_by_low[mask.trailing_zeros() as usize].push(mask);
         }
@@ -197,7 +200,10 @@ pub fn best_meld(cards: &[Card], wild: u8) -> Meld {
     let mut best: Vec<(u32, u32)> = vec![(0, 0); (full as usize) + 1];
     for mask in 1..=full {
         let low = mask.trailing_zeros() as usize;
-        let mut choice = (cards[low].points(wild) + best[(mask & !(1 << low)) as usize].0, 0);
+        let mut choice = (
+            cards[low].points(wild) + best[(mask & !(1 << low)) as usize].0,
+            0,
+        );
         for &g in &groups_by_low[low] {
             if g & !mask == 0 {
                 let score = best[(mask & !g) as usize].0;
@@ -221,7 +227,10 @@ pub fn best_meld(cards: &[Card], wild: u8) -> Meld {
             meld.leftover.push(cards[low]);
             mask &= !(1 << low);
         } else {
-            let mut group: Vec<Card> = (0..n).filter(|i| g & (1 << i) != 0).map(|i| cards[i]).collect();
+            let mut group: Vec<Card> = (0..n)
+                .filter(|i| g & (1 << i) != 0)
+                .map(|i| cards[i])
+                .collect();
             sort_for_display(&mut group, wild);
             meld.groups.push(group);
             mask &= !g;
@@ -250,8 +259,6 @@ pub struct PlayerView {
     pub id: u8,
     pub nickname: String,
     pub connected: bool,
-    /// Cards in hand.
-    pub cards: u8,
     pub total: u32,
     /// Points scored in each finished round.
     pub rounds: Vec<u32>,
@@ -276,11 +283,38 @@ pub struct Standing {
 #[serde(tag = "type", content = "data")]
 pub enum Stage {
     /// `drawn` is whether the current player has drawn yet this turn.
-    Playing { drawn: bool },
-    RoundOver { results: Vec<RoundResult> },
+    Playing {
+        drawn: bool,
+    },
+    RoundOver {
+        results: Vec<RoundResult>,
+    },
     GameOver {
         results: Vec<RoundResult>,
         standings: Vec<Standing>,
+    },
+}
+
+/// The latest move at the table, so clients can animate it. `seq` counts up
+/// with every move; a client that sees a new `seq` animates `kind`.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct Action {
+    pub seq: u32,
+    pub player: u8,
+    pub kind: ActionKind,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "type", content = "data")]
+pub enum ActionKind {
+    /// A fresh round was dealt.
+    Deal,
+    DrewDeck,
+    DrewDiscard {
+        card: Card,
+    },
+    Discarded {
+        card: Card,
     },
 }
 
@@ -303,13 +337,17 @@ pub struct GameView {
     pub stage: Stage,
     /// Recent happenings, newest last.
     pub log: Vec<String>,
+    pub last: Option<Action>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", content = "data")]
 pub enum ServerMsg {
     /// Sent immediately on connect. `token` is used to reclaim this seat on reconnect.
-    Welcome { player: u8, token: String },
+    Welcome {
+        player: u8,
+        token: String,
+    },
     Lobby {
         players: Vec<SeatInfo>,
         host: u8,
@@ -322,15 +360,25 @@ pub enum ServerMsg {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", content = "data")]
 pub enum ClientMsg {
-    SetNickname { name: String },
+    SetNickname {
+        name: String,
+    },
     StartGame,
     /// Take the top of the draw pile, or the top of the discard pile.
-    Draw { from_discard: bool },
-    Discard { card: u8 },
+    Draw {
+        from_discard: bool,
+    },
+    Discard {
+        card: u8,
+    },
     /// Discard `card` and lay the rest of the hand down in books and runs.
-    GoOut { card: u8 },
+    GoOut {
+        card: u8,
+    },
     /// Reorder the hand; `order` lists every card id in the hand.
-    Arrange { order: Vec<u8> },
+    Arrange {
+        order: Vec<u8>,
+    },
     NextRound,
     PlayAgain,
 }
@@ -376,23 +424,47 @@ mod tests {
     fn groups_from_the_rules() {
         // Books and runs from the rulebook, with 3s wild unless noted.
         assert!(is_valid_group(&[c(8, Clubs), c(8, Stars), c(8, Spades)], 3));
-        assert!(is_valid_group(&[c(13, Spades), c(13, Diamonds), c(13, Hearts), c(13, Hearts)], 3));
-        assert!(is_valid_group(&[c(8, Spades), c(12, Spades), c(12, Stars)], 8));
-        assert!(is_valid_group(&[c(8, Stars), c(9, Diamonds), c(9, Diamonds), c(9, Hearts)], 8));
+        assert!(is_valid_group(
+            &[c(13, Spades), c(13, Diamonds), c(13, Hearts), c(13, Hearts)],
+            3
+        ));
+        assert!(is_valid_group(
+            &[c(8, Spades), c(12, Spades), c(12, Stars)],
+            8
+        ));
+        assert!(is_valid_group(
+            &[c(8, Stars), c(9, Diamonds), c(9, Diamonds), c(9, Hearts)],
+            8
+        ));
         assert!(is_valid_group(&[c(5, Clubs), c(6, Clubs), c(7, Clubs)], 3));
-        assert!(is_valid_group(&[c(9, Stars), c(10, Stars), c(11, Stars), c(12, Stars)], 3));
-        assert!(is_valid_group(&[c(9, Diamonds), c(7, Clubs), c(11, Diamonds)], 7));
-        assert!(is_valid_group(&[c(6, Diamonds), c(7, Stars), c(7, Spades), c(9, Diamonds)], 7));
+        assert!(is_valid_group(
+            &[c(9, Stars), c(10, Stars), c(11, Stars), c(12, Stars)],
+            3
+        ));
+        assert!(is_valid_group(
+            &[c(9, Diamonds), c(7, Clubs), c(11, Diamonds)],
+            7
+        ));
+        assert!(is_valid_group(
+            &[c(6, Diamonds), c(7, Stars), c(7, Spades), c(9, Diamonds)],
+            7
+        ));
         assert!(is_valid_group(&[joker(), joker(), c(4, Hearts)], 3));
     }
 
     #[test]
     fn invalid_groups() {
         assert!(!is_valid_group(&[c(8, Clubs), c(8, Stars)], 3));
-        assert!(!is_valid_group(&[c(5, Clubs), c(6, Clubs), c(7, Hearts)], 3));
+        assert!(!is_valid_group(
+            &[c(5, Clubs), c(6, Clubs), c(7, Hearts)],
+            3
+        ));
         assert!(!is_valid_group(&[c(5, Clubs), c(6, Clubs), c(9, Clubs)], 3));
         assert!(!is_valid_group(&[c(5, Clubs), c(5, Clubs), c(6, Clubs)], 3));
-        assert!(!is_valid_group(&[c(5, Clubs), c(6, Hearts), c(9, Stars)], 3));
+        assert!(!is_valid_group(
+            &[c(5, Clubs), c(6, Hearts), c(9, Stars)],
+            3
+        ));
     }
 
     #[test]
@@ -408,7 +480,13 @@ mod tests {
     fn leftover_is_minimised() {
         // K♠ Q♠ J♠ 10♠ plus a lone joker and a 4: the run takes the joker
         // only if that saves points, and it does (joker is 50).
-        let hand = ids(vec![c(13, Spades), c(12, Spades), c(11, Spades), joker(), c(4, Hearts)]);
+        let hand = ids(vec![
+            c(13, Spades),
+            c(12, Spades),
+            c(11, Spades),
+            joker(),
+            c(4, Hearts),
+        ]);
         let meld = best_meld(&hand, 5);
         assert_eq!(meld.points, 4);
         assert_eq!(meld.groups.len(), 1);

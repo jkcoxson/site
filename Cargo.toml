@@ -59,6 +59,16 @@ web-sys = { version = "0.3", features = [
   "Location",
   "Window",
   "Clipboard",
+  "Document",
+  "Element",
+  "HtmlElement",
+  "Node",
+  "NodeList",
+  "DomRect",
+  "DomTokenList",
+  "PointerEvent",
+  "CssStyleDeclaration",
+  "MediaQueryList",
 ] }
 plist = "1.8"
 

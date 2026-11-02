@@ -4,8 +4,9 @@
 use crate::games::rooms::{RoomGame, Seats};
 
 use super::logic::{
-    best_meld, full_deck, hand_size, rank_label, Card, ClientMsg, GameView, Meld, PlayerView,
-    RoundResult, SeatInfo, ServerMsg, Stage, Standing, MAX_PLAYERS, MIN_PLAYERS, ROUNDS,
+    best_meld, full_deck, hand_size, rank_label, Action, ActionKind, Card, ClientMsg, GameView,
+    Meld, PlayerView, RoundResult, SeatInfo, ServerMsg, Stage, Standing, MAX_PLAYERS, MIN_PLAYERS,
+    ROUNDS,
 };
 
 const LOG_LEN: usize = 8;
@@ -38,6 +39,7 @@ pub struct FiveCrowns {
     scores: Vec<Vec<u32>>,
     hand: Option<Round>,
     log: Vec<String>,
+    last: Option<Action>,
 }
 
 impl Default for FiveCrowns {
@@ -71,6 +73,7 @@ impl FiveCrowns {
             scores: Vec::new(),
             hand: None,
             log: Vec::new(),
+            last: None,
         }
     }
 
@@ -83,6 +86,15 @@ impl FiveCrowns {
         if self.log.len() > LOG_LEN {
             self.log.remove(0);
         }
+    }
+
+    fn act(&mut self, player: usize, kind: ActionKind) {
+        let seq = self.last.map_or(1, |a| a.seq + 1);
+        self.last = Some(Action {
+            seq,
+            player: player as u8,
+            kind,
+        });
     }
 
     fn name(seats: &Seats, player: usize) -> String {
@@ -145,7 +157,6 @@ impl FiveCrowns {
                     id: i as u8,
                     nickname: s.nickname.clone(),
                     connected: s.connected,
-                    cards: hand.map_or(0, |h| h.hands[i].len() as u8),
                     total: self.scores[i].iter().sum(),
                     rounds: self.scores[i].clone(),
                 })
@@ -153,6 +164,7 @@ impl FiveCrowns {
             out: hand.and_then(|h| h.out.map(|o| o as u8)),
             stage,
             log: self.log.clone(),
+            last: self.last,
         }
     }
 
@@ -185,6 +197,7 @@ impl FiveCrowns {
             finals: vec![None; players],
         });
         self.phase = Phase::Playing;
+        self.act(self.dealer, ActionKind::Deal);
     }
 
     fn on_start(&mut self, seats: &Seats, player: usize) {
@@ -251,8 +264,20 @@ impl FiveCrowns {
         };
         round.hands[player].push(card);
         round.drawn = true;
+        self.act(
+            player,
+            if from_discard {
+                ActionKind::DrewDiscard { card }
+            } else {
+                ActionKind::DrewDeck
+            },
+        );
         let line = if from_discard {
-            format!("{} took {} from the discard pile.", Self::name(seats, player), card_label(&card))
+            format!(
+                "{} took {} from the discard pile.",
+                Self::name(seats, player),
+                card_label(&card)
+            )
         } else {
             format!("{} drew from the deck.", Self::name(seats, player))
         };
@@ -302,6 +327,7 @@ impl FiveCrowns {
         let round_done = round.out == Some(next);
         round.current = next;
         round.drawn = false;
+        self.act(player, ActionKind::Discarded { card: discarded });
         self.note(line);
         if round_done {
             self.end_round(seats);
@@ -342,7 +368,10 @@ impl FiveCrowns {
                 .filter(|&i| totals[i] == best)
                 .map(|i| Self::name(seats, i))
                 .collect();
-            self.note(format!("Game over! {} won with {best} points.", winners.join(" and ")));
+            self.note(format!(
+                "Game over! {} won with {best} points.",
+                winners.join(" and ")
+            ));
             self.phase = Phase::GameOver(results, standings);
         } else {
             self.phase = Phase::RoundOver(results);

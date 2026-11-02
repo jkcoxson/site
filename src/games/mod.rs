@@ -1,5 +1,6 @@
 // Jackson Coxson
 
+pub mod five_crowns;
 pub mod light_beams;
 pub mod rays_of_light;
 #[cfg(feature = "ssr")]

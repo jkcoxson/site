@@ -11,6 +11,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use crate::games::{
+    five_crowns::server::FiveCrowns,
     light_beams::{
         beam_tracing::trace_beam,
         logic::{
@@ -834,6 +835,7 @@ pub fn mode_label(rules: &Rules) -> String {
 
 pub struct GameState {
     light_beams: Arc<Rooms<LightBeams>>,
+    five_crowns: Arc<Rooms<FiveCrowns>>,
 }
 
 impl Default for GameState {
@@ -846,12 +848,14 @@ impl GameState {
     pub fn new() -> Self {
         Self {
             light_beams: Arc::new(Rooms::new()),
+            five_crowns: Arc::new(Rooms::new()),
         }
     }
 
     /// Spawn the background tasks that reap abandoned rooms.
     pub fn spawn_reaper(self: Arc<Self>) {
         self.light_beams.clone().spawn_reaper();
+        self.five_crowns.clone().spawn_reaper();
     }
 
     pub async fn create_room(&self, id: String, name: String, passcode: String, rules: Rules) {
@@ -867,6 +871,21 @@ impl GameState {
 
     pub async fn room_exists(&self, id: &str) -> bool {
         self.light_beams.exists(id).await
+    }
+
+    pub async fn create_five_crowns_room(&self, id: String, name: String, passcode: String) {
+        self.five_crowns
+            .create(id, name, passcode, FiveCrowns::new())
+            .await;
+    }
+
+    pub async fn list_five_crowns_rooms(&self) -> Vec<RoomInfo> {
+        let rooms = self.five_crowns.list().await;
+        rooms.into_iter().map(RoomInfo::from).collect()
+    }
+
+    pub async fn five_crowns_room_exists(&self, id: &str) -> bool {
+        self.five_crowns.exists(id).await
     }
 }
 
@@ -886,5 +905,15 @@ pub async fn ws_handler(
     Extension(state): Extension<Arc<GameState>>,
 ) -> impl IntoResponse {
     let rooms = state.light_beams.clone();
+    ws.on_upgrade(move |socket| rooms::serve(socket, rooms, room_id, passcode, query.token))
+}
+
+pub async fn five_crowns_ws_handler(
+    ws: WebSocketUpgrade,
+    Path((room_id, passcode)): Path<(String, String)>,
+    Query(query): Query<WsQuery>,
+    Extension(state): Extension<Arc<GameState>>,
+) -> impl IntoResponse {
+    let rooms = state.five_crowns.clone();
     ws.on_upgrade(move |socket| rooms::serve(socket, rooms, room_id, passcode, query.token))
 }

@@ -1,7 +1,6 @@
 // Jackson Coxson
 
 pub mod light_beams;
-pub mod rays_of_light;
 #[cfg(feature = "ssr")]
 pub mod server;
 
@@ -142,13 +141,13 @@ pub fn GamesLobby() -> impl IntoView {
         <div class="container mx-auto px-4 py-12 max-w-xl">
             <h1 class="text-3xl font-bold mb-6 dark:text-white">"Games"</h1>
             <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6">
-                <h2 class="text-xl font-semibold mb-2 dark:text-stone-100">"Rays of Light"</h2>
+                <h2 class="text-xl font-semibold mb-2 dark:text-stone-100">"Light Beams"</h2>
                 <p class="text-stone-600 dark:text-stone-400 mb-4 text-sm">
                     "A two-player deduction game. Place colored glass and mirrors on your board, \
-                    then deduce your opponent's layout by shooting rays of light."
+                    then deduce your opponent's layout by shooting beams of light."
                 </p>
                 <A
-                    href="/games/rays-of-light"
+                    href="/games/light-beams"
                     attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                 >
                     "Play"
@@ -159,20 +158,22 @@ pub fn GamesLobby() -> impl IntoView {
     }
 }
 
-// ── Rays of Light lobby ───────────────────────────────────────────────────────
+// ── Light Beams lobby ─────────────────────────────────────────────────────────
 
 #[component]
-pub fn RaysOfLightLobby() -> impl IntoView {
+pub fn LightBeamsLobby() -> impl IntoView {
     use crate::app::{Footer, NavBar};
+    use light_beams::logic::Rules;
 
     let (room_name, set_room_name) = signal(String::new());
     let (passcode, set_passcode) = signal(String::new());
+    let rules = RwSignal::new(Rules::default());
     let create = ServerAction::<CreateRoom>::new();
     let nav = use_navigate();
 
     Effect::new(move |_| {
         if let Some(Ok(id)) = create.value().get() {
-            nav(&format!("/games/rays-of-light/{id}"), Default::default());
+            nav(&format!("/games/light-beams/{id}"), Default::default());
         }
     });
 
@@ -183,8 +184,8 @@ pub fn RaysOfLightLobby() -> impl IntoView {
         <div class="container mx-auto px-4 py-8 max-w-xl space-y-6">
             <GameGate>
             <div class="flex items-center gap-2">
-                <h1 class="text-3xl font-bold dark:text-white">"Rays of Light"</h1>
-                <rays_of_light::RulesButton />
+                <h1 class="text-3xl font-bold dark:text-white">"Light Beams"</h1>
+                <light_beams::RulesButton />
             </div>
 
             // Single player mode
@@ -197,10 +198,28 @@ pub fn RaysOfLightLobby() -> impl IntoView {
                         </p>
                     </div>
                     <A
-                        href="/games/rays-of-light/single-player"
+                        href="/games/light-beams/single-player"
                         attr:class="shrink-0 rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
                     >
                         "Single Player"
+                    </A>
+                </div>
+            </div>
+
+            // Sandbox
+            <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="min-w-0">
+                        <h2 class="text-lg font-semibold dark:text-stone-100">"Sandbox"</h2>
+                        <p class="text-sm text-stone-500 dark:text-stone-400">
+                            "Design a board by hand, then share it as a puzzle."
+                        </p>
+                    </div>
+                    <A
+                        href="/games/light-beams/sandbox"
+                        attr:class="shrink-0 rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+                    >
+                        "Sandbox"
                     </A>
                 </div>
             </div>
@@ -240,22 +259,31 @@ pub fn RaysOfLightLobby() -> impl IntoView {
                                             .into_iter()
                                             .map(|room| {
                                                 let id = room.id.clone();
-                                                let full = room.players >= 2;
+                                                let joinable = !room.in_progress
+                                                    && room.players < room.capacity;
                                                 view! {
                                                     <div class="flex items-center justify-between rounded border border-stone-200 dark:border-stone-600 px-3 py-2">
                                                         <div class="min-w-0">
-                                                            <span class="font-semibold dark:text-stone-100 truncate">
-                                                                {room.name.clone()}
-                                                            </span>
-                                                            <span class="ml-2 text-xs text-stone-400 font-mono">
-                                                                {id.clone()}
+                                                            <div>
+                                                                <span class="font-semibold dark:text-stone-100 truncate">
+                                                                    {room.name.clone()}
+                                                                </span>
+                                                                <span class="ml-2 text-xs text-stone-400 font-mono">
+                                                                    {id.clone()}
+                                                                </span>
+                                                            </div>
+                                                            <span class="text-xs text-stone-400">
+                                                                {room.mode.clone()}
                                                             </span>
                                                         </div>
                                                         <div class="flex shrink-0 items-center gap-2 ml-2">
-                                                            <span class=if full {
-                                                                "text-xs text-stone-400"
-                                                            } else {
+                                                            <span class="text-xs text-stone-400 font-mono">
+                                                                {format!("{}/{}", room.players, room.capacity)}
+                                                            </span>
+                                                            <span class=if joinable {
                                                                 "text-xs text-green-600 dark:text-green-400"
+                                                            } else {
+                                                                "text-xs text-stone-400"
                                                             }>
                                                                 {if room.in_progress {
                                                                     "In progress"
@@ -263,7 +291,7 @@ pub fn RaysOfLightLobby() -> impl IntoView {
                                                                     "Waiting"
                                                                 }}
                                                             </span>
-                                                            {if !full {
+                                                            {if joinable {
                                                                 let nav2 = use_navigate();
                                                                 let rid = id.clone();
                                                                 view! {
@@ -271,9 +299,7 @@ pub fn RaysOfLightLobby() -> impl IntoView {
                                                                         class="rounded bg-blue-500 px-3 py-1 text-xs text-white hover:bg-blue-600 touch-manipulation"
                                                                         on:click=move |_| {
                                                                             nav2(
-                                                                                &format!(
-                                                                                    "/games/rays-of-light/{rid}",
-                                                                                ),
+                                                                                &format!("/games/light-beams/{rid}"),
                                                                                 Default::default(),
                                                                             );
                                                                         }
@@ -321,6 +347,12 @@ pub fn RaysOfLightLobby() -> impl IntoView {
                         on:input=move |ev| set_passcode.set(event_target_value(&ev))
                         prop:value=move || passcode.get()
                     />
+                    <light_beams::RulesConfig rules multiplayer=true />
+                    <input
+                        type="hidden"
+                        name="rules"
+                        prop:value=move || serde_json::to_string(&rules.get()).unwrap_or_default()
+                    />
                     <button
                         type="submit"
                         class="w-full rounded bg-blue-500 py-2 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
@@ -343,16 +375,32 @@ pub fn RaysOfLightLobby() -> impl IntoView {
     }
 }
 
-// ── Single player mode page ────────────────────────────────────────────────────
+// ── Single player mode page ───────────────────────────────────────────────────
 
 #[component]
-pub fn RaysOfLightSinglePlayer() -> impl IntoView {
+pub fn LightBeamsSinglePlayer() -> impl IntoView {
     use crate::app::{Footer, NavBar};
     view! {
         <NavBar />
         <div class="container mx-auto px-4 py-6">
             <GameGate>
-                <rays_of_light::SinglePlayerInner />
+                <light_beams::SinglePlayerInner />
+            </GameGate>
+        </div>
+        <Footer />
+    }
+}
+
+// ── Sandbox page ──────────────────────────────────────────────────────────────
+
+#[component]
+pub fn LightBeamsSandbox() -> impl IntoView {
+    use crate::app::{Footer, NavBar};
+    view! {
+        <NavBar />
+        <div class="container mx-auto px-4 py-6">
+            <GameGate>
+                <light_beams::SandboxInner />
             </GameGate>
         </div>
         <Footer />
@@ -367,7 +415,7 @@ struct RoomParams {
 }
 
 #[component]
-pub fn RaysOfLightRoom() -> impl IntoView {
+pub fn LightBeamsRoom() -> impl IntoView {
     use crate::app::{Footer, NavBar};
     let params = use_params::<RoomParams>();
     let code = move || {
@@ -444,7 +492,7 @@ pub fn RaysOfLightRoom() -> impl IntoView {
                                                 "There's no room with the code " <span class="font-mono">{c.clone()}</span> "."
                                             </p>
                                             <A
-                                                href="/games/rays-of-light"
+                                                href="/games/light-beams"
                                                 attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
                                             >
                                                 "Back to the lobby"
@@ -521,7 +569,7 @@ fn RoomGate(
                 }
                 let pc = passcode.get();
                 view! {
-                    <rays_of_light::GameRoomInner room_id=c room_passcode=pc />
+                    <light_beams::GameRoomInner room_id=c room_passcode=pc />
                 }
                     .into_any()
             }}

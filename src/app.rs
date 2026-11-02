@@ -68,16 +68,20 @@ pub fn App() -> impl IntoView {
                     <Route path=path!("") view=HomePage />
                     <Route path=path!("/games") view=crate::games::GamesLobby />
                     <Route
-                        path=path!("/games/rays-of-light")
-                        view=crate::games::RaysOfLightLobby
+                        path=path!("/games/light-beams")
+                        view=crate::games::LightBeamsLobby
                     />
                     <Route
-                        path=path!("/games/rays-of-light/single-player")
-                        view=crate::games::RaysOfLightSinglePlayer
+                        path=path!("/games/light-beams/single-player")
+                        view=crate::games::LightBeamsSinglePlayer
                     />
                     <Route
-                        path=path!("/games/rays-of-light/:code")
-                        view=crate::games::RaysOfLightRoom
+                        path=path!("/games/light-beams/sandbox")
+                        view=crate::games::LightBeamsSandbox
+                    />
+                    <Route
+                        path=path!("/games/light-beams/:code")
+                        view=crate::games::LightBeamsRoom
                     />
                     <Route path=path!("/forge/*any") view=ForgeComponent />
                     <Route path=path!("/blog") view=blog::browse::BrowseView />

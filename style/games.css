@@ -92,7 +92,7 @@
   border: 0;
 }
 
-/* Card tables (Five Crowns, Pirate's Wager, Stack Attack, 9 Holes of Golf). --cw is the card width; --n (set inline) is the number
+/* Card tables (Five Crowns, Pirate's Wager, Stack Attack, 9 Holes of Golf, Age of Monuments). --cw is the card width; --n (set inline) is the number
    of cards in hand, used to overlap them so a full hand fits a phone. */
 
 .card-table {
@@ -221,6 +221,101 @@
 .card-glow {
   border-radius: 0.5rem;
   animation: 1.6s ease-in-out infinite card-glow;
+}
+
+/* Age of Monuments cards. Each card sits in a .mon-slot and sizes its text
+   to its own width (cqw), so the same card reads at hand size on a phone
+   and large in the zoomed view. */
+
+.mon-slot {
+  container-type: inline-size;
+}
+
+.mon-card {
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 7cqw;
+  background: #fafaf9;
+  color: #1c1917;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mon-band {
+  display: flex;
+  align-items: center;
+  min-height: calc(2.2em + 8cqw);
+  padding: 4cqw 5cqw;
+  font-size: 12.5cqw;
+  font-weight: 700;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.mon-cost {
+  min-height: 1.3em;
+  padding: 3cqw 5cqw 0;
+  font-size: 13cqw;
+  line-height: 1.25;
+  letter-spacing: -0.06em;
+  overflow-wrap: anywhere;
+}
+
+.mon-effect {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4cqw;
+  text-align: center;
+  font-size: 21cqw;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.mon-effect-sm {
+  font-size: 12cqw;
+  font-weight: 700;
+}
+
+.mon-foot {
+  padding: 0 5cqw 4cqw;
+  font-size: 9.5cqw;
+  color: #57534e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mon-sq {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 0.15em;
+  vertical-align: -0.08em;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.2);
+}
+
+.mon-hand-card,
+.mon-pick {
+  transition: translate 150ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mon-pick {
+  translate: 0 -0.4rem;
+}
+
+.mon-pick .mon-card {
+  box-shadow: 0 0 0 3px rgb(59 130 246), 0 6px 14px rgb(0 0 0 / 0.35);
+}
+
+.mon-dim .mon-card {
+  filter: brightness(0.55) saturate(0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {

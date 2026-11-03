@@ -91,6 +91,14 @@ pub fn App() -> impl IntoView {
                         path=path!("/games/stack-attack/:code")
                         view=crate::games::stack_attack::StackAttackRoom
                     />
+                    <Route
+                        path=path!("/games/monuments")
+                        view=crate::games::monuments::MonumentsLobby
+                    />
+                    <Route
+                        path=path!("/games/monuments/:code")
+                        view=crate::games::monuments::MonumentsRoom
+                    />
                     <Route path=path!("/games/golf") view=crate::games::golf::GolfLobby />
                     <Route path=path!("/games/golf/:code") view=crate::games::golf::GolfRoom />
                     <Route

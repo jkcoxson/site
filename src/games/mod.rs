@@ -4,6 +4,7 @@ pub mod cards;
 pub mod five_crowns;
 pub mod golf;
 pub mod light_beams;
+pub mod monuments;
 pub mod number_cards;
 pub mod pirates_wager;
 pub mod rules;
@@ -209,6 +210,19 @@ pub fn GamesLobby() -> impl IntoView {
                 </p>
                 <A
                     href="/games/golf"
+                    attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                >
+                    "Play"
+                </A>
+            </div>
+            <div class="mt-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6">
+                <h2 class="text-xl font-semibold mb-2 dark:text-stone-100">"Age of Monuments"</h2>
+                <p class="text-stone-600 dark:text-stone-400 mb-4 text-sm">
+                    "A card-drafting game for three to seven players. Lead an ancient city through \
+                    three ages: build, trade with your neighbors and raise your monument."
+                </p>
+                <A
+                    href="/games/monuments"
                     attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                 >
                     "Play"

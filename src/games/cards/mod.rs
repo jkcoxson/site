@@ -7,6 +7,7 @@
 
 #[cfg(target_arch = "wasm32")]
 pub mod fx;
+pub mod seating;
 #[cfg(feature = "ssr")]
 pub mod server;
 
@@ -26,6 +27,7 @@ pub enum GameKind {
     PiratesWager,
     StackAttack,
     Golf,
+    Monuments,
 }
 
 impl GameKind {
@@ -35,6 +37,7 @@ impl GameKind {
             GameKind::PiratesWager => "pirates-wager",
             GameKind::StackAttack => "stack-attack",
             GameKind::Golf => "golf",
+            GameKind::Monuments => "monuments",
         }
     }
 
@@ -44,6 +47,7 @@ impl GameKind {
             GameKind::PiratesWager,
             GameKind::StackAttack,
             GameKind::Golf,
+            GameKind::Monuments,
         ]
             .into_iter()
             .find(|g| g.slug() == slug)
@@ -55,6 +59,7 @@ impl GameKind {
             GameKind::PiratesWager => "Pirate's Wager",
             GameKind::StackAttack => "Stack Attack",
             GameKind::Golf => "9 Holes of Golf",
+            GameKind::Monuments => "Age of Monuments",
         }
     }
 
@@ -76,6 +81,10 @@ impl GameKind {
                 "A family game of nine face-down cards. Swap and turn them up to end \
                  each hole with the lowest score. Matching columns score nothing."
             }
+            GameKind::Monuments => {
+                "Lead an ancient city through three ages. Draft a card each turn, \
+                 trade with your neighbors, raise your monument and outscore them all."
+            }
         }
     }
 
@@ -85,6 +94,7 @@ impl GameKind {
             GameKind::PiratesWager => (2, 8),
             GameKind::StackAttack => (2, 6),
             GameKind::Golf => (2, 6),
+            GameKind::Monuments => (3, 7),
         }
     }
 }
@@ -675,10 +685,12 @@ fn waiting_room(kind: GameKind, info: LobbyInfo) -> impl IntoView {
                         disabled=count < min
                         on:click=|_| send(&CommonMsg::StartGame)
                     >
-                        {if count < min {
-                            "Waiting for another player..."
+                        {if count + 1 == min {
+                            "Waiting for another player...".to_string()
+                        } else if count < min {
+                            format!("Waiting for {} more players...", min - count)
                         } else {
-                            "Deal the first round"
+                            "Deal the first round".to_string()
                         }}
                     </button>
                 }
@@ -692,7 +704,11 @@ fn waiting_room(kind: GameKind, info: LobbyInfo) -> impl IntoView {
                     .into_any()
             }}
             <p class="text-center text-xs text-stone-500">
-                {format!("Share the room code and passcode so friends can join. Up to {max} players.")}
+                {if min > 2 {
+                    format!("Share the room code and passcode so friends can join. {min} to {max} players.")
+                } else {
+                    format!("Share the room code and passcode so friends can join. Up to {max} players.")
+                }}
             </p>
         </div>
     }
@@ -1080,6 +1096,102 @@ pub fn final_standings(
                 "Play again"
             </button>
         </div>
+    }
+}
+
+// ── Peeking and inspecting ────────────────────────────────────────────────────
+
+/// One tab in `peek_tabs`: whose area it shows and how to label it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PeekTab {
+    pub id: u8,
+    pub label: String,
+    /// A small note under the label ("left", "you", "right").
+    pub note: String,
+}
+
+/// A row of tabs for looking at other players' areas (their tableau, city,
+/// board), with arrows to step around the table. `viewing` holds the id of
+/// the tab shown; `tabs` are in table order.
+pub fn peek_tabs(
+    tabs: impl Fn() -> Vec<PeekTab> + Send + Sync + Copy + 'static,
+    viewing: RwSignal<u8>,
+) -> impl IntoView {
+    let step = move |by: isize| {
+        let list = tabs();
+        if list.is_empty() {
+            return;
+        }
+        let at = list
+            .iter()
+            .position(|t| t.id == viewing.get_untracked())
+            .unwrap_or(0) as isize;
+        let n = list.len() as isize;
+        viewing.set(list[((at + by) % n + n) as usize % list.len()].id);
+    };
+    let arrow = "flex h-10 w-9 shrink-0 touch-manipulation items-center justify-center rounded-lg bg-stone-200 text-stone-700 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-100 dark:hover:bg-stone-600";
+    view! {
+        <div class="flex items-stretch gap-1">
+            <button class=arrow aria-label="Previous player" on:click=move |_| step(-1)>"◂"</button>
+            <div class="flex min-w-0 flex-1 gap-1 overflow-x-auto">
+                {move || {
+                    tabs()
+                        .into_iter()
+                        .map(|t| {
+                            let id = t.id;
+                            view! {
+                                <button
+                                    class=move || {
+                                        if viewing.get() == id {
+                                            "min-w-[4.5rem] shrink-0 touch-manipulation rounded-lg bg-amber-400 px-2 py-1 text-left text-stone-900"
+                                        } else {
+                                            "min-w-[4.5rem] shrink-0 touch-manipulation rounded-lg bg-white px-2 py-1 text-left ring-1 ring-stone-200 hover:bg-stone-50 dark:bg-stone-800 dark:text-stone-100 dark:ring-stone-700"
+                                        }
+                                    }
+                                    on:click=move |_| viewing.set(id)
+                                >
+                                    <span class="block max-w-[7rem] truncate text-xs font-semibold">{t.label}</span>
+                                    <span class="block text-[0.6rem] opacity-70">{t.note}</span>
+                                </button>
+                            }
+                        })
+                        .collect_view()
+                }}
+            </div>
+            <button class=arrow aria-label="Next player" on:click=move |_| step(1)>"▸"</button>
+        </div>
+    }
+}
+
+/// A card blown up over the page with its full text, for cards too detailed
+/// to read at hand size. Shows while `open` holds a card id; tapping
+/// anywhere closes it.
+pub fn card_overlay(
+    open: RwSignal<Option<u8>>,
+    render: impl Fn(u8) -> AnyView + Send + Sync + 'static,
+) -> impl IntoView {
+    move || {
+        open.get().map(|id| {
+            view! {
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+                    on:click=move |_| open.set(None)
+                >
+                    <div
+                        class="max-h-full w-full max-w-sm overflow-y-auto rounded-2xl bg-stone-800 p-4 text-stone-100 shadow-2xl ring-1 ring-stone-700"
+                        on:click=move |ev| ev.stop_propagation()
+                    >
+                        {render(id)}
+                        <button
+                            class="mt-4 w-full touch-manipulation rounded-xl bg-stone-600 py-2 font-semibold text-white hover:bg-stone-500"
+                            on:click=move |_| open.set(None)
+                        >
+                            "Close"
+                        </button>
+                    </div>
+                </div>
+            }
+        })
     }
 }
 

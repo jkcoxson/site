@@ -101,3 +101,94 @@ impl Log {
         self.lines.clone()
     }
 }
+
+/// Places for final totals with a tiebreak: each entry is (total, tiebreak),
+/// higher is better for both, and players tied on both share a place.
+pub fn standings_with_tiebreak(scores: &[(i32, i32)]) -> Vec<Standing> {
+    scores
+        .iter()
+        .enumerate()
+        .map(|(i, &mine)| Standing {
+            player: i as u8,
+            total: mine.0,
+            place: 1 + scores.iter().filter(|&&s| s > mine).count() as u8,
+        })
+        .collect()
+}
+
+/// Choices everyone makes at once and keeps hidden until all are in (a
+/// draft pick, a bid). A player may change or take back their pick until
+/// the last one arrives.
+pub struct Picks<T> {
+    picks: Vec<Option<T>>,
+}
+
+impl<T> Picks<T> {
+    pub fn new(players: usize) -> Self {
+        Self {
+            picks: (0..players).map(|_| None).collect(),
+        }
+    }
+
+    pub fn set(&mut self, player: usize, pick: T) {
+        if let Some(slot) = self.picks.get_mut(player) {
+            *slot = Some(pick);
+        }
+    }
+
+    pub fn clear(&mut self, player: usize) {
+        if let Some(slot) = self.picks.get_mut(player) {
+            *slot = None;
+        }
+    }
+
+    pub fn get(&self, player: usize) -> Option<&T> {
+        self.picks.get(player).and_then(|p| p.as_ref())
+    }
+
+    pub fn is_in(&self, player: usize) -> bool {
+        self.get(player).is_some()
+    }
+
+    pub fn all_in(&self) -> bool {
+        self.picks.iter().all(|p| p.is_some())
+    }
+
+    /// Everyone's pick in player order, leaving the slots empty for the
+    /// next round. `None` unless everyone is in.
+    pub fn take_all(&mut self) -> Option<Vec<T>> {
+        if !self.all_in() {
+            return None;
+        }
+        Some(self.picks.iter_mut().filter_map(|p| p.take()).collect())
+    }
+
+    pub fn reset(&mut self) {
+        for p in &mut self.picks {
+            *p = None;
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tiebreak_places() {
+        let s = standings_with_tiebreak(&[(50, 3), (50, 7), (40, 9), (50, 7)]);
+        let places: Vec<u8> = s.iter().map(|s| s.place).collect();
+        assert_eq!(places, vec![3, 1, 4, 1]);
+    }
+
+    #[test]
+    fn picks_wait_for_everyone() {
+        let mut p = Picks::new(2);
+        p.set(0, 'a');
+        assert!(p.take_all().is_none());
+        p.set(1, 'b');
+        p.set(0, 'c');
+        assert_eq!(p.take_all(), Some(vec!['c', 'b']));
+        assert!(!p.is_in(0));
+    }
+}

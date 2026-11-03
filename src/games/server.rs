@@ -13,7 +13,9 @@ use serde::{Deserialize, Serialize};
 use crate::games::{
     cards::GameKind,
     five_crowns::server::FiveCrowns,
+    golf::server::Golf,
     pirates_wager::{logic::Options as WagerOptions, server::PiratesWager},
+    stack_attack::{logic::Options as StackOptions, server::StackAttack},
     light_beams::{
         beam_tracing::trace_beam,
         logic::{
@@ -839,6 +841,8 @@ pub struct GameState {
     light_beams: Arc<Rooms<LightBeams>>,
     five_crowns: Arc<Rooms<FiveCrowns>>,
     pirates_wager: Arc<Rooms<PiratesWager>>,
+    stack_attack: Arc<Rooms<StackAttack>>,
+    golf: Arc<Rooms<Golf>>,
 }
 
 impl Default for GameState {
@@ -853,6 +857,8 @@ impl GameState {
             light_beams: Arc::new(Rooms::new()),
             five_crowns: Arc::new(Rooms::new()),
             pirates_wager: Arc::new(Rooms::new()),
+            stack_attack: Arc::new(Rooms::new()),
+            golf: Arc::new(Rooms::new()),
         }
     }
 
@@ -861,6 +867,8 @@ impl GameState {
         self.light_beams.clone().spawn_reaper();
         self.five_crowns.clone().spawn_reaper();
         self.pirates_wager.clone().spawn_reaper();
+        self.stack_attack.clone().spawn_reaper();
+        self.golf.clone().spawn_reaper();
     }
 
     pub async fn create_room(&self, id: String, name: String, passcode: String, rules: Rules) {
@@ -899,6 +907,13 @@ impl GameState {
                     .create(id, name, passcode, PiratesWager::new(options))
                     .await
             }
+            GameKind::StackAttack => {
+                let options: StackOptions = serde_json::from_str(options).unwrap_or_default();
+                self.stack_attack
+                    .create(id, name, passcode, StackAttack::new(options))
+                    .await
+            }
+            GameKind::Golf => self.golf.create(id, name, passcode, Golf::new()).await,
         }
         Ok(())
     }
@@ -907,6 +922,8 @@ impl GameState {
         let rooms = match kind {
             GameKind::FiveCrowns => self.five_crowns.list().await,
             GameKind::PiratesWager => self.pirates_wager.list().await,
+            GameKind::StackAttack => self.stack_attack.list().await,
+            GameKind::Golf => self.golf.list().await,
         };
         rooms.into_iter().map(RoomInfo::from).collect()
     }
@@ -915,6 +932,8 @@ impl GameState {
         match kind {
             GameKind::FiveCrowns => self.five_crowns.exists(id).await,
             GameKind::PiratesWager => self.pirates_wager.exists(id).await,
+            GameKind::StackAttack => self.stack_attack.exists(id).await,
+            GameKind::Golf => self.golf.exists(id).await,
         }
     }
 }
@@ -954,6 +973,14 @@ pub async fn card_ws_handler(
             }
             Some(GameKind::PiratesWager) => {
                 let rooms = state.pirates_wager.clone();
+                rooms::serve(socket, rooms, room_id, passcode, query.token).await
+            }
+            Some(GameKind::StackAttack) => {
+                let rooms = state.stack_attack.clone();
+                rooms::serve(socket, rooms, room_id, passcode, query.token).await
+            }
+            Some(GameKind::Golf) => {
+                let rooms = state.golf.clone();
                 rooms::serve(socket, rooms, room_id, passcode, query.token).await
             }
             None => {}

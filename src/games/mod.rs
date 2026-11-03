@@ -2,9 +2,12 @@
 
 pub mod cards;
 pub mod five_crowns;
+pub mod golf;
 pub mod light_beams;
+pub mod number_cards;
 pub mod pirates_wager;
 pub mod rules;
+pub mod stack_attack;
 #[cfg(feature = "ssr")]
 pub mod rooms;
 #[cfg(feature = "ssr")]
@@ -180,6 +183,32 @@ pub fn GamesLobby() -> impl IntoView {
                 </p>
                 <A
                     href="/games/pirates-wager"
+                    attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                >
+                    "Play"
+                </A>
+            </div>
+            <div class="mt-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6">
+                <h2 class="text-xl font-semibold mb-2 dark:text-stone-100">"Stack Attack"</h2>
+                <p class="text-stone-600 dark:text-stone-400 mb-4 text-sm">
+                    "A card game for two to six players. Race to empty your stock pile by building \
+                    shared piles from 1 up to 12."
+                </p>
+                <A
+                    href="/games/stack-attack"
+                    attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                >
+                    "Play"
+                </A>
+            </div>
+            <div class="mt-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6">
+                <h2 class="text-xl font-semibold mb-2 dark:text-stone-100">"9 Holes of Golf"</h2>
+                <p class="text-stone-600 dark:text-stone-400 mb-4 text-sm">
+                    "A family card game for two to six players. Swap and turn up the nine cards in \
+                    your grid to finish each hole with the lowest score."
+                </p>
+                <A
+                    href="/games/golf"
                     attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                 >
                     "Play"

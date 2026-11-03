@@ -92,7 +92,7 @@
   border: 0;
 }
 
-/* Card tables (Five Crowns, Pirate's Wager). --cw is the card width; --n (set inline) is the number
+/* Card tables (Five Crowns, Pirate's Wager, Stack Attack, 9 Holes of Golf). --cw is the card width; --n (set inline) is the number
    of cards in hand, used to overlap them so a full hand fits a phone. */
 
 .card-table {
@@ -156,6 +156,52 @@
   box-shadow: 0 0 0 3px rgb(251 191 36), 0 0 18px 4px rgb(251 191 36 / 0.7);
 }
 
+/* Numbered cards (Stack Attack, 9 Holes of Golf): the numbers scale with the card. */
+.num-card-corner {
+  font-size: calc(var(--cw, 3.5rem) * 0.24);
+}
+
+.num-card-middle {
+  font-size: calc(var(--cw, 3.5rem) * 0.55);
+}
+
+/* Smaller cards for other players' piles and grids. */
+.card-mini {
+  --cw: 2.4rem;
+}
+
+@media (min-width: 640px) {
+  .card-mini {
+    --cw: 2.75rem;
+  }
+}
+
+/* A discard pile fanned downward so every card's number shows. */
+.discard-fan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0.5rem;
+}
+
+.discard-fan > [data-card] + [data-card] {
+  margin-top: calc(var(--cw, 3.5rem) * -1.05);
+}
+
+/* A golf card turning face up. */
+@keyframes card-flip {
+  from {
+    transform: rotateY(90deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.card-flip {
+  animation: 320ms ease-out card-flip;
+}
+
 @media (hover: hover) {
   .card-hand > :not(.card-lift):not(.card-dragging):hover {
     translate: 0 -0.25rem;
@@ -182,7 +228,8 @@
   .beam-loop,
   .row-appear,
   .piece-pop,
-  .card-glow {
+  .card-glow,
+  .card-flip {
     animation: none;
   }
 }

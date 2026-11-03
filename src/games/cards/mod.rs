@@ -24,6 +24,8 @@ use crate::games::{GameGate, RoomInfo};
 pub enum GameKind {
     FiveCrowns,
     PiratesWager,
+    StackAttack,
+    Golf,
 }
 
 impl GameKind {
@@ -31,11 +33,18 @@ impl GameKind {
         match self {
             GameKind::FiveCrowns => "five-crowns",
             GameKind::PiratesWager => "pirates-wager",
+            GameKind::StackAttack => "stack-attack",
+            GameKind::Golf => "golf",
         }
     }
 
     pub fn from_slug(slug: &str) -> Option<Self> {
-        [GameKind::FiveCrowns, GameKind::PiratesWager]
+        [
+            GameKind::FiveCrowns,
+            GameKind::PiratesWager,
+            GameKind::StackAttack,
+            GameKind::Golf,
+        ]
             .into_iter()
             .find(|g| g.slug() == slug)
     }
@@ -44,6 +53,8 @@ impl GameKind {
         match self {
             GameKind::FiveCrowns => "Five Crowns",
             GameKind::PiratesWager => "Pirate's Wager",
+            GameKind::StackAttack => "Stack Attack",
+            GameKind::Golf => "9 Holes of Golf",
         }
     }
 
@@ -57,6 +68,14 @@ impl GameKind {
                 "A pirate trick-taking game. Each round, bid exactly how many tricks \
                  you'll win. Pirates, mermaids and the Captain fight over every trick."
             }
+            GameKind::StackAttack => {
+                "Race to empty your stock pile. Build shared piles from 1 up to 12, \
+                 and use Wild cards to get unstuck."
+            }
+            GameKind::Golf => {
+                "A family game of nine face-down cards. Swap and turn them up to end \
+                 each hole with the lowest score. Matching columns score nothing."
+            }
         }
     }
 
@@ -64,6 +83,8 @@ impl GameKind {
         match self {
             GameKind::FiveCrowns => (2, 7),
             GameKind::PiratesWager => (2, 8),
+            GameKind::StackAttack => (2, 6),
+            GameKind::Golf => (2, 6),
         }
     }
 }

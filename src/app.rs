@@ -125,6 +125,7 @@ pub fn App() -> impl IntoView {
                         path=path!("/games/light-beams/:code")
                         view=crate::games::LightBeamsRoom
                     />
+                    <crate::private::PrivateRoutes />
                     <Route path=path!("/forge/*any") view=ForgeComponent />
                     <Route path=path!("/blog") view=blog::browse::BrowseView />
                     <Route path=path!("/blog/:id") view=blog::page::PageView />

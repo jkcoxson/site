@@ -83,6 +83,7 @@ async fn main() {
             move || shell(shell_options.clone()),
         )
         .route("/favicon.ico", axum::routing::get(get_favicon))
+        .merge(jkcoxson::private::router())
         .fallback(|state, req| file_and_error_handler(state, req, context))
         .with_state(leptos_options)
         .layer(axum::Extension(game_state));

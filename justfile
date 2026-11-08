@@ -26,3 +26,7 @@ rsync-site:
 
 deploy: _remote-build _remote-stop _send-bin rsync-site _remote-start
 
+
+# Clone the private pages repo into src/private (gitignored; the site builds without it)
+private:
+  git clone git@github.com:jkcoxson/site-private.git src/private

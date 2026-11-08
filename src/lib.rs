@@ -16,6 +16,13 @@ pub mod games;
 pub mod idevice_tools;
 pub mod jitstreamer;
 
+// Private pages: src/private/ is its own gitignored repo (see build.rs).
+#[cfg(private_pages)]
+pub mod private;
+#[cfg(not(private_pages))]
+#[path = "private_stub.rs"]
+pub mod private;
+
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {

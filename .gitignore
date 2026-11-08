@@ -25,3 +25,6 @@ playwright/.cache/
 style/output.css
 
 .DS_Store
+
+# Private pages: a separate private repo, cloned in by `just private`
+/src/private/

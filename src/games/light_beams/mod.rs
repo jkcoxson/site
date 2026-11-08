@@ -319,6 +319,13 @@ impl GameUiState {
             ServerMsg::OpponentCalledGame => {}
             ServerMsg::RotateResult { row, col, accepted } => {
                 self.last_rotate_result = Some((row, col, accepted));
+                // A correct flip turns the real mirror, so flip the guess too.
+                if accepted {
+                    let (r, c) = (row as usize, col as usize);
+                    if let Some(p) = self.guess_board.get(r, c).filter(|p| logic::is_slash(*p)) {
+                        self.guess_board.set(r, c, Some(rotate_piece(p)));
+                    }
+                }
                 // Your one flip for this turn is now spent.
                 self.flip_used_this_turn = true;
                 // Flipping a cell with no mirror loses your turn.
@@ -2038,6 +2045,14 @@ pub fn SinglePlayerInner() -> impl IntoView {
                     }
                 });
                 flip_used.set(true);
+                // A correct flip turns the real mirror, so flip the guess too.
+                if accepted {
+                    guess_board.update(|b| {
+                        if let Some(p) = b.get(r, c).filter(|p| logic::is_slash(*p)) {
+                            b.set(r, c, Some(rotate_piece(p)));
+                        }
+                    });
+                }
                 // Flipping a cell with no mirror costs a beam, log it.
                 if !accepted {
                     log.update(|v| {

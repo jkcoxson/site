@@ -13,8 +13,8 @@ use crate::games::cards::{
     self, final_standings, hand_view, seat_strip, table_talk, GameKind, HandOrder, SeatChip,
     TAG_DARK, TAG_GOLD,
 };
-use cards::Standing;
 use crate::games::rules::{RulesButton, RulesSection};
+use cards::Standing;
 use logic::{
     best_meld, hand_size, rank_label, sort_for_display, Card, ClientMsg, GameView, Meld,
     RoundResult, Stage, Suit, ROUNDS,
@@ -231,10 +231,18 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                     <button
                         data-pile="deck"
                         class=move || {
-                            if can_draw() { "card-glow shrink-0 touch-manipulation" } else { "shrink-0 cursor-default" }
+                            if can_draw() {
+                                "card-glow shrink-0 touch-manipulation"
+                            } else {
+                                "shrink-0 cursor-default"
+                            }
                         }
                         disabled=move || !can_draw()
-                        on:click=|_| send_msg(&ClientMsg::Draw { from_discard: false })
+                        on:click=|_| send_msg(
+                            &ClientMsg::Draw {
+                                from_discard: false,
+                            },
+                        )
                         title="Draw from the deck"
                     >
                         {move || card_back(format!("{} left", game.with(|g| g.deck_size)))}
@@ -248,16 +256,24 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                             }
                         }
                         disabled=move || !(can_draw() && game.with(|g| g.discard_top.is_some()))
-                        on:click=|_| send_msg(&ClientMsg::Draw { from_discard: true })
+                        on:click=|_| send_msg(
+                            &ClientMsg::Draw {
+                                from_discard: true,
+                            },
+                        )
                         title="Take the top discard"
                     >
                         {move || match game.with(|g| g.discard_top) {
                             Some(c) => {
-                                view! { <div data-card=c.id>{card_face(c, wild.get_untracked())}</div> }
+                                view! {
+                                    <div data-card=c.id>{card_face(c, wild.get_untracked())}</div>
+                                }
                                     .into_any()
                             }
                             None => {
-                                view! { <div class="card-face rounded-lg border-2 border-dashed border-green-700"></div> }
+                                view! {
+                                    <div class="card-face rounded-lg border-2 border-dashed border-green-700"></div>
+                                }
                                     .into_any()
                             }
                         }}
@@ -281,8 +297,7 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                             };
                             Some(view! { <RoundResults view=g results /> })
                         };
-                        view! { {results_view} }
-                            .into_any()
+                        view! { {results_view} }.into_any()
                     }
                     StageKind::GameOver => {
                         let results_view = move || {
@@ -292,8 +307,7 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                             };
                             Some(view! { <FinalResults view=g results standings /> })
                         };
-                        view! { {results_view} }
-                            .into_any()
+                        view! { {results_view} }.into_any()
                     }
                 }}
             </div>
@@ -350,7 +364,6 @@ fn HandView(game: Memo<GameView>, my_turn: Memo<bool>, drawn: Memo<bool>) -> imp
             <p class="text-xs text-stone-500 dark:text-stone-400">
                 "Tap a card to pick it. Drag cards to rearrange your hand."
             </p>
-
             {move || {
                 my_turn
                     .get()
@@ -374,8 +387,7 @@ fn HandView(game: Memo<GameView>, my_turn: Memo<bool>, drawn: Memo<bool>) -> imp
                             </div>
                         }
                     })
-            }}
-            <div class="flex gap-2">
+            }} <div class="flex gap-2">
                 <button
                     class="flex-1 touch-manipulation rounded bg-stone-600 px-3 py-2 text-sm text-white hover:bg-stone-500"
                     on:click=move |_| sort(false)
@@ -389,7 +401,6 @@ fn HandView(game: Memo<GameView>, my_turn: Memo<bool>, drawn: Memo<bool>) -> imp
                     "Sort by rank"
                 </button>
             </div>
-
             <div class="rounded-lg border border-stone-200 bg-white p-3 dark:border-stone-700 dark:bg-stone-800">
                 {move || match preview() {
                     Some(meld) => {
@@ -434,11 +445,19 @@ fn results_list(view: &GameView, results: Vec<RoundResult>) -> impl IntoView {
                     <div class="flex items-center justify-between text-sm dark:text-stone-100">
                         <span class="font-semibold">
                             {name}
-                            {r.went_out.then(|| view! { <span class="ml-2 text-xs text-amber-500">"went out"</span> })}
+                            {r
+                                .went_out
+                                .then(|| {
+                                    view! {
+                                        <span class="ml-2 text-xs text-amber-500">"went out"</span>
+                                    }
+                                })}
                         </span>
-                        <span class=if r.meld.points == 0 { "text-green-500" } else { "text-red-400" }>
-                            {format!("+{}", r.meld.points)}
-                        </span>
+                        <span class=if r.meld.points == 0 {
+                            "text-green-500"
+                        } else {
+                            "text-red-400"
+                        }>{format!("+{}", r.meld.points)}</span>
                     </div>
                     {meld_view(r.meld, wild)}
                 </div>
@@ -472,7 +491,9 @@ fn RoundResults(view: GameView, results: Vec<RoundResult>) -> impl IntoView {
                     .into_any()
             } else {
                 view! {
-                    <p class="text-center text-sm text-stone-500">"Waiting for the host to deal..."</p>
+                    <p class="text-center text-sm text-stone-500">
+                        "Waiting for the host to deal..."
+                    </p>
                 }
                     .into_any()
             }}
@@ -533,12 +554,16 @@ fn FiveCrownsRules() -> impl IntoView {
             </p>
         </RulesSection>
         <RulesSection heading="Your turn">
-            <p>
-                "Draw the top card of the deck or the discard pile, then discard one card."
-            </p>
+            <p>"Draw the top card of the deck or the discard pile, then discard one card."</p>
             <ul class="list-disc space-y-1 pl-5">
-                <li><span class=b>"Books"</span>": three or more cards of the same rank, like 7♥ 7♣ 7♠."</li>
-                <li><span class=b>"Runs"</span>": three or more cards in a row of one suit, like 9♦ 10♦ J♦."</li>
+                <li>
+                    <span class=b>"Books"</span>
+                    ": three or more cards of the same rank, like 7♥ 7♣ 7♠."
+                </li>
+                <li>
+                    <span class=b>"Runs"</span>
+                    ": three or more cards in a row of one suit, like 9♦ 10♦ J♦."
+                </li>
                 <li>"Wild cards stand in for anything in a book or run."</li>
             </ul>
             <p>

@@ -45,11 +45,7 @@ pub fn Page() -> impl IntoView {
             {
                 *stop_flag.borrow_mut() = false;
                 let stop_flag = stop_flag.clone();
-                let pid = pid_filter
-                    .get_untracked()
-                    .trim()
-                    .parse::<u32>()
-                    .ok();
+                let pid = pid_filter.get_untracked().trim().parse::<u32>().ok();
                 wasm_bindgen_futures::spawn_local(async move {
                     if let Err(e) = run_stream(state, rows, pid, stop_flag).await {
                         state.push_log(format!("ERROR: {e}"));
@@ -181,7 +177,10 @@ async fn run_stream(
     pid: Option<u32>,
     stop_flag: Rc<RefCell<bool>>,
 ) -> Result<(), String> {
-    use idevice::{IdeviceService, os_trace_relay::{LogLevel, OsTraceRelayClient}};
+    use idevice::{
+        os_trace_relay::{LogLevel, OsTraceRelayClient},
+        IdeviceService,
+    };
     let provider = crate::idevice_tools::transport::build_provider(&state)?;
     let client = OsTraceRelayClient::connect(&provider)
         .await

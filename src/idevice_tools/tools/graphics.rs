@@ -175,7 +175,9 @@ async fn run_stream(
             stream_inner(&mut rs, &rows, &stop_flag).await
         }
         Err(rsd_err) => {
-            state.push_log(format!("CoreDeviceProxy unavailable, falling back: {rsd_err}"));
+            state.push_log(format!(
+                "CoreDeviceProxy unavailable, falling back: {rsd_err}"
+            ));
             use idevice::IdeviceService;
             let provider = crate::idevice_tools::transport::build_provider(&state)?;
             let mut rs: RemoteServerClient<Box<dyn idevice::ReadWrite>> =

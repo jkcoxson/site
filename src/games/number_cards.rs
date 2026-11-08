@@ -111,7 +111,11 @@ pub fn card_back(label: String) -> impl IntoView {
         <div class="card-face flex select-none flex-col items-center justify-center rounded-lg bg-gradient-to-br from-sky-700 to-indigo-900 text-amber-300 shadow-md ring-1 ring-sky-400">
             <span class="num-card-middle leading-none">"✦"</span>
             {(!label.is_empty())
-                .then(|| view! { <span class="mt-0.5 text-[0.6rem] font-semibold text-sky-100">{label}</span> })}
+                .then(|| {
+                    view! {
+                        <span class="mt-0.5 text-[0.6rem] font-semibold text-sky-100">{label}</span>
+                    }
+                })}
         </div>
     }
 }

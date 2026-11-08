@@ -117,7 +117,7 @@ async fn run_stream(
     lines: RwSignal<Vec<String>>,
     stop_flag: Rc<RefCell<bool>>,
 ) -> Result<(), String> {
-    use idevice::{IdeviceService, syslog_relay::SyslogRelayClient};
+    use idevice::{syslog_relay::SyslogRelayClient, IdeviceService};
     let provider = crate::idevice_tools::transport::build_provider(&state)?;
     let mut client = SyslogRelayClient::connect(&provider)
         .await

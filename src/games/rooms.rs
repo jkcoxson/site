@@ -394,12 +394,16 @@ pub async fn serve<G: RoomGame>(
     let reject = |msg: &str| serde_json::to_string(&EngineMsg::Error(msg)).unwrap();
 
     let Some((room, expected_passcode)) = rooms.get(&room_id).await else {
-        let _ = sink.send(Message::Text(reject("Room not found.").into())).await;
+        let _ = sink
+            .send(Message::Text(reject("Room not found.").into()))
+            .await;
         return;
     };
 
     if passcode != expected_passcode {
-        let _ = sink.send(Message::Text(reject("Wrong passcode.").into())).await;
+        let _ = sink
+            .send(Message::Text(reject("Wrong passcode.").into()))
+            .await;
         return;
     }
 
@@ -407,7 +411,10 @@ pub async fn serve<G: RoomGame>(
     let seat = {
         let mut r = room.lock().await;
         // Try to reclaim a seat by token; an unknown token is just a new player.
-        match reconnect_token.as_deref().and_then(|tok| r.seats.index_of(tok)) {
+        match reconnect_token
+            .as_deref()
+            .and_then(|tok| r.seats.index_of(tok))
+        {
             Some(idx) => {
                 let s = &mut r.seats.seats[idx];
                 s.sender = Some(tx.clone());
@@ -430,7 +437,9 @@ pub async fn serve<G: RoomGame>(
     // its token and looks its index up fresh each time.
     let token = match seat {
         SeatResult::Full => {
-            let _ = sink.send(Message::Text(reject("Room is full.").into())).await;
+            let _ = sink
+                .send(Message::Text(reject("Room is full.").into()))
+                .await;
             return;
         }
         SeatResult::InProgress => {

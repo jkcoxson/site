@@ -112,23 +112,12 @@ pub enum ServerMsg {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type", content = "data")]
 pub enum ClientMsg {
-    SetNickname {
-        name: String,
-    },
+    SetNickname { name: String },
     StartGame,
-    LockBoard {
-        board: Board,
-    },
-    ShootBeam {
-        port: u8,
-    },
-    CallGame {
-        guess: Board,
-    },
-    RequestRotate {
-        row: u8,
-        col: u8,
-    },
+    LockBoard { board: Board },
+    ShootBeam { port: u8 },
+    CallGame { guess: Board },
+    RequestRotate { row: u8, col: u8 },
     PlayAgain,
 }
 
@@ -689,13 +678,9 @@ pub fn GameRoomInner(room_id: String, room_passcode: String) -> impl IntoView {
                         .into_any()
                 }
                 Phase::Setup => view! { <SetupView state /> }.into_any(),
-                Phase::Playing { your_turn } => {
-                    view! { <PlayView state your_turn /> }.into_any()
-                }
+                Phase::Playing { your_turn } => view! { <PlayView state your_turn /> }.into_any(),
                 Phase::Independent { .. } => view! { <IndependentPlayView state /> }.into_any(),
-                Phase::GameOver { you_win } => {
-                    view! { <GameOverView state you_win /> }.into_any()
-                }
+                Phase::GameOver { you_win } => view! { <GameOverView state you_win /> }.into_any(),
                 Phase::Closed => {
                     view! {
                         <div class="text-center py-16 space-y-3">
@@ -839,13 +824,21 @@ fn arrow_head(deg: i32) -> impl IntoView {
     view! {
         <g transform=format!("rotate({deg} 16 16)")>
             <line
-                x1="16" y1="16" x2="16" y2="6"
-                stroke="#94a3b8" stroke-width="3" stroke-linecap="round"
+                x1="16"
+                y1="16"
+                x2="16"
+                y2="6"
+                stroke="#94a3b8"
+                stroke-width="3"
+                stroke-linecap="round"
             />
             <polyline
                 points="12,10 16,5 20,10"
-                fill="none" stroke="#94a3b8" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round"
+                fill="none"
+                stroke="#94a3b8"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
             />
         </g>
     }
@@ -855,51 +848,97 @@ fn piece_icon(piece: Piece) -> AnyView {
     match piece {
         Piece::Red => view! {
             <svg viewBox="0 0 32 32" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="17" r="11" fill="rgba(0,0,0,0.25)"/>
-                <circle cx="16" cy="16" r="11" fill="#ef4444"/>
-                <circle cx="12" cy="11" r="4" fill="rgba(255,255,255,0.35)"/>
+                <circle cx="16" cy="17" r="11" fill="rgba(0,0,0,0.25)" />
+                <circle cx="16" cy="16" r="11" fill="#ef4444" />
+                <circle cx="12" cy="11" r="4" fill="rgba(255,255,255,0.35)" />
             </svg>
         }
         .into_any(),
         Piece::Yellow => view! {
             <svg viewBox="0 0 32 32" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="17" r="11" fill="rgba(0,0,0,0.25)"/>
-                <circle cx="16" cy="16" r="11" fill="#eab308"/>
-                <circle cx="12" cy="11" r="4" fill="rgba(255,255,255,0.35)"/>
+                <circle cx="16" cy="17" r="11" fill="rgba(0,0,0,0.25)" />
+                <circle cx="16" cy="16" r="11" fill="#eab308" />
+                <circle cx="12" cy="11" r="4" fill="rgba(255,255,255,0.35)" />
             </svg>
         }
         .into_any(),
         Piece::Blue => view! {
             <svg viewBox="0 0 32 32" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="17" r="11" fill="rgba(0,0,0,0.25)"/>
-                <circle cx="16" cy="16" r="11" fill="#3b82f6"/>
-                <circle cx="12" cy="11" r="4" fill="rgba(255,255,255,0.35)"/>
+                <circle cx="16" cy="17" r="11" fill="rgba(0,0,0,0.25)" />
+                <circle cx="16" cy="16" r="11" fill="#3b82f6" />
+                <circle cx="12" cy="11" r="4" fill="rgba(255,255,255,0.35)" />
             </svg>
         }
         .into_any(),
         Piece::Black => view! {
             <svg viewBox="0 0 32 32" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="17" r="11" fill="rgba(0,0,0,0.5)"/>
-                <circle cx="16" cy="16" r="11" fill="#1c1917"/>
-                <circle cx="12" cy="11" r="3" fill="rgba(255,255,255,0.18)"/>
+                <circle cx="16" cy="17" r="11" fill="rgba(0,0,0,0.5)" />
+                <circle cx="16" cy="16" r="11" fill="#1c1917" />
+                <circle cx="12" cy="11" r="3" fill="rgba(255,255,255,0.18)" />
             </svg>
         }
         .into_any(),
         Piece::Slash(SlashDir::Forward) => view! {
-            // / mirror, a line from bottom-left to top-right
             <svg viewBox="0 0 32 32" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <line x1="8" y1="26" x2="24" y2="6" stroke="rgba(0,0,0,0.3)" stroke-width="5" stroke-linecap="round"/>
-                <line x1="8" y1="25" x2="24" y2="5" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
-                <line x1="10" y1="22" x2="22" y2="8" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round"/>
+                <line
+                    x1="8"
+                    y1="26"
+                    x2="24"
+                    y2="6"
+                    stroke="rgba(0,0,0,0.3)"
+                    stroke-width="5"
+                    stroke-linecap="round"
+                />
+                <line
+                    x1="8"
+                    y1="25"
+                    x2="24"
+                    y2="5"
+                    stroke="#94a3b8"
+                    stroke-width="5"
+                    stroke-linecap="round"
+                />
+                <line
+                    x1="10"
+                    y1="22"
+                    x2="22"
+                    y2="8"
+                    stroke="rgba(255,255,255,0.5)"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                />
             </svg>
         }
         .into_any(),
         Piece::Slash(SlashDir::Backward) => view! {
-            // \ mirror, a line from top-left to bottom-right
             <svg viewBox="0 0 32 32" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <line x1="8" y1="6" x2="24" y2="26" stroke="rgba(0,0,0,0.3)" stroke-width="5" stroke-linecap="round"/>
-                <line x1="8" y1="5" x2="24" y2="25" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
-                <line x1="10" y1="8" x2="22" y2="22" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round"/>
+                <line
+                    x1="8"
+                    y1="6"
+                    x2="24"
+                    y2="26"
+                    stroke="rgba(0,0,0,0.3)"
+                    stroke-width="5"
+                    stroke-linecap="round"
+                />
+                <line
+                    x1="8"
+                    y1="5"
+                    x2="24"
+                    y2="25"
+                    stroke="#94a3b8"
+                    stroke-width="5"
+                    stroke-linecap="round"
+                />
+                <line
+                    x1="10"
+                    y1="8"
+                    x2="22"
+                    y2="22"
+                    stroke="rgba(255,255,255,0.5)"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                />
             </svg>
         }
         .into_any(),
@@ -981,13 +1020,17 @@ fn PiecePalette(
                                     )
                                 }
                                 on:click=move |_| {
-                                    selected.update(|s| {
-                                        *s = if s.map(|sel| same_piece_type(sel, p)).unwrap_or(false) {
-                                            None
-                                        } else {
-                                            Some(p)
-                                        };
-                                    });
+                                    selected
+                                        .update(|s| {
+                                            *s = if s
+                                                .map(|sel| same_piece_type(sel, p))
+                                                .unwrap_or(false)
+                                            {
+                                                None
+                                            } else {
+                                                Some(p)
+                                            };
+                                        });
                                 }
                             >
                                 {piece_icon(p)}
@@ -1158,9 +1201,7 @@ fn SetupView(state: RwSignal<GameUiState>) -> impl IntoView {
                 </button>
                 {move || {
                     if state.with(|s| s.opponent_locked) {
-                        view! {
-                            <span class="text-sm text-green-400">"Opponent is ready!"</span>
-                        }
+                        view! { <span class="text-sm text-green-400">"Opponent is ready!"</span> }
                             .into_any()
                     } else {
                         view! {
@@ -1247,14 +1288,7 @@ fn GuessPanel(
     #[prop(into)] highlight: Signal<Option<(u8, u8, Color)>>,
 ) -> impl IntoView {
     view! {
-        <BoardWithPorts
-            board
-            on_port
-            port_active
-            on_cell
-            cell_interactive=true
-            highlight
-        />
+        <BoardWithPorts board on_port port_active on_cell cell_interactive=true highlight />
         <div class="mt-4 space-y-3">
             <PiecePalette selected rules />
             <OrientationPicker selected />
@@ -1364,9 +1398,7 @@ fn PlayView(state: RwSignal<GameUiState>, your_turn: bool) -> impl IntoView {
                                     "Opponent found your mirror at ({top}, {left}) and flipped it!",
                                 )
                             } else {
-                                format!(
-                                    "Opponent tried to flip ({top}, {left}). No mirror there.",
-                                )
+                                format!("Opponent tried to flip ({top}, {left}). No mirror there.")
                             };
                             let cls = if accepted {
                                 "mt-2 text-sm text-orange-400"
@@ -1419,7 +1451,9 @@ fn PlayView(state: RwSignal<GameUiState>, your_turn: bool) -> impl IntoView {
                     {move || {
                         if state.with(|s| s.last_guess_wrong) {
                             view! {
-                                <p class="mt-3 text-sm text-red-400">"Wrong guess, game continues."</p>
+                                <p class="mt-3 text-sm text-red-400">
+                                    "Wrong guess, game continues."
+                                </p>
                             }
                                 .into_any()
                         } else {
@@ -1644,7 +1678,9 @@ fn Scoreboard(state: RwSignal<GameUiState>) -> impl IntoView {
                                 <span class="font-mono text-xs text-stone-400 w-5">
                                     {format!("#{}", r.place)}
                                 </span>
-                                <span class="truncate dark:text-stone-100">{r.nickname.clone()}</span>
+                                <span class="truncate dark:text-stone-100">
+                                    {r.nickname.clone()}
+                                </span>
                                 {mine
                                     .then(|| {
                                         view! {
@@ -2240,8 +2276,8 @@ pub fn SinglePlayerInner() -> impl IntoView {
                     </h3>
                     {move || {
                         if over() {
-                            // Round finished, reveal the real board for comparison.
                             view! {
+                                // Round finished, reveal the real board for comparison.
                                 <BoardWithPorts
                                     board=Signal::derive(move || answer.get())
                                     on_port=|_| {}
@@ -2321,9 +2357,7 @@ pub fn SinglePlayerInner() -> impl IntoView {
                                                 )
                                             } else {
                                                 (
-                                                    format!(
-                                                        "No mirror at ({top}, {left}). That costs a beam.",
-                                                    ),
+                                                    format!("No mirror at ({top}, {left}). That costs a beam."),
                                                     "text-sm text-stone-500",
                                                 )
                                             };
@@ -2470,7 +2504,8 @@ pub fn SandboxInner() -> impl IntoView {
             <div class="flex flex-col gap-3">
                 {move || {
                     if complete() {
-                        view! { <ShareBoard board=Signal::derive(move || board.get()) /> }.into_any()
+                        view! { <ShareBoard board=Signal::derive(move || board.get()) /> }
+                            .into_any()
                     } else {
                         view! {
                             <p class="text-sm text-stone-500">
@@ -2539,11 +2574,11 @@ fn ShareBoard(board: Signal<Board>) -> impl IntoView {
                 {move || if copied.get() { "Link copied!" } else { "Share this board" }}
             </button>
             {move || {
-                // Only shown when the clipboard wasn't available, so the player
-                // can still copy the link by hand.
                 link.get()
                     .map(|url| {
                         view! {
+                            // Only shown when the clipboard wasn't available, so the player
+                            // can still copy the link by hand.
                             <div class="space-y-1">
                                 <input
                                     type="text"
@@ -2660,10 +2695,11 @@ pub fn RulesConfig(rules: RwSignal<Rules>, #[prop(optional)] multiplayer: bool) 
                                 on:input=move |ev| {
                                     if let Ok(n) = event_target_value(&ev).parse::<u8>() {
                                         let n = n.clamp(MIN_SIZE, MAX_SIZE);
-                                        rules.update(|r| {
-                                            r.size = n;
-                                            r.counts = clamp_counts(r.counts, n as u32 * n as u32);
-                                        });
+                                        rules
+                                            .update(|r| {
+                                                r.size = n;
+                                                r.counts = clamp_counts(r.counts, n as u32 * n as u32);
+                                            });
                                     }
                                 }
                             />
@@ -2698,10 +2734,11 @@ pub fn RulesConfig(rules: RwSignal<Rules>, #[prop(optional)] multiplayer: bool) 
                                                     type="button"
                                                     class="h-6 w-6 rounded bg-stone-700 text-stone-200 hover:bg-stone-600 touch-manipulation"
                                                     on:click=move |_| {
-                                                        rules.update(|r| {
-                                                            let n = r.counts.get(ty);
-                                                            r.counts.set(ty, n.saturating_sub(1));
-                                                        })
+                                                        rules
+                                                            .update(|r| {
+                                                                let n = r.counts.get(ty);
+                                                                r.counts.set(ty, n.saturating_sub(1));
+                                                            })
                                                     }
                                                 >
                                                     "−"
@@ -2714,10 +2751,11 @@ pub fn RulesConfig(rules: RwSignal<Rules>, #[prop(optional)] multiplayer: bool) 
                                                     class="h-6 w-6 rounded bg-stone-700 text-stone-200 hover:bg-stone-600 touch-manipulation"
                                                     on:click=move |_| {
                                                         if total() < cells() {
-                                                            rules.update(|r| {
-                                                                let n = r.counts.get(ty);
-                                                                r.counts.set(ty, n + 1);
-                                                            })
+                                                            rules
+                                                                .update(|r| {
+                                                                    let n = r.counts.get(ty);
+                                                                    r.counts.set(ty, n + 1);
+                                                                })
                                                         }
                                                     }
                                                 >
@@ -2772,13 +2810,14 @@ pub fn RulesConfig(rules: RwSignal<Rules>, #[prop(optional)] multiplayer: bool) 
                                             }
                                             on:change=move |ev| {
                                                 let on = event_target_checked(&ev);
-                                                rules.update(|r| {
-                                                    r.resolution = if on {
-                                                        Resolution::Async
-                                                    } else {
-                                                        Resolution::Live
-                                                    };
-                                                });
+                                                rules
+                                                    .update(|r| {
+                                                        r.resolution = if on {
+                                                            Resolution::Async
+                                                        } else {
+                                                            Resolution::Live
+                                                        };
+                                                    });
                                             }
                                         />
                                         <span>"Asynchronous (compare scores)"</span>
@@ -2787,8 +2826,7 @@ pub fn RulesConfig(rules: RwSignal<Rules>, #[prop(optional)] multiplayer: bool) 
                                     .into_any()
                             } else {
                                 view! { <span /> }.into_any()
-                            }}
-                            <label class="flex items-center gap-2">
+                            }} <label class="flex items-center gap-2">
                                 <input
                                     type="checkbox"
                                     class="accent-blue-500"
@@ -2853,8 +2891,7 @@ fn cell_view(
         >
             {move || {
                 if let Some(p) = cell() {
-                    view! { <div class="w-full h-full piece-pop">{piece_icon(p)}</div> }
-                        .into_any()
+                    view! { <div class="w-full h-full piece-pop">{piece_icon(p)}</div> }.into_any()
                 } else {
                     view! { <span class="text-stone-600 text-lg select-none">"·"</span> }
                         .into_any()
@@ -2955,16 +2992,20 @@ fn BoardWithPorts(
                             <button
                                 style=move || {
                                     let glow = lit(p)
-                                        .map(|(color, _)| format!("--beam-color: {};", color.glow()))
+                                        .map(|(color, _)| {
+                                            format!("--beam-color: {};", color.glow())
+                                        })
                                         .unwrap_or_default();
                                     format!("width:{port}px;height:{port}px;{glow}")
                                 }
                                 class=move || {
                                     let base = "rounded-full text-xs font-bold touch-manipulation transition-all";
                                     if let Some((color, looped)) = lit(p) {
-                                        // A used port glows with the beam's color, on top
-                                        // of the normal active/idle styling.
-                                        let anim = if looped { "beam-loop" } else { "beam-breathe" };
+                                        let anim = if looped {
+                                            "beam-loop"
+                                        } else {
+                                            "beam-breathe"
+                                        };
                                         format!("{base} {anim} {}", color.css_class())
                                     } else if port_active.get() {
                                         format!(
@@ -2984,10 +3025,10 @@ fn BoardWithPorts(
                             </button>
                         }
                     };
-                    // Wrap a port button in a cell-sized box so it lines up with its
-                    // grid column / row.
                     let col_port = move |p: u8| {
                         view! {
+                            // Wrap a port button in a cell-sized box so it lines up with its
+                            // grid column / row.
                             <div class="flex justify-center" style=format!("width:{cell}px")>
                                 {port_btn(p)}
                             </div>
@@ -3153,8 +3194,7 @@ fn LightBeamsRules() -> impl IntoView {
                 "Custom games can change how many of each appear."
             </p>
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {legend_item(Piece::Red, "Red glass")}
-                {legend_item(Piece::Yellow, "Yellow glass")}
+                {legend_item(Piece::Red, "Red glass")} {legend_item(Piece::Yellow, "Yellow glass")}
                 {legend_item(Piece::Blue, "Blue glass")}
                 {legend_item(Piece::Black, "Black absorbs light")}
                 {legend_item(Piece::Slash(SlashDir::Forward), "Slash mirror (turns 90°)")}
@@ -3261,8 +3301,7 @@ fn LightBeamsRules() -> impl IntoView {
             <h3 class="font-semibold text-white">"Taking a turn"</h3>
             <ul class="ml-4 list-disc space-y-1 text-stone-300">
                 <li>
-                    "Optionally "
-                    <span class="font-medium text-white">"flip"</span>
+                    "Optionally " <span class="font-medium text-white">"flip"</span>
                     " one cell on the opponent's board. If it holds a slash mirror "
                     "it rotates (/ ↔ \\). They're told which cell you flipped."
                 </li>
@@ -3272,10 +3311,8 @@ fn LightBeamsRules() -> impl IntoView {
                     "ends your turn."
                 </li>
                 <li>
-                    "When you're sure, "
-                    <span class="font-medium text-white">"call the game"</span>
-                    " with your full guess. An exact match wins; otherwise play "
-                    "continues."
+                    "When you're sure, " <span class="font-medium text-white">"call the game"</span>
+                    " with your full guess. An exact match wins; otherwise play " "continues."
                 </li>
             </ul>
         </section>
@@ -3308,11 +3345,9 @@ fn LightBeamsRules() -> impl IntoView {
                 <li>
                     "With enough mirrors a beam can get stuck bouncing forever. A "
                     "trapped beam is reported as a "
-                    <span class="font-medium text-white">"loop (∞)"</span>
-                    " with no exit."
+                    <span class="font-medium text-white">"loop (∞)"</span> " with no exit."
                 </li>
             </ul>
         </section>
-
     }
 }

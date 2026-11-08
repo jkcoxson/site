@@ -15,7 +15,7 @@ use crate::idevice_tools::state::IdeviceState;
 #[cfg(target_arch = "wasm32")]
 use std::{cell::RefCell, rc::Rc};
 #[cfg(target_arch = "wasm32")]
-use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
 #[cfg(target_arch = "wasm32")]
 type Sender = Rc<RefCell<Option<UnboundedSender<String>>>>;
@@ -164,7 +164,7 @@ async fn run_session(
     connected: RwSignal<bool>,
     sender_slot: Sender,
 ) -> Result<(), String> {
-    use idevice::{RsdService, debug_proxy::DebugProxyClient};
+    use idevice::{debug_proxy::DebugProxyClient, RsdService};
 
     let (mut adapter, mut handshake) = crate::idevice_tools::transport::open_rsd(&state).await?;
     let mut dp = DebugProxyClient::connect_rsd(&mut adapter, &mut handshake)

@@ -138,7 +138,6 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                             }
                         })
                 }}
-
                 {seat_strip(move || {
                     game.with(|g| {
                         let playing = matches!(g.stage, Stage::Playing);
@@ -164,10 +163,7 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                             })
                             .collect()
                     })
-                })}
-
-                <Opponents game pick my_turn />
-
+                })} <Opponents game pick my_turn />
                 <div class="space-y-2 rounded-xl bg-green-900/60 p-3 ring-1 ring-green-800 sm:p-5">
                     <div class="flex items-end gap-3 sm:gap-5">
                         <div data-pile="deck" class="shrink-0">
@@ -184,7 +180,6 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                         }
                     }>{turn_text}</p>
                 </div>
-
                 {move || {
                     let g = game.get();
                     match g.stage.clone() {
@@ -193,9 +188,7 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                             Some(game_over(g, winners, points, match_over, standings))
                         }
                     }
-                }}
-
-                <MyArea game pick my_turn />
+                }} <MyArea game pick my_turn />
             </div>
 
             {table_talk(move || game.with(|g| g.log.clone()))}
@@ -232,7 +225,12 @@ fn BuildingPiles(game: Memo<GameView>, pick: Pick, my_turn: Memo<bool>) -> impl 
                                     return;
                                 }
                                 if let Some(card) = pick.card() {
-                                    send_msg(&ClientMsg::Play { card, pile: i as u8 });
+                                    send_msg(
+                                        &ClientMsg::Play {
+                                            card,
+                                            pile: i as u8,
+                                        },
+                                    );
                                     pick.clear();
                                 }
                             }
@@ -294,12 +292,22 @@ fn Opponents(game: Memo<GameView>, pick: Pick, my_turn: Memo<bool>) -> impl Into
                             }>
                                 <div class="flex flex-col items-center gap-0.5">
                                     {stock_view(p.stock_top, p.stock_left, usable, pick, my_turn)}
-                                    <span class="max-w-[4rem] truncate text-[0.6rem] text-green-100">{p.nickname.clone()}</span>
+                                    <span class="max-w-[4rem] truncate text-[0.6rem] text-green-100">
+                                        {p.nickname.clone()}
+                                    </span>
                                 </div>
                                 <div class="flex gap-1">
-                                    {p.discards
+                                    {p
+                                        .discards
                                         .into_iter()
-                                        .map(|pile| discard_pile(pile, 3, usable, None, pick, my_turn))
+                                        .map(|pile| discard_pile(
+                                            pile,
+                                            3,
+                                            usable,
+                                            None,
+                                            pick,
+                                            my_turn,
+                                        ))
                                         .collect_view()}
                                 </div>
                             </div>
@@ -388,7 +396,11 @@ fn discard_pile(
         >
             {(hidden > 0)
                 .then(|| {
-                    view! { <span class="block text-center text-[0.6rem] text-green-200">{format!("+{hidden}")}</span> }
+                    view! {
+                        <span class="block text-center text-[0.6rem] text-green-200">
+                            {format!("+{hidden}")}
+                        </span>
+                    }
                 })}
             {if visible.is_empty() {
                 card_slot(if discard_to.is_some() { "discard" } else { "" }).into_any()
@@ -444,7 +456,8 @@ fn MyArea(game: Memo<GameView>, pick: Pick, my_turn: Memo<bool>) -> impl IntoVie
                                 </div>
                                 <div class="h-16 w-px self-center bg-green-700"></div>
                                 <div class="grid grid-cols-4 gap-2 sm:gap-3">
-                                    {p.discards
+                                    {p
+                                        .discards
                                         .into_iter()
                                         .enumerate()
                                         .map(|(i, pile)| {
@@ -505,7 +518,11 @@ fn game_over(
             {if match_over {
                 view! {
                     <p class="text-center text-xs text-stone-500">
-                        {if points.is_some() { "Match points" } else { "Cards left in each stock pile" }}
+                        {if points.is_some() {
+                            "Match points"
+                        } else {
+                            "Cards left in each stock pile"
+                        }}
                     </p>
                     {final_standings(g.you, standings, names, || send_msg(&ClientMsg::PlayAgain))}
                 }
@@ -522,7 +539,9 @@ fn game_over(
                     .into_any()
             } else {
                 view! {
-                    <p class="text-center text-sm text-stone-500">"Waiting for the host to deal..."</p>
+                    <p class="text-center text-sm text-stone-500">
+                        "Waiting for the host to deal..."
+                    </p>
                 }
                     .into_any()
             }}
@@ -581,11 +600,16 @@ fn StackAttackRules() -> impl IntoView {
                 There can only be four piles at once. When a pile reaches 12 it's cleared \
                 away, and finished piles are shuffled back in when the draw pile runs out."
             </p>
-            <p>"Play from your stock whenever you can, since that's what you're trying to empty."</p>
+            <p>
+                "Play from your stock whenever you can, since that's what you're trying to empty."
+            </p>
         </RulesSection>
         <RulesSection heading="Options">
             <ul class="list-disc space-y-1 pl-5">
-                <li><span class=b>"Short game"</span>": stock piles of only 10 cards."</li>
+                <li>
+                    <span class=b>"Short game"</span>
+                    ": stock piles of only 10 cards."
+                </li>
                 <li>
                     <span class=b>"Partners"</span>
                     " (four or six players): partners sit across from each other and may play \

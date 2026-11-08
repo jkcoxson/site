@@ -535,24 +535,42 @@ pub fn board_view(camera: Camera, world: impl IntoView + 'static) -> impl IntoVi
             on:wheel=on_wheel
             on:contextmenu=|ev| ev.prevent_default()
         >
-            <div
-                class="board-world"
-                style=move || camera.transform()
-            >
+            <div class="board-world" style=move || camera.transform()>
                 {world}
             </div>
             <div
                 class="absolute top-2 right-2 flex flex-col gap-2"
                 on:pointerdown=|ev| ev.stop_propagation()
             >
-                <button class=button aria-label="Zoom in" on:click=move |_| camera.zoom_by(1.5, None, true)>
+                <button
+                    class=button
+                    aria-label="Zoom in"
+                    on:click=move |_| camera.zoom_by(1.5, None, true)
+                >
                     "+"
                 </button>
-                <button class=button aria-label="Zoom out" on:click=move |_| camera.zoom_by(1.0 / 1.5, None, true)>
+                <button
+                    class=button
+                    aria-label="Zoom out"
+                    on:click=move |_| camera.zoom_by(1.0 / 1.5, None, true)
+                >
                     "−"
                 </button>
-                <button class=button aria-label="Show the whole board" title="Show the whole board" on:click=move |_| camera.fit_all(true)>
-                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <button
+                    class=button
+                    aria-label="Show the whole board"
+                    title="Show the whole board"
+                    on:click=move |_| camera.fit_all(true)
+                >
+                    <svg
+                        viewBox="0 0 24 24"
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
                         <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
                     </svg>
                 </button>

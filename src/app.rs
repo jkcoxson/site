@@ -109,10 +109,7 @@ pub fn App() -> impl IntoView {
                     />
                     <Route path=path!("/games/golf") view=crate::games::golf::GolfLobby />
                     <Route path=path!("/games/golf/:code") view=crate::games::golf::GolfRoom />
-                    <Route
-                        path=path!("/games/light-beams")
-                        view=crate::games::LightBeamsLobby
-                    />
+                    <Route path=path!("/games/light-beams") view=crate::games::LightBeamsLobby />
                     <Route
                         path=path!("/games/light-beams/single-player")
                         view=crate::games::LightBeamsSinglePlayer

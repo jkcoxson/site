@@ -147,17 +147,33 @@ async fn run_launch(
             rs.read_message(0)
                 .await
                 .map_err(|e| format!("read_message: {e:?}"))?;
-            launch_inner(&mut rs, bundle, kill_existing, start_suspended, drop_memlimit).await
+            launch_inner(
+                &mut rs,
+                bundle,
+                kill_existing,
+                start_suspended,
+                drop_memlimit,
+            )
+            .await
         }
         Err(rsd_err) => {
-            state.push_log(format!("CoreDeviceProxy unavailable, falling back: {rsd_err}"));
+            state.push_log(format!(
+                "CoreDeviceProxy unavailable, falling back: {rsd_err}"
+            ));
             use idevice::IdeviceService;
             let provider = crate::idevice_tools::transport::build_provider(&state)?;
             let mut rs: RemoteServerClient<Box<dyn idevice::ReadWrite>> =
                 RemoteServerClient::connect(&provider)
                     .await
                     .map_err(|e| format!("RemoteServerClient::connect: {e:?}"))?;
-            launch_inner(&mut rs, bundle, kill_existing, start_suspended, drop_memlimit).await
+            launch_inner(
+                &mut rs,
+                bundle,
+                kill_existing,
+                start_suspended,
+                drop_memlimit,
+            )
+            .await
         }
     }
 }

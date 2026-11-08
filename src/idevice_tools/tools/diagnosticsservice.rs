@@ -129,7 +129,7 @@ async fn run_capture(
     received: RwSignal<usize>,
 ) -> Result<(), String> {
     use ::futures::StreamExt;
-    use idevice::{RsdService, core_device::DiagnostisServiceClient};
+    use idevice::{core_device::DiagnostisServiceClient, RsdService};
 
     let (mut adapter, mut handshake) = crate::idevice_tools::transport::open_rsd(&state).await?;
     let mut dsc = DiagnostisServiceClient::connect_rsd(&mut adapter, &mut handshake)

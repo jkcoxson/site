@@ -383,7 +383,7 @@ fn TextField(
 async fn open_diag(
     state: &IdeviceState,
 ) -> Result<idevice::services::diagnostics_relay::DiagnosticsRelayClient, String> {
-    use idevice::{IdeviceService, diagnostics_relay::DiagnosticsRelayClient};
+    use idevice::{diagnostics_relay::DiagnosticsRelayClient, IdeviceService};
     let provider = crate::idevice_tools::transport::build_provider(state)?;
     DiagnosticsRelayClient::connect(&provider)
         .await
@@ -408,7 +408,11 @@ async fn run_ioregistry(
 ) -> Result<String, String> {
     let mut c = open_diag(&state).await?;
     fn opt(s: &str) -> Option<&str> {
-        if s.is_empty() { None } else { Some(s) }
+        if s.is_empty() {
+            None
+        } else {
+            Some(s)
+        }
     }
     let res = c
         .ioregistry(opt(&plane), opt(&entry), opt(&class))

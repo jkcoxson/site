@@ -10,12 +10,12 @@ pub mod light_beams;
 pub mod monuments;
 pub mod number_cards;
 pub mod pirates_wager;
-pub mod rules;
-pub mod stack_attack;
 #[cfg(feature = "ssr")]
 pub mod rooms;
+pub mod rules;
 #[cfg(feature = "ssr")]
 pub mod server;
+pub mod stack_attack;
 
 use leptos::prelude::*;
 use leptos_router::hooks::use_params;
@@ -70,7 +70,9 @@ pub async fn create_room(
             "No context".to_string(),
         )
     })?;
-    ctx.game_state.create_room(id.clone(), name, passcode, rules).await;
+    ctx.game_state
+        .create_room(id.clone(), name, passcode, rules)
+        .await;
     Ok(id)
 }
 
@@ -138,8 +140,7 @@ pub fn GameGate(children: Children) -> impl IntoView {
                     }
                         .into_any()
                 }
-            }}
-            {children()}
+            }} {children()}
         </div>
     }
 }
@@ -274,192 +275,200 @@ pub fn LightBeamsLobby() -> impl IntoView {
         <NavBar />
         <div class="container mx-auto px-4 py-8 max-w-xl space-y-6">
             <GameGate>
-            <div class="flex items-center gap-2">
-                <h1 class="text-3xl font-bold dark:text-white">"Light Beams"</h1>
-                <light_beams::RulesButton />
-            </div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-3xl font-bold dark:text-white">"Light Beams"</h1>
+                    <light_beams::RulesButton />
+                </div>
 
-            // Single player mode
-            <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5">
-                <div class="flex items-center justify-between gap-4">
-                    <div class="min-w-0">
-                        <h2 class="text-lg font-semibold dark:text-stone-100">"Single player"</h2>
-                        <p class="text-sm text-stone-500 dark:text-stone-400">
-                            "Deduce a board the computer hides, no opponent needed."
-                        </p>
+                // Single player mode
+                <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="min-w-0">
+                            <h2 class="text-lg font-semibold dark:text-stone-100">
+                                "Single player"
+                            </h2>
+                            <p class="text-sm text-stone-500 dark:text-stone-400">
+                                "Deduce a board the computer hides, no opponent needed."
+                            </p>
+                        </div>
+                        <A
+                            href="/games/light-beams/single-player"
+                            attr:class="shrink-0 rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+                        >
+                            "Single Player"
+                        </A>
                     </div>
-                    <A
-                        href="/games/light-beams/single-player"
-                        attr:class="shrink-0 rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
-                    >
-                        "Single Player"
-                    </A>
                 </div>
-            </div>
 
-            // Sandbox
-            <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5">
-                <div class="flex items-center justify-between gap-4">
-                    <div class="min-w-0">
-                        <h2 class="text-lg font-semibold dark:text-stone-100">"Sandbox"</h2>
-                        <p class="text-sm text-stone-500 dark:text-stone-400">
-                            "Design a board by hand, then share it as a puzzle."
-                        </p>
+                // Sandbox
+                <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="min-w-0">
+                            <h2 class="text-lg font-semibold dark:text-stone-100">"Sandbox"</h2>
+                            <p class="text-sm text-stone-500 dark:text-stone-400">
+                                "Design a board by hand, then share it as a puzzle."
+                            </p>
+                        </div>
+                        <A
+                            href="/games/light-beams/sandbox"
+                            attr:class="shrink-0 rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+                        >
+                            "Sandbox"
+                        </A>
                     </div>
-                    <A
-                        href="/games/light-beams/sandbox"
-                        attr:class="shrink-0 rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
-                    >
-                        "Sandbox"
-                    </A>
                 </div>
-            </div>
 
-            // Open room browser
-            <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-lg font-semibold dark:text-stone-100">"Open Rooms"</h2>
-                    <button
-                        class="text-xs text-blue-500 hover:underline touch-manipulation"
-                        on:click=move |_| rooms.refetch()
-                    >
-                        "Refresh"
-                    </button>
-                </div>
-                <Suspense fallback=|| view! { <p class="text-sm text-stone-400">"Loading..."</p> }>
-                    {move || {
-                        rooms.get().map(|result| match result {
-                            Err(_) => {
-                                view! {
-                                    <p class="text-sm text-red-500">"Error loading rooms."</p>
-                                }
-                                    .into_any()
-                            }
-                            Ok(list) if list.is_empty() => {
-                                view! {
-                                    <p class="text-sm text-stone-400 dark:text-stone-500">
-                                        "No open rooms yet. Create one below."
-                                    </p>
-                                }
-                                    .into_any()
-                            }
-                            Ok(list) => {
-                                view! {
-                                    <div class="space-y-2">
-                                        {list
-                                            .into_iter()
-                                            .map(|room| {
-                                                let id = room.id.clone();
-                                                let joinable = !room.in_progress
-                                                    && room.players < room.capacity;
-                                                view! {
-                                                    <div class="flex items-center justify-between rounded border border-stone-200 dark:border-stone-600 px-3 py-2">
-                                                        <div class="min-w-0">
-                                                            <div>
-                                                                <span class="font-semibold dark:text-stone-100 truncate">
-                                                                    {room.name.clone()}
-                                                                </span>
-                                                                <span class="ml-2 text-xs text-stone-400 font-mono">
-                                                                    {id.clone()}
-                                                                </span>
-                                                            </div>
-                                                            <span class="text-xs text-stone-400">
-                                                                {room.mode.clone()}
-                                                            </span>
-                                                        </div>
-                                                        <div class="flex shrink-0 items-center gap-2 ml-2">
-                                                            <span class="text-xs text-stone-400 font-mono">
-                                                                {format!("{}/{}", room.players, room.capacity)}
-                                                            </span>
-                                                            <span class=if joinable {
-                                                                "text-xs text-green-600 dark:text-green-400"
-                                                            } else {
-                                                                "text-xs text-stone-400"
-                                                            }>
-                                                                {if room.in_progress {
-                                                                    "In progress"
-                                                                } else {
-                                                                    "Waiting"
-                                                                }}
-                                                            </span>
-                                                            {if joinable {
-                                                                let nav2 = use_navigate();
-                                                                let rid = id.clone();
-                                                                view! {
-                                                                    <button
-                                                                        class="rounded bg-blue-500 px-3 py-1 text-xs text-white hover:bg-blue-600 touch-manipulation"
-                                                                        on:click=move |_| {
-                                                                            nav2(
-                                                                                &format!("/games/light-beams/{rid}"),
-                                                                                Default::default(),
-                                                                            );
-                                                                        }
-                                                                    >
-                                                                        "Join"
-                                                                    </button>
-                                                                }
-                                                                    .into_any()
-                                                            } else {
-                                                                view! { <span /> }.into_any()
-                                                            }}
-                                                        </div>
-                                                    </div>
-                                                }
-                                            })
-                                            .collect_view()}
-                                    </div>
-                                }
-                                    .into_any()
-                            }
-                        })
-                    }}
-                </Suspense>
-            </div>
-
-            // Create room
-            <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5">
-                <h2 class="text-lg font-semibold mb-3 dark:text-stone-100">"Create a Room"</h2>
-                <ActionForm action=create attr:class="space-y-3">
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Room name (visible in the list)"
-                        maxlength="32"
-                        class="w-full rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-sm dark:text-white"
-                        on:input=move |ev| set_room_name.set(event_target_value(&ev))
-                        prop:value=move || room_name.get()
-                    />
-                    <input
-                        type="text"
-                        name="passcode"
-                        placeholder="Passcode (required to join)"
-                        maxlength="20"
-                        class="w-full rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-sm dark:text-white"
-                        on:input=move |ev| set_passcode.set(event_target_value(&ev))
-                        prop:value=move || passcode.get()
-                    />
-                    <light_beams::RulesConfig rules multiplayer=true />
-                    <input
-                        type="hidden"
-                        name="rules"
-                        prop:value=move || serde_json::to_string(&rules.get()).unwrap_or_default()
-                    />
-                    <button
-                        type="submit"
-                        class="w-full rounded bg-blue-500 py-2 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                        disabled=move || create.pending().get()
-                    >
+                // Open room browser
+                <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-lg font-semibold dark:text-stone-100">"Open Rooms"</h2>
+                        <button
+                            class="text-xs text-blue-500 hover:underline touch-manipulation"
+                            on:click=move |_| rooms.refetch()
+                        >
+                            "Refresh"
+                        </button>
+                    </div>
+                    <Suspense fallback=|| {
+                        view! { <p class="text-sm text-stone-400">"Loading..."</p> }
+                    }>
                         {move || {
-                            if create.pending().get() { "Creating..." } else { "Create Room" }
+                            rooms
+                                .get()
+                                .map(|result| match result {
+                                    Err(_) => {
+                                        view! {
+                                            <p class="text-sm text-red-500">"Error loading rooms."</p>
+                                        }
+                                            .into_any()
+                                    }
+                                    Ok(list) if list.is_empty() => {
+                                        view! {
+                                            <p class="text-sm text-stone-400 dark:text-stone-500">
+                                                "No open rooms yet. Create one below."
+                                            </p>
+                                        }
+                                            .into_any()
+                                    }
+                                    Ok(list) => {
+                                        view! {
+                                            <div class="space-y-2">
+                                                {list
+                                                    .into_iter()
+                                                    .map(|room| {
+                                                        let id = room.id.clone();
+                                                        let joinable = !room.in_progress
+                                                            && room.players < room.capacity;
+                                                        view! {
+                                                            <div class="flex items-center justify-between rounded border border-stone-200 dark:border-stone-600 px-3 py-2">
+                                                                <div class="min-w-0">
+                                                                    <div>
+                                                                        <span class="font-semibold dark:text-stone-100 truncate">
+                                                                            {room.name.clone()}
+                                                                        </span>
+                                                                        <span class="ml-2 text-xs text-stone-400 font-mono">
+                                                                            {id.clone()}
+                                                                        </span>
+                                                                    </div>
+                                                                    <span class="text-xs text-stone-400">
+                                                                        {room.mode.clone()}
+                                                                    </span>
+                                                                </div>
+                                                                <div class="flex shrink-0 items-center gap-2 ml-2">
+                                                                    <span class="text-xs text-stone-400 font-mono">
+                                                                        {format!("{}/{}", room.players, room.capacity)}
+                                                                    </span>
+                                                                    <span class=if joinable {
+                                                                        "text-xs text-green-600 dark:text-green-400"
+                                                                    } else {
+                                                                        "text-xs text-stone-400"
+                                                                    }>
+                                                                        {if room.in_progress { "In progress" } else { "Waiting" }}
+                                                                    </span>
+                                                                    {if joinable {
+                                                                        let nav2 = use_navigate();
+                                                                        let rid = id.clone();
+                                                                        view! {
+                                                                            <button
+                                                                                class="rounded bg-blue-500 px-3 py-1 text-xs text-white hover:bg-blue-600 touch-manipulation"
+                                                                                on:click=move |_| {
+                                                                                    nav2(
+                                                                                        &format!("/games/light-beams/{rid}"),
+                                                                                        Default::default(),
+                                                                                    );
+                                                                                }
+                                                                            >
+                                                                                "Join"
+                                                                            </button>
+                                                                        }
+                                                                            .into_any()
+                                                                    } else {
+                                                                        view! { <span /> }.into_any()
+                                                                    }}
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    })
+                                                    .collect_view()}
+                                            </div>
+                                        }
+                                            .into_any()
+                                    }
+                                })
                         }}
-                    </button>
-                    {move || {
-                        create.value().get().and_then(|v| v.err()).map(|e| {
-                            view! { <p class="text-xs text-red-500">{e.to_string()}</p> }
-                        })
-                    }}
-                </ActionForm>
-            </div>
+                    </Suspense>
+                </div>
+
+                // Create room
+                <div class="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5">
+                    <h2 class="text-lg font-semibold mb-3 dark:text-stone-100">"Create a Room"</h2>
+                    <ActionForm action=create attr:class="space-y-3">
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Room name (visible in the list)"
+                            maxlength="32"
+                            class="w-full rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-sm dark:text-white"
+                            on:input=move |ev| set_room_name.set(event_target_value(&ev))
+                            prop:value=move || room_name.get()
+                        />
+                        <input
+                            type="text"
+                            name="passcode"
+                            placeholder="Passcode (required to join)"
+                            maxlength="20"
+                            class="w-full rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-sm dark:text-white"
+                            on:input=move |ev| set_passcode.set(event_target_value(&ev))
+                            prop:value=move || passcode.get()
+                        />
+                        <light_beams::RulesConfig rules multiplayer=true />
+                        <input
+                            type="hidden"
+                            name="rules"
+                            prop:value=move || {
+                                serde_json::to_string(&rules.get()).unwrap_or_default()
+                            }
+                        />
+                        <button
+                            type="submit"
+                            class="w-full rounded bg-blue-500 py-2 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                            disabled=move || create.pending().get()
+                        >
+                            {move || {
+                                if create.pending().get() { "Creating..." } else { "Create Room" }
+                            }}
+                        </button>
+                        {move || {
+                            create
+                                .value()
+                                .get()
+                                .and_then(|v| v.err())
+                                .map(|e| {
+                                    view! { <p class="text-xs text-red-500">{e.to_string()}</p> }
+                                })
+                        }}
+                    </ActionForm>
+                </div>
             </GameGate>
         </div>
         <Footer />
@@ -553,59 +562,69 @@ pub fn LightBeamsRoom() -> impl IntoView {
         <NavBar />
         <div class="container mx-auto px-4 py-6">
             <GameGate>
-            {move || {
-                let c = code();
-                if c.is_empty() {
-                    return view! { <p class="text-red-500">"Missing room code."</p> }.into_any();
-                }
-                view! {
-                    <Suspense fallback=|| {
-                        view! {
-                            <p class="text-sm text-stone-400 pt-16 text-center">
-                                "Checking room..."
-                            </p>
-                        }
-                    }>
-                        {move || {
-                            let c = code();
-                            match exists.get() {
-                                Some(Ok(true)) => {
-                                    view! { <RoomGate code=c.clone() passcode passcode_submitted set_passcode set_passcode_submitted /> }
-                                        .into_any()
-                                }
-                                Some(Ok(false)) => {
-                                    view! {
-                                        <div class="max-w-xs mx-auto space-y-4 pt-16 text-center">
-                                            <h2 class="text-xl font-bold dark:text-white">
-                                                "No game found"
-                                            </h2>
-                                            <p class="text-sm text-stone-500 dark:text-stone-400">
-                                                "There's no room with the code " <span class="font-mono">{c.clone()}</span> "."
-                                            </p>
-                                            <A
-                                                href="/games/light-beams"
-                                                attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
-                                            >
-                                                "Back to the lobby"
-                                            </A>
-                                        </div>
-                                    }
-                                        .into_any()
-                                }
-                                _ => {
-                                    view! {
-                                        <p class="text-sm text-red-500 pt-16 text-center">
-                                            "Couldn't check the room. Try again."
-                                        </p>
-                                    }
-                                        .into_any()
-                                }
+                {move || {
+                    let c = code();
+                    if c.is_empty() {
+                        return view! { <p class="text-red-500">"Missing room code."</p> }
+                            .into_any();
+                    }
+                    view! {
+                        <Suspense fallback=|| {
+                            view! {
+                                <p class="text-sm text-stone-400 pt-16 text-center">
+                                    "Checking room..."
+                                </p>
                             }
-                        }}
-                    </Suspense>
-                }
-                    .into_any()
-            }}
+                        }>
+                            {move || {
+                                let c = code();
+                                match exists.get() {
+                                    Some(Ok(true)) => {
+                                        view! {
+                                            <RoomGate
+                                                code=c.clone()
+                                                passcode
+                                                passcode_submitted
+                                                set_passcode
+                                                set_passcode_submitted
+                                            />
+                                        }
+                                            .into_any()
+                                    }
+                                    Some(Ok(false)) => {
+                                        view! {
+                                            <div class="max-w-xs mx-auto space-y-4 pt-16 text-center">
+                                                <h2 class="text-xl font-bold dark:text-white">
+                                                    "No game found"
+                                                </h2>
+                                                <p class="text-sm text-stone-500 dark:text-stone-400">
+                                                    "There's no room with the code "
+                                                    <span class="font-mono">{c.clone()}</span> "."
+                                                </p>
+                                                <A
+                                                    href="/games/light-beams"
+                                                    attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+                                                >
+                                                    "Back to the lobby"
+                                                </A>
+                                            </div>
+                                        }
+                                            .into_any()
+                                    }
+                                    _ => {
+                                        view! {
+                                            <p class="text-sm text-red-500 pt-16 text-center">
+                                                "Couldn't check the room. Try again."
+                                            </p>
+                                        }
+                                            .into_any()
+                                    }
+                                }
+                            }}
+                        </Suspense>
+                    }
+                        .into_any()
+                }}
             </GameGate>
         </div>
         <Footer />
@@ -624,45 +643,42 @@ fn RoomGate(
 ) -> impl IntoView {
     view! {
         {move || {
-                let c = code.clone();
-                if !passcode_submitted.get() {
-                    return view! {
-                        <div class="max-w-xs mx-auto space-y-4 pt-16">
-                            <h2 class="text-xl font-bold dark:text-white">
-                                "Enter Passcode for " {c.clone()}
-                            </h2>
-                            <form
-                                on:submit=move |ev| {
-                                    ev.prevent_default();
-                                    if !passcode.get_untracked().is_empty() {
-                                        set_passcode_submitted.set(true);
-                                    }
+            let c = code.clone();
+            if !passcode_submitted.get() {
+                return view! {
+                    <div class="max-w-xs mx-auto space-y-4 pt-16">
+                        <h2 class="text-xl font-bold dark:text-white">
+                            "Enter Passcode for " {c.clone()}
+                        </h2>
+                        <form
+                            on:submit=move |ev| {
+                                ev.prevent_default();
+                                if !passcode.get_untracked().is_empty() {
+                                    set_passcode_submitted.set(true);
                                 }
-                                class="space-y-3"
+                            }
+                            class="space-y-3"
+                        >
+                            <input
+                                type="text"
+                                placeholder="Passcode"
+                                class="w-full rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 dark:text-white"
+                                on:input=move |ev| set_passcode.set(event_target_value(&ev))
+                                prop:value=move || passcode.get()
+                            />
+                            <button
+                                type="submit"
+                                class="w-full rounded bg-blue-500 py-2 text-white hover:bg-blue-600"
                             >
-                                <input
-                                    type="text"
-                                    placeholder="Passcode"
-                                    class="w-full rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 dark:text-white"
-                                    on:input=move |ev| set_passcode.set(event_target_value(&ev))
-                                    prop:value=move || passcode.get()
-                                />
-                                <button
-                                    type="submit"
-                                    class="w-full rounded bg-blue-500 py-2 text-white hover:bg-blue-600"
-                                >
-                                    "Enter"
-                                </button>
-                            </form>
-                        </div>
-                    }
-                        .into_any();
+                                "Enter"
+                            </button>
+                        </form>
+                    </div>
                 }
-                let pc = passcode.get();
-                view! {
-                    <light_beams::GameRoomInner room_id=c room_passcode=pc />
-                }
-                    .into_any()
-            }}
+                    .into_any();
+            }
+            let pc = passcode.get();
+            view! { <light_beams::GameRoomInner room_id=c room_passcode=pc /> }.into_any()
+        }}
     }
 }

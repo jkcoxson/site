@@ -136,11 +136,7 @@ fn InstallSection() -> impl IntoView {
                 return;
             };
             let el: &web_sys::HtmlInputElement = input.unchecked_ref();
-            file_name.set(
-                el.files()
-                    .and_then(|fl| fl.item(0))
-                    .map(|f| f.name()),
-            );
+            file_name.set(el.files().and_then(|fl| fl.item(0)).map(|f| f.name()));
         }
         #[cfg(not(target_arch = "wasm32"))]
         let _ = input_ref;
@@ -319,8 +315,10 @@ fn StatusBlock(status: RwSignal<Option<String>>) -> impl IntoView {
 // --- wasm-only backends ---------------------------------------------------
 
 #[cfg(target_arch = "wasm32")]
-async fn open_mis(state: &IdeviceState) -> Result<idevice::services::misagent::MisagentClient, String> {
-    use idevice::{IdeviceService, misagent::MisagentClient};
+async fn open_mis(
+    state: &IdeviceState,
+) -> Result<idevice::services::misagent::MisagentClient, String> {
+    use idevice::{misagent::MisagentClient, IdeviceService};
     let provider = crate::idevice_tools::transport::build_provider(state)?;
     MisagentClient::connect(&provider)
         .await
@@ -330,10 +328,7 @@ async fn open_mis(state: &IdeviceState) -> Result<idevice::services::misagent::M
 #[cfg(target_arch = "wasm32")]
 async fn run_list(state: IdeviceState) -> Result<Vec<ProfileEntry>, String> {
     let mut c = open_mis(&state).await?;
-    let profiles = c
-        .copy_all()
-        .await
-        .map_err(|e| format!("copy_all: {e:?}"))?;
+    let profiles = c.copy_all().await.map_err(|e| format!("copy_all: {e:?}"))?;
     let mut out = Vec::with_capacity(profiles.len());
     for (index, bytes) in profiles.into_iter().enumerate() {
         let url = bytes_to_blob_url(&bytes, "application/octet-stream")?;

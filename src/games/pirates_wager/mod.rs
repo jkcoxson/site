@@ -174,11 +174,26 @@ fn PiratesWagerRules() -> impl IntoView {
         </RulesSection>
         <RulesSection heading="Special cards">
             <ul class="list-disc space-y-1 pl-5">
-                <li><span class=b>"☠️ Pirates"</span>" beat every number. Between pirates, the first one played wins."</li>
-                <li><span class=b>"👑 The Captain"</span>" beats every pirate."</li>
-                <li><span class=b>"🧜 Mermaids"</span>" beat numbers and the Captain, but lose to pirates."</li>
-                <li><span class=b>"🏳️ Flags"</span>" always lose. If everyone plays one, the first wins."</li>
-                <li><span class=b>"🎭 The Turncoat"</span>" plays as a pirate or a flag, your choice."</li>
+                <li>
+                    <span class=b>"☠️ Pirates"</span>
+                    " beat every number. Between pirates, the first one played wins."
+                </li>
+                <li>
+                    <span class=b>"👑 The Captain"</span>
+                    " beats every pirate."
+                </li>
+                <li>
+                    <span class=b>"🧜 Mermaids"</span>
+                    " beat numbers and the Captain, but lose to pirates."
+                </li>
+                <li>
+                    <span class=b>"🏳️ Flags"</span>
+                    " always lose. If everyone plays one, the first wins."
+                </li>
+                <li>
+                    <span class=b>"🎭 The Turncoat"</span>
+                    " plays as a pirate or a flag, your choice."
+                </li>
                 <li>
                     "A flag lead lets the next card set the suit. A character lead means \
                     there's no suit to follow."
@@ -187,8 +202,12 @@ fn PiratesWagerRules() -> impl IntoView {
         </RulesSection>
         <RulesSection heading="Scoring">
             <ul class="list-disc space-y-1 pl-5">
-                <li>"Bid one or more and make it: 20 points per trick. Miss: −10 per trick you were off."</li>
-                <li>"Bid zero and take nothing: 10 × cards dealt. Take any: −10 × cards dealt."</li>
+                <li>
+                    "Bid one or more and make it: 20 points per trick. Miss: −10 per trick you were off."
+                </li>
+                <li>
+                    "Bid zero and take nothing: 10 × cards dealt. Take any: −10 × cards dealt."
+                </li>
                 <li>
                     "Bonuses, only when you make your bid: 10 per 14 you capture (20 for the \
                     cutlass 14), 20 per mermaid taken by a pirate, 30 per pirate taken by the \
@@ -198,7 +217,10 @@ fn PiratesWagerRules() -> impl IntoView {
         </RulesSection>
         <RulesSection heading="Optional cards">
             <ul class="list-disc space-y-1 pl-5">
-                <li><span class=b>"🐙 Kraken"</span>": nobody wins the trick. Whoever would have won leads next."</li>
+                <li>
+                    <span class=b>"🐙 Kraken"</span>
+                    ": nobody wins the trick. Whoever would have won leads next."
+                </li>
                 <li>
                     <span class=b>"🐋 White Whale"</span>
                     ": special cards are wiped out and the highest number wins, ignoring \
@@ -457,7 +479,11 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                     <span class="rounded bg-amber-400 px-3 py-1 font-semibold text-stone-900">
                         {move || {
                             game.with(|g| {
-                                if g.dealt == 1 { "1 card".to_string() } else { format!("{} cards", g.dealt) }
+                                if g.dealt == 1 {
+                                    "1 card".to_string()
+                                } else {
+                                    format!("{} cards", g.dealt)
+                                }
                             })
                         }}
                     </span>
@@ -492,11 +518,11 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                                     Some((w, r.cards[won_with].card.id))
                                 });
                             game.with_untracked(|g| {
-                                cards
-                                    .into_iter()
-                                    .map(|p| trick_card(g, p, winner_card.map(|w| w.1)))
-                                    .collect_view()
-                            })
+                                    cards
+                                        .into_iter()
+                                        .map(|p| trick_card(g, p, winner_card.map(|w| w.1)))
+                                        .collect_view()
+                                })
                                 .into_any()
                         }}
                     </div>
@@ -516,7 +542,9 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                                     let mut s = match t.winner {
                                         Some(w) if w == g.you => "You take the trick!".to_string(),
                                         Some(w) => format!("{} takes the trick.", name_of(g, w)),
-                                        None => format!("Nobody wins. {} leads.", name_of(g, t.next)),
+                                        None => {
+                                            format!("Nobody wins. {} leads.", name_of(g, t.next))
+                                        }
                                     };
                                     if !t.why.is_empty() {
                                         s = format!("{} {s}", t.why);
@@ -534,10 +562,20 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                 </p>
 
                 {move || match stage.get() {
-                    StageKind::Bidding => view! { <BidPanel game /> <HandPanel game my_turn /> }.into_any(),
+                    StageKind::Bidding => {
+                        view! {
+                            <BidPanel game />
+                            <HandPanel game my_turn />
+                        }
+                            .into_any()
+                    }
                     StageKind::Playing => view! { <HandPanel game my_turn /> }.into_any(),
                     StageKind::Ability => {
-                        view! { <AbilityPanel game /> <HandPanel game my_turn /> }.into_any()
+                        view! {
+                            <AbilityPanel game />
+                            <HandPanel game my_turn />
+                        }
+                            .into_any()
                     }
                     StageKind::RoundOver => {
                         let results = move || {
@@ -563,9 +601,15 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                             Some(
                                 view! {
                                     <div class="space-y-4">
-                                        {final_standings(g.you, standings, names, || send_msg(&ClientMsg::PlayAgain))}
-                                        <h3 class="pt-2 text-sm font-semibold text-stone-500 uppercase">"Final round"</h3>
-                                        {results_table(&g, results)}
+                                        {final_standings(
+                                            g.you,
+                                            standings,
+                                            names,
+                                            || send_msg(&ClientMsg::PlayAgain),
+                                        )}
+                                        <h3 class="pt-2 text-sm font-semibold text-stone-500 uppercase">
+                                            "Final round"
+                                        </h3> {results_table(&g, results)}
                                     </div>
                                 },
                             )
@@ -780,7 +824,14 @@ fn AbilityPanel(game: Memo<GameView>) -> impl IntoView {
                         p.nickname.clone()
                     };
                     view! {
-                        <button class=button on:click=move |_| send_msg(&ClientMsg::ChooseLeader { player: id })>
+                        <button
+                            class=button
+                            on:click=move |_| send_msg(
+                                &ClientMsg::ChooseLeader {
+                                    player: id,
+                                },
+                            )
+                        >
                             {label}
                         </button>
                     }
@@ -810,13 +861,14 @@ fn AbilityPanel(game: Memo<GameView>) -> impl IntoView {
                                                 }
                                             }
                                             on:click=move |_| {
-                                                picks.update(|p| {
-                                                    if let Some(i) = p.iter().position(|&x| x == id) {
-                                                        p.remove(i);
-                                                    } else {
-                                                        p.push(id);
-                                                    }
-                                                })
+                                                picks
+                                                    .update(|p| {
+                                                        if let Some(i) = p.iter().position(|&x| x == id) {
+                                                            p.remove(i);
+                                                        } else {
+                                                            p.push(id);
+                                                        }
+                                                    })
                                             }
                                         >
                                             {card_face(c)}
@@ -829,7 +881,11 @@ fn AbilityPanel(game: Memo<GameView>) -> impl IntoView {
                             class=button
                             disabled=move || picks.with(|p| p.len()) != extra
                             on:click=move |_| {
-                                send_msg(&ClientMsg::Discard { cards: picks.get_untracked() });
+                                send_msg(
+                                    &ClientMsg::Discard {
+                                        cards: picks.get_untracked(),
+                                    },
+                                );
                                 picks.set(Vec::new());
                             }
                         >
@@ -865,7 +921,9 @@ fn AbilityPanel(game: Memo<GameView>) -> impl IntoView {
                         }}
                     </p>
                     {mini_cards(cards)}
-                    <button class=button on:click=|_| send_msg(&ClientMsg::Done)>"Done"</button>
+                    <button class=button on:click=|_| send_msg(&ClientMsg::Done)>
+                        "Done"
+                    </button>
                 </div>
             }
             .into_any(),
@@ -880,7 +938,7 @@ fn AbilityPanel(game: Memo<GameView>) -> impl IntoView {
                 view! {
                     <button
                         class=button
-                        disabled={bid == 0}
+                        disabled=bid == 0
                         on:click=|_| send_msg(&ClientMsg::ChangeBid { by: -1 })
                     >
                         {format!("Bid {}", bid.saturating_sub(1))}
@@ -890,7 +948,7 @@ fn AbilityPanel(game: Memo<GameView>) -> impl IntoView {
                     </button>
                     <button
                         class=button
-                        disabled={bid >= dealt}
+                        disabled=bid >= dealt
                         on:click=|_| send_msg(&ClientMsg::ChangeBid { by: 1 })
                     >
                         {format!("Bid {}", bid + 1)}
@@ -947,8 +1005,22 @@ fn results_table(g: &GameView, results: Vec<RoundResult>) -> impl IntoView {
                     <td class="px-1 text-center">{format!("{}/{}", r.won, r.bid)}</td>
                     <td class="px-1 text-right">{signed(r.base)}</td>
                     <td class="px-1 text-right">{(r.bonus != 0).then(|| signed(r.bonus))}</td>
-                    {show_loot.then(|| view! { <td class="px-1 text-right">{(r.loot != 0).then(|| signed(r.loot))}</td> })}
-                    {show_bet.then(|| view! { <td class="px-1 text-right">{(r.bet != 0).then(|| signed(r.bet))}</td> })}
+                    {show_loot
+                        .then(|| {
+                            view! {
+                                <td class="px-1 text-right">
+                                    {(r.loot != 0).then(|| signed(r.loot))}
+                                </td>
+                            }
+                        })}
+                    {show_bet
+                        .then(|| {
+                            view! {
+                                <td class="px-1 text-right">
+                                    {(r.bet != 0).then(|| signed(r.bet))}
+                                </td>
+                            }
+                        })}
                     <td class=format!("px-1 text-right {class}")>{signed(r.total)}</td>
                     <td class="pl-2 text-right font-bold">{total}</td>
                 </tr>
@@ -981,7 +1053,9 @@ fn round_over(g: GameView, results: Vec<RoundResult>) -> impl IntoView {
     let next = g.round + 1;
     view! {
         <div class="space-y-3">
-            <h2 class="text-lg font-semibold dark:text-white">{format!("Round {} results", g.round)}</h2>
+            <h2 class="text-lg font-semibold dark:text-white">
+                {format!("Round {} results", g.round)}
+            </h2>
             {results_table(&g, results)}
             {if host {
                 view! {

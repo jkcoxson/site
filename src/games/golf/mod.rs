@@ -127,7 +127,10 @@ fn grid_view(game: Memo<GameView>, player: u8, mine: bool) -> impl IntoView {
                         }
                         None => {
                             view! {
-                                <div data-pile=slot_pile(player, slot as u8)>{card_back(String::new())}</div>
+                                <div data-pile=slot_pile(
+                                    player,
+                                    slot as u8,
+                                )>{card_back(String::new())}</div>
                             }
                                 .into_any()
                         }
@@ -144,8 +147,16 @@ fn grid_view(game: Memo<GameView>, player: u8, mine: bool) -> impl IntoView {
                             on:click=move |_| {
                                 let msg = match action() {
                                     SlotAction::None => return,
-                                    SlotAction::Flip => ClientMsg::Flip { slot: slot as u8 },
-                                    SlotAction::Swap => ClientMsg::Swap { slot: slot as u8 },
+                                    SlotAction::Flip => {
+                                        ClientMsg::Flip {
+                                            slot: slot as u8,
+                                        }
+                                    }
+                                    SlotAction::Swap => {
+                                        ClientMsg::Swap {
+                                            slot: slot as u8,
+                                        }
+                                    }
                                 };
                                 send_msg(&msg);
                             }
@@ -269,24 +280,42 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                     <button
                         data-pile="deck"
                         class=move || {
-                            if can_draw() { "card-glow shrink-0 touch-manipulation" } else { "shrink-0 cursor-default" }
+                            if can_draw() {
+                                "card-glow shrink-0 touch-manipulation"
+                            } else {
+                                "shrink-0 cursor-default"
+                            }
                         }
                         disabled=move || !can_draw()
-                        on:click=|_| send_msg(&ClientMsg::Draw { from_discard: false })
+                        on:click=|_| send_msg(
+                            &ClientMsg::Draw {
+                                from_discard: false,
+                            },
+                        )
                         title="Draw from the deck"
                     >
                         {move || card_back(format!("{} left", game.with(|g| g.deck_size)))}
                     </button>
                     <button
                         class=move || {
-                            if can_take() { "card-glow shrink-0 touch-manipulation" } else { "shrink-0 cursor-default" }
+                            if can_take() {
+                                "card-glow shrink-0 touch-manipulation"
+                            } else {
+                                "shrink-0 cursor-default"
+                            }
                         }
                         disabled=move || !can_take()
-                        on:click=|_| send_msg(&ClientMsg::Draw { from_discard: true })
+                        on:click=|_| send_msg(
+                            &ClientMsg::Draw {
+                                from_discard: true,
+                            },
+                        )
                         title="Take the top discard"
                     >
                         {move || match game.with(|g| g.discard_top) {
-                            Some(c) => view! { <div data-card=c.id>{card_face(c, "")}</div> }.into_any(),
+                            Some(c) => {
+                                view! { <div data-card=c.id>{card_face(c, "")}</div> }.into_any()
+                            }
                             None => card_slot("discard").into_any(),
                         }}
                     </button>
@@ -296,9 +325,14 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                                 let holder = game.with(|g| name_of(g, g.current));
                                 view! {
                                     <div class="flex flex-col items-center gap-1">
-                                        <div data-card=c.id>{card_face(c, "ring-4 ring-blue-500")}</div>
+                                        <div data-card=c
+                                            .id>{card_face(c, "ring-4 ring-blue-500")}</div>
                                         <span class="text-[0.65rem] text-green-100">
-                                            {if my_turn.get() { "You drew".to_string() } else { format!("{holder} drew") }}
+                                            {if my_turn.get() {
+                                                "You drew".to_string()
+                                            } else {
+                                                format!("{holder} drew")
+                                            }}
                                         </span>
                                     </div>
                                 }
@@ -437,7 +471,13 @@ fn results_list(g: &GameView, results: Vec<HoleResult>) -> impl IntoView {
                             <div class="space-y-0.5 text-sm dark:text-stone-100">
                                 <p class="font-semibold">
                                     {name}
-                                    {r.went_out.then(|| view! { <span class="ml-1 text-xs text-amber-500">"went out"</span> })}
+                                    {r
+                                        .went_out
+                                        .then(|| {
+                                            view! {
+                                                <span class="ml-1 text-xs text-amber-500">"went out"</span>
+                                            }
+                                        })}
                                 </p>
                                 <p>{format!("This hole: {}", signed(r.score))}</p>
                                 <p class="text-xs text-stone-500">{format!("Total: {total}")}</p>
@@ -455,7 +495,9 @@ fn hole_over(g: GameView, results: Vec<HoleResult>) -> impl IntoView {
     let next = g.hole + 1;
     view! {
         <div class="space-y-3 rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-800">
-            <h2 class="text-lg font-semibold dark:text-white">{format!("Hole {} results", g.hole)}</h2>
+            <h2 class="text-lg font-semibold dark:text-white">
+                {format!("Hole {} results", g.hole)}
+            </h2>
             {results_list(&g, results)}
             {if host {
                 view! {
@@ -498,8 +540,7 @@ fn game_over(g: GameView, results: Vec<HoleResult>, standings: Vec<Standing>) ->
             {final_standings(g.you, standings, names, || send_msg(&ClientMsg::PlayAgain))}
             <h3 class="pt-2 text-sm font-semibold text-stone-500 uppercase">
                 {format!("Hole {}", g.hole)}
-            </h3>
-            {results_list(&g, results)}
+            </h3> {results_list(&g, results)}
         </div>
     }
 }
@@ -520,7 +561,9 @@ fn GolfRules() -> impl IntoView {
     let b = "font-medium text-white";
     view! {
         <RulesSection heading="Goal">
-            <p>"Have the lowest score. Each hand is a hole, and scores add up from hole to hole."</p>
+            <p>
+                "Have the lowest score. Each hand is a hole, and scores add up from hole to hole."
+            </p>
         </RulesSection>
         <RulesSection heading="Setup">
             <p>
@@ -540,7 +583,10 @@ fn GolfRules() -> impl IntoView {
                     <span class=b>"Take the top discard."</span>
                     " You have to swap it for one of your cards."
                 </li>
-                <li><span class=b>"Turn up"</span>" one of your face-down cards."</li>
+                <li>
+                    <span class=b>"Turn up"</span>
+                    " one of your face-down cards."
+                </li>
             </ul>
             <p>"A card you swap out goes on the discard pile, and the new card goes in face up."</p>
         </RulesSection>
@@ -552,7 +598,10 @@ fn GolfRules() -> impl IntoView {
         </RulesSection>
         <RulesSection heading="Scoring">
             <ul class="list-disc space-y-1 pl-5">
-                <li>"Cards are worth their number. " <span class=b>"2s are -2"</span> " and " <span class=b>"Wilds are 0"</span> "."</li>
+                <li>
+                    "Cards are worth their number. " <span class=b>"2s are -2"</span> " and "
+                    <span class=b>"Wilds are 0"</span> "."
+                </li>
                 <li>
                     "A " <span class=b>"column"</span>
                     " of three matching numbers scores 0. Wilds don't match anything, and a column \

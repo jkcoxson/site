@@ -232,7 +232,12 @@ impl Forge {
                 if path.file_name().unwrap_or_default() == "forge.toml" {
                     continue;
                 }
-                if path.file_name().unwrap_or_default().to_string_lossy().starts_with("._") {
+                if path
+                    .file_name()
+                    .unwrap_or_default()
+                    .to_string_lossy()
+                    .starts_with("._")
+                {
                     continue;
                 }
                 files.push((

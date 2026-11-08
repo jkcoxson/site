@@ -73,8 +73,7 @@ pub fn RulesButton(
                         </div>
 
                         <div class="space-y-6 px-5 py-5 text-sm leading-relaxed">
-                            {children()}
-                            <div class="flex justify-end pt-1">
+                            {children()} <div class="flex justify-end pt-1">
                                 <button
                                     on:click=move |_| show.set(false)
                                     class="rounded-xl bg-blue-500 px-5 py-2 font-semibold text-white hover:bg-blue-600 touch-manipulation"

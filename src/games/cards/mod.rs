@@ -52,8 +52,8 @@ impl GameKind {
             GameKind::Monuments,
             GameKind::ChickenScratch,
         ]
-            .into_iter()
-            .find(|g| g.slug() == slug)
+        .into_iter()
+        .find(|g| g.slug() == slug)
     }
 
     pub fn title(self) -> &'static str {
@@ -647,12 +647,18 @@ fn waiting_room(kind: GameKind, info: LobbyInfo) -> impl IntoView {
                                         }></span>
                                         {p.nickname.clone()}
                                         {(p.id == you)
-                                            .then(|| view! { <span class="text-xs text-stone-400">"(you)"</span> })}
+                                            .then(|| {
+                                                view! {
+                                                    <span class="text-xs text-stone-400">"(you)"</span>
+                                                }
+                                            })}
                                     </span>
                                     {(p.id == host)
                                         .then(|| {
                                             view! {
-                                                <span class="text-xs font-semibold text-amber-500">"Host"</span>
+                                                <span class="text-xs font-semibold text-amber-500">
+                                                    "Host"
+                                                </span>
                                             }
                                         })}
                                 </li>
@@ -662,14 +668,20 @@ fn waiting_room(kind: GameKind, info: LobbyInfo) -> impl IntoView {
                 </ul>
                 {(!about.is_empty())
                     .then(|| {
-                        view! { <p class="mt-3 text-xs text-stone-500 dark:text-stone-400">{about}</p> }
+                        view! {
+                            <p class="mt-3 text-xs text-stone-500 dark:text-stone-400">{about}</p>
+                        }
                     })}
             </div>
             <form
                 class="flex gap-2"
                 on:submit=move |ev| {
                     ev.prevent_default();
-                    send(&CommonMsg::SetNickname { name: name.get_untracked() });
+                    send(
+                        &CommonMsg::SetNickname {
+                            name: name.get_untracked(),
+                        },
+                    );
                 }
             >
                 <input
@@ -714,9 +726,13 @@ fn waiting_room(kind: GameKind, info: LobbyInfo) -> impl IntoView {
             }}
             <p class="text-center text-xs text-stone-500">
                 {if min > 2 {
-                    format!("Share the room code and passcode so friends can join. {min} to {max} players.")
+                    format!(
+                        "Share the room code and passcode so friends can join. {min} to {max} players.",
+                    )
                 } else {
-                    format!("Share the room code and passcode so friends can join. Up to {max} players.")
+                    format!(
+                        "Share the room code and passcode so friends can join. Up to {max} players.",
+                    )
                 }}
             </p>
         </div>
@@ -758,13 +774,16 @@ pub fn room_page<V: TableView>(kind: GameKind, table: TableFn<V>, rules: RulesFn
         <div class="container mx-auto px-3 py-4 sm:px-4 sm:py-6">
             <GameGate>
                 <Suspense fallback=|| {
-                    view! { <p class="pt-16 text-center text-sm text-stone-400">"Checking room..."</p> }
+                    view! {
+                        <p class="pt-16 text-center text-sm text-stone-400">"Checking room..."</p>
+                    }
                 }>
                     {move || {
                         let c = code();
                         match exists.get() {
                             Some(Ok(true)) if entered.get() => {
-                                game_room(kind, c, passcode.get_untracked(), table, rules).into_any()
+                                game_room(kind, c, passcode.get_untracked(), table, rules)
+                                    .into_any()
                             }
                             Some(Ok(true)) => {
                                 view! {
@@ -777,7 +796,9 @@ pub fn room_page<V: TableView>(kind: GameKind, table: TableFn<V>, rules: RulesFn
                                             }
                                         }
                                     >
-                                        <h2 class="text-xl font-bold dark:text-white">{format!("Enter Passcode for {c}")}</h2>
+                                        <h2 class="text-xl font-bold dark:text-white">
+                                            {format!("Enter Passcode for {c}")}
+                                        </h2>
                                         <input
                                             type="text"
                                             placeholder="Passcode"
@@ -798,9 +819,12 @@ pub fn room_page<V: TableView>(kind: GameKind, table: TableFn<V>, rules: RulesFn
                             Some(Ok(false)) => {
                                 view! {
                                     <div class="mx-auto max-w-xs space-y-4 pt-16 text-center">
-                                        <h2 class="text-xl font-bold dark:text-white">"No game found"</h2>
+                                        <h2 class="text-xl font-bold dark:text-white">
+                                            "No game found"
+                                        </h2>
                                         <p class="text-sm text-stone-500 dark:text-stone-400">
-                                            "There's no room with the code " <span class="font-mono">{c}</span> "."
+                                            "There's no room with the code "
+                                            <span class="font-mono">{c}</span> "."
                                         </p>
                                         <A
                                             href=lobby_href.clone()
@@ -854,7 +878,9 @@ pub fn lobby_page(kind: GameKind, options: AnyView, rules: RulesFn) -> impl Into
                             <h1 class="text-3xl font-bold dark:text-white">{kind.title()}</h1>
                             {rules()}
                         </div>
-                        <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">{kind.blurb()}</p>
+                        <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                            {kind.blurb()}
+                        </p>
                     </div>
                     <div class="rounded-lg border border-stone-200 bg-white p-5 dark:border-stone-700 dark:bg-stone-800">
                         <div class="mb-3 flex items-center justify-between">
@@ -874,7 +900,9 @@ pub fn lobby_page(kind: GameKind, options: AnyView, rules: RulesFn) -> impl Into
                                     .get()
                                     .map(|result| match result {
                                         Err(_) => {
-                                            view! { <p class="text-sm text-red-500">"Error loading rooms."</p> }
+                                            view! {
+                                                <p class="text-sm text-red-500">"Error loading rooms."</p>
+                                            }
                                                 .into_any()
                                         }
                                         Ok(list) if list.is_empty() => {
@@ -898,7 +926,9 @@ pub fn lobby_page(kind: GameKind, options: AnyView, rules: RulesFn) -> impl Into
                         </Suspense>
                     </div>
                     <div class="rounded-lg border border-stone-200 bg-white p-5 dark:border-stone-700 dark:bg-stone-800">
-                        <h2 class="mb-3 text-lg font-semibold dark:text-stone-100">"Create a Room"</h2>
+                        <h2 class="mb-3 text-lg font-semibold dark:text-stone-100">
+                            "Create a Room"
+                        </h2>
                         <ActionForm action=create attr:class="space-y-3">
                             <input type="hidden" name="game" value=kind.slug() />
                             <input
@@ -921,14 +951,24 @@ pub fn lobby_page(kind: GameKind, options: AnyView, rules: RulesFn) -> impl Into
                                 class="w-full touch-manipulation rounded bg-blue-500 py-2 text-sm font-semibold text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 disabled=move || create.pending().get()
                             >
-                                {move || if create.pending().get() { "Creating..." } else { "Create Room" }}
+                                {move || {
+                                    if create.pending().get() {
+                                        "Creating..."
+                                    } else {
+                                        "Create Room"
+                                    }
+                                }}
                             </button>
                             {move || {
                                 create
                                     .value()
                                     .get()
                                     .and_then(|v| v.err())
-                                    .map(|e| view! { <p class="text-xs text-red-500">{e.to_string()}</p> })
+                                    .map(|e| {
+                                        view! {
+                                            <p class="text-xs text-red-500">{e.to_string()}</p>
+                                        }
+                                    })
                             }}
                         </ActionForm>
                     </div>
@@ -1018,28 +1058,44 @@ pub fn seat_strip(seats: impl Fn() -> Vec<SeatChip> + Send + Sync + 'static) -> 
                             <div data-seat=p.id class=class>
                                 <div class="flex max-w-[9rem] items-center gap-1 font-semibold dark:text-stone-100">
                                     <span class="truncate">{p.name.clone()}</span>
-                                    {p.you
-                                        .then(|| view! { <span class="text-xs font-normal text-stone-400">"(you)"</span> })}
+                                    {p
+                                        .you
+                                        .then(|| {
+                                            view! {
+                                                <span class="text-xs font-normal text-stone-400">
+                                                    "(you)"
+                                                </span>
+                                            }
+                                        })}
                                 </div>
                                 <div class="flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400">
-                                    {p.score
+                                    {p
+                                        .score
                                         .map(|score| {
                                             view! {
                                                 <span>
-                                                    <span class="font-bold text-stone-800 dark:text-stone-100">{score}</span>
+                                                    <span class="font-bold text-stone-800 dark:text-stone-100">
+                                                        {score}
+                                                    </span>
                                                     " pts"
                                                 </span>
                                             }
                                         })}
-                                    {p.tags
+                                    {p
+                                        .tags
                                         .into_iter()
                                         .map(|(text, class)| {
                                             view! {
-                                                <span class=format!("rounded px-1 text-[0.6rem] {class}")>{text}</span>
+                                                <span class=format!(
+                                                    "rounded px-1 text-[0.6rem] {class}",
+                                                )>{text}</span>
                                             }
                                         })
                                         .collect_view()}
-                                    {(!p.connected).then(|| view! { <span class="text-[0.6rem]">"away"</span> })}
+                                    {(!p.connected)
+                                        .then(|| {
+                                            view! { <span class="text-[0.6rem]">"away"</span> }
+                                        })}
                                 </div>
                             </div>
                         }
@@ -1141,7 +1197,9 @@ pub fn peek_tabs(
     let arrow = "flex h-10 w-9 shrink-0 touch-manipulation items-center justify-center rounded-lg bg-stone-200 text-stone-700 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-100 dark:hover:bg-stone-600";
     view! {
         <div class="flex items-stretch gap-1">
-            <button class=arrow aria-label="Previous player" on:click=move |_| step(-1)>"◂"</button>
+            <button class=arrow aria-label="Previous player" on:click=move |_| step(-1)>
+                "◂"
+            </button>
             <div class="flex min-w-0 flex-1 gap-1 overflow-x-auto">
                 {move || {
                     tabs()
@@ -1159,7 +1217,9 @@ pub fn peek_tabs(
                                     }
                                     on:click=move |_| viewing.set(id)
                                 >
-                                    <span class="block max-w-[7rem] truncate text-xs font-semibold">{t.label}</span>
+                                    <span class="block max-w-[7rem] truncate text-xs font-semibold">
+                                        {t.label}
+                                    </span>
                                     <span class="block text-[0.6rem] opacity-70">{t.note}</span>
                                 </button>
                             }
@@ -1167,7 +1227,9 @@ pub fn peek_tabs(
                         .collect_view()
                 }}
             </div>
-            <button class=arrow aria-label="Next player" on:click=move |_| step(1)>"▸"</button>
+            <button class=arrow aria-label="Next player" on:click=move |_| step(1)>
+                "▸"
+            </button>
         </div>
     }
 }
@@ -1441,9 +1503,11 @@ where
                             }
                             on:pointerdown=move |ev| on_down(id, ev)
                             on:click=move |ev| {
-                                // Pointers are handled above; this is for keyboards.
                                 if ev.detail() == 0 {
-                                    selected.update(|s| *s = if *s == Some(id) { None } else { Some(id) });
+                                    selected
+                                        .update(|s| {
+                                            *s = if *s == Some(id) { None } else { Some(id) };
+                                        });
                                 }
                             }
                             on:contextmenu=|ev| ev.prevent_default()

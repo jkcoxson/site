@@ -578,11 +578,15 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
             Stage::Seventh { player } if *player == g.you => {
                 "Your monument lets you play your last card too.".into()
             }
-            Stage::Seventh { player } => format!("{} is playing their last card...", g.name(*player)),
+            Stage::Seventh { player } => {
+                format!("{} is playing their last card...", g.name(*player))
+            }
             Stage::Salvage { player } if *player == g.you => {
                 "Pick a card from the discards to build for free.".into()
             }
-            Stage::Salvage { player } => format!("{} is searching the discards...", g.name(*player)),
+            Stage::Salvage { player } => {
+                format!("{} is searching the discards...", g.name(*player))
+            }
             Stage::Over { .. } => "Game over.".into(),
         })
     };
@@ -600,7 +604,11 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                 .iter()
                 .map(|p| PeekTab {
                     id: p.id,
-                    label: if p.id == g.you { "You".into() } else { p.nickname.clone() },
+                    label: if p.id == g.you {
+                        "You".into()
+                    } else {
+                        p.nickname.clone()
+                    },
                     note: if p.id == g.you {
                         p.city.board().city.to_string()
                     } else if p.id == g.left() {
@@ -741,7 +749,9 @@ fn HandPanel(game: Memo<GameView>, inspect: RwSignal<Option<u8>>) -> impl IntoVi
             let cities = g.cities();
             match build_cost(&cities, g.you as usize, id) {
                 Cost::Chain(_) => Some(("🔗 free", "bg-green-600 text-white")),
-                Cost::Cannot("You already have one.") => Some(("have it", "bg-stone-600 text-white")),
+                Cost::Cannot("You already have one.") => {
+                    Some(("have it", "bg-stone-600 text-white"))
+                }
                 Cost::Cannot(_) => Some(("can't build", "bg-red-700 text-white")),
                 _ => None,
             }
@@ -862,7 +872,14 @@ fn choose(card: u8, act: Act, pay: Pay) {
 }
 
 /// Buttons for each way to pay for something; `label` names the action.
-fn pay_buttons(g: &GameView, cost: Cost, card: u8, act: Act, label: String, style: &'static str) -> AnyView {
+fn pay_buttons(
+    g: &GameView,
+    cost: Cost,
+    card: u8,
+    act: Act,
+    label: String,
+    style: &'static str,
+) -> AnyView {
     match cost {
         Cost::Free => view! {
             <button
@@ -914,7 +931,14 @@ fn actions(g: &GameView, id: u8) -> AnyView {
     let me = g.you as usize;
     let city = &cities[me];
     let d = def(id);
-    let build = pay_buttons(g, build_cost(&cities, me, id), id, Act::Build, format!("Build {}", d.name), BTN_GO);
+    let build = pay_buttons(
+        g,
+        build_cost(&cities, me, id),
+        id,
+        Act::Build,
+        format!("Build {}", d.name),
+        BTN_GO,
+    );
     let power = can_use_power(city, id).then(|| {
         view! {
             <button
@@ -1073,7 +1097,13 @@ fn city_panel(g: &GameView, id: u8, inspect: RwSignal<Option<u8>>) -> AnyView {
     let tokens: Vec<String> = city
         .tokens
         .iter()
-        .map(|&t| if t > 0 { format!("+{t}") } else { format!("{t}") })
+        .map(|&t| {
+            if t > 0 {
+                format!("+{t}")
+            } else {
+                format!("{t}")
+            }
+        })
         .collect();
 
     // What they make. For a neighbor, what it costs you to buy.

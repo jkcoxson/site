@@ -12,21 +12,20 @@ use serde::{Deserialize, Serialize};
 
 use crate::games::{
     cards::GameKind,
-    five_crowns::server::FiveCrowns,
     chicken_scratch::{logic::Options as ChickenOptions, server::ChickenScratch},
+    five_crowns::server::FiveCrowns,
     golf::server::Golf,
-    monuments::{logic::Options as MonumentOptions, server::Monuments},
-    pirates_wager::{logic::Options as WagerOptions, server::PiratesWager},
-    stack_attack::{logic::Options as StackOptions, server::StackAttack},
     light_beams::{
         beam_tracing::trace_beam,
         logic::{
-            boards_match, is_slash, random_board, rotate_piece, validate_board, Board,
-            BoardSource, Color, LobbyPlayer, PlayerResult, Resolution, ResyncPhase, ResyncShot,
-            Rules,
+            boards_match, is_slash, random_board, rotate_piece, validate_board, Board, BoardSource,
+            Color, LobbyPlayer, PlayerResult, Resolution, ResyncPhase, ResyncShot, Rules,
         },
     },
+    monuments::{logic::Options as MonumentOptions, server::Monuments},
+    pirates_wager::{logic::Options as WagerOptions, server::PiratesWager},
     rooms::{self, RoomGame, Rooms, Seats},
+    stack_attack::{logic::Options as StackOptions, server::StackAttack},
 };
 
 // ── Wire messages ─────────────────────────────────────────────────────────────
@@ -35,7 +34,10 @@ use crate::games::{
 #[serde(tag = "type", content = "data")]
 pub enum ServerMsg {
     /// Sent immediately on connect. `token` is used to reclaim this slot on reconnect.
-    Welcome { player: u8, token: String },
+    Welcome {
+        player: u8,
+        token: String,
+    },
     /// The waiting room roster. `you` is the receiving player's id.
     Lobby {
         players: Vec<LobbyPlayer>,
@@ -43,24 +45,46 @@ pub enum ServerMsg {
         you: u8,
         rules: Rules,
     },
-    GameStart { rules: Rules },
+    GameStart {
+        rules: Rules,
+    },
     YourTurn,
     /// Play has begun but it's the opponent's move first.
     OpponentTurn,
     /// Every board is locked and the independent engine has started.
     BeginPlay,
-    BeamResult { call: u8, exit: u8, color: Color },
-    OpponentShot { call: u8, exit: u8, color: Color },
+    BeamResult {
+        call: u8,
+        exit: u8,
+        color: Color,
+    },
+    OpponentShot {
+        call: u8,
+        exit: u8,
+        color: Color,
+    },
     OpponentLocked,
     GuessIncorrect,
     OpponentCalledGame,
-    RotateResult { row: u8, col: u8, accepted: bool },
+    RotateResult {
+        row: u8,
+        col: u8,
+        accepted: bool,
+    },
     /// The opponent attempted to flip one of your cells. `accepted` is true when
     /// they correctly guessed a mirror's location (and it was rotated).
-    YourMirrorRotated { row: u8, col: u8, accepted: bool },
+    YourMirrorRotated {
+        row: u8,
+        col: u8,
+        accepted: bool,
+    },
     /// You solved your board in an independent game.
-    YouFinished { score: u32 },
-    PlayerFinished { player: u8 },
+    YouFinished {
+        score: u32,
+    },
+    PlayerFinished {
+        player: u8,
+    },
     GameOver {
         you_win: bool,
         your_board: Board,
@@ -76,8 +100,12 @@ pub enum ServerMsg {
         host: u8,
         phase: ResyncPhase,
     },
-    PlayerConnected { player: u8 },
-    PlayerDisconnected { player: u8 },
+    PlayerConnected {
+        player: u8,
+    },
+    PlayerDisconnected {
+        player: u8,
+    },
     Error(String),
 }
 
@@ -192,7 +220,11 @@ impl LightBeams {
 
     /// Beams fired plus penalties: what an untimed independent game scores.
     fn running_score(&self, player: usize) -> u32 {
-        let shots = self.shot_history.iter().filter(|s| s.player == player).count() as u32;
+        let shots = self
+            .shot_history
+            .iter()
+            .filter(|s| s.player == player)
+            .count() as u32;
         match &self.phase {
             MatchPhase::Independent { wrong, wasted, .. } => shots + wrong[player] + wasted[player],
             _ => shots,
@@ -337,7 +369,9 @@ impl LightBeams {
             ClientMsg::LockBoard { board } => self.on_lock_board(seats, player, board),
             ClientMsg::ShootBeam { port } => self.on_shoot(seats, player, port),
             ClientMsg::CallGame { guess } => self.on_call_game(seats, player, guess),
-            ClientMsg::RequestRotate { row, col } => self.on_request_rotate(seats, player, row, col),
+            ClientMsg::RequestRotate { row, col } => {
+                self.on_request_rotate(seats, player, row, col)
+            }
             ClientMsg::PlayAgain => self.on_play_again(seats),
         }
     }
@@ -363,7 +397,10 @@ impl LightBeams {
             return;
         }
         if seats.len() > self.capacity() {
-            seats.send(player, &ServerMsg::Error("Too many players for this mode.".into()));
+            seats.send(
+                player,
+                &ServerMsg::Error("Too many players for this mode.".into()),
+            );
             return;
         }
         self.shot_history.clear();
@@ -453,8 +490,15 @@ impl LightBeams {
             Ignore,
             NotYourTurn,
             InvalidPort,
-            Shot { other: usize, exit: u8, color: Color },
-            Solo { exit: u8, color: Color },
+            Shot {
+                other: usize,
+                exit: u8,
+                color: Color,
+            },
+            Solo {
+                exit: u8,
+                color: Color,
+            },
         }
         let outcome = match &mut self.phase {
             MatchPhase::Playing {
@@ -498,8 +542,22 @@ impl LightBeams {
                     exit,
                     color,
                 });
-                seats.send(player, &ServerMsg::BeamResult { call: port, exit, color });
-                seats.send(other, &ServerMsg::OpponentShot { call: port, exit, color });
+                seats.send(
+                    player,
+                    &ServerMsg::BeamResult {
+                        call: port,
+                        exit,
+                        color,
+                    },
+                );
+                seats.send(
+                    other,
+                    &ServerMsg::OpponentShot {
+                        call: port,
+                        exit,
+                        color,
+                    },
+                );
                 seats.send(other, &ServerMsg::YourTurn);
             }
             Outcome::Solo { exit, color } => {
@@ -509,7 +567,14 @@ impl LightBeams {
                     exit,
                     color,
                 });
-                seats.send(player, &ServerMsg::BeamResult { call: port, exit, color });
+                seats.send(
+                    player,
+                    &ServerMsg::BeamResult {
+                        call: port,
+                        exit,
+                        color,
+                    },
+                );
             }
         }
     }
@@ -517,7 +582,11 @@ impl LightBeams {
     fn on_call_game(&mut self, seats: &Seats, player: usize, guess: Board) {
         let timed = self.rules.timed;
         let race = matches!(self.rules.resolution, Resolution::Live);
-        let beams = self.shot_history.iter().filter(|s| s.player == player).count() as u32;
+        let beams = self
+            .shot_history
+            .iter()
+            .filter(|s| s.player == player)
+            .count() as u32;
         enum Outcome {
             Ignore,
             NotYourTurn,

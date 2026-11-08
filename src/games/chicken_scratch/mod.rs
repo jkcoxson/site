@@ -382,7 +382,11 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                             view! {
                                 <div
                                     class=move || {
-                                        if landed.get() == Some(-1) { "board-piece tile-land" } else { "board-piece" }
+                                        if landed.get() == Some(-1) {
+                                            "board-piece tile-land"
+                                        } else {
+                                            "board-piece"
+                                        }
                                     }
                                     style=piece_style(0.0, 0.0, 2.0, 1.0, 0.0)
                                     inner_html=tile_svg(c.a, c.b, false)
@@ -399,15 +403,21 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
             }
             key=|k| *k
             children=move |(_, i)| {
-                let pose = layout.with_untracked(|l| l.as_ref().and_then(|l| l.tiles.get(i).copied()));
-                let p = game.with_untracked(|g| g.board.as_ref().and_then(|b| b.placed.get(i).copied()));
+                let pose = layout
+                    .with_untracked(|l| l.as_ref().and_then(|l| l.tiles.get(i).copied()));
+                let p = game
+                    .with_untracked(|g| g.board.as_ref().and_then(|b| b.placed.get(i).copied()));
                 let (Some(pose), Some(p)) = (pose, p) else {
                     return ().into_any();
                 };
                 view! {
                     <div
                         class=move || {
-                            if landed.get() == Some(i as i32) { "board-piece tile-land" } else { "board-piece" }
+                            if landed.get() == Some(i as i32) {
+                                "board-piece tile-land"
+                            } else {
+                                "board-piece"
+                            }
                         }
                         style=piece_style(pose.x, pose.y, 2.0, 1.0, pose.angle)
                         inner_html=tile_svg(p.near, p.far(), false)
@@ -501,10 +511,16 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                         g.players
                             .iter()
                             .map(|p| {
-                                let mut tags = vec![(
-                                    format!("{} tile{}", p.tiles, if p.tiles == 1 { "" } else { "s" }),
-                                    TAG_SOFT,
-                                )];
+                                let mut tags = vec![
+                                    (
+                                        format!(
+                                            "{} tile{}",
+                                            p.tiles,
+                                            if p.tiles == 1 { "" } else { "s" },
+                                        ),
+                                        TAG_SOFT,
+                                    ),
+                                ];
                                 if playing && p.tiles == 1 {
                                     tags.push(("last one!".to_string(), TAG_GOLD));
                                 }
@@ -586,7 +602,9 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                                 <button
                                     data-card=id
                                     class=move || {
-                                        let mut c = String::from("domino-in-hand touch-manipulation");
+                                        let mut c = String::from(
+                                            "domino-in-hand touch-manipulation",
+                                        );
                                         if selected.get() == Some(id) {
                                             c.push_str(" domino-lift");
                                         }
@@ -599,7 +617,10 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                                     on:contextmenu=|ev| ev.prevent_default()
                                     aria-label=tile.label()
                                 >
-                                    <div class="domino-face" inner_html=tile_svg(tile.a, tile.b, true)></div>
+                                    <div
+                                        class="domino-face"
+                                        inner_html=tile_svg(tile.a, tile.b, true)
+                                    ></div>
                                 </button>
                             }
                         }
@@ -617,7 +638,9 @@ fn left_tiles(tiles: Vec<Tile>) -> impl IntoView {
         <div class="flex flex-wrap gap-1">
             {tiles
                 .into_iter()
-                .map(|t| view! { <div class="domino-mini" inner_html=tile_svg(t.a, t.b, false)></div> })
+                .map(|t| {
+                    view! { <div class="domino-mini" inner_html=tile_svg(t.a, t.b, false)></div> }
+                })
                 .collect_view()}
         </div>
     }
@@ -638,11 +661,19 @@ fn results_list(g: &GameView, results: Vec<RoundResult>) -> impl IntoView {
                             <div class="flex items-baseline justify-between text-sm dark:text-stone-100">
                                 <span class="font-semibold">
                                     {name}
-                                    {r.went_out.then(|| view! { <span class="ml-1 text-xs text-amber-500">"went out"</span> })}
+                                    {r
+                                        .went_out
+                                        .then(|| {
+                                            view! {
+                                                <span class="ml-1 text-xs text-amber-500">"went out"</span>
+                                            }
+                                        })}
                                 </span>
                                 <span>
                                     {format!("+{}", r.points)}
-                                    <span class="ml-2 text-xs text-stone-500">{format!("total {total}")}</span>
+                                    <span class="ml-2 text-xs text-stone-500">
+                                        {format!("total {total}")}
+                                    </span>
                                 </span>
                             </div>
                             {left_tiles(r.left)}
@@ -659,7 +690,9 @@ fn round_over(g: GameView, results: Vec<RoundResult>, blocked: bool) -> impl Int
     let next = g.round + 1;
     view! {
         <div class="row-appear space-y-3 rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-800">
-            <h2 class="text-lg font-semibold dark:text-white">{format!("Round {} results", g.round)}</h2>
+            <h2 class="text-lg font-semibold dark:text-white">
+                {format!("Round {} results", g.round)}
+            </h2>
             {blocked
                 .then(|| {
                     view! {
@@ -681,7 +714,9 @@ fn round_over(g: GameView, results: Vec<RoundResult>, blocked: bool) -> impl Int
                     .into_any()
             } else {
                 view! {
-                    <p class="text-center text-sm text-stone-500">"Waiting for the host to start the next round..."</p>
+                    <p class="text-center text-sm text-stone-500">
+                        "Waiting for the host to start the next round..."
+                    </p>
                 }
                     .into_any()
             }}

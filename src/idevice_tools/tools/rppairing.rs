@@ -148,7 +148,9 @@ fn PairSection() -> impl IntoView {
                 match run_pair(state, h.clone()).await {
                     Ok(url) => {
                         download_url.set(Some(url));
-                        status.set(Some("Paired. Click Download to save the .plist.".to_string()));
+                        status.set(Some(
+                            "Paired. Click Download to save the .plist.".to_string(),
+                        ));
                     }
                     Err(e) => {
                         state.push_log(format!("ERROR: {e}"));
@@ -256,8 +258,8 @@ async fn run_tunnel(state: IdeviceState) -> Result<(String, Vec<ServiceRow>), St
 #[cfg(target_arch = "wasm32")]
 async fn run_pair(state: IdeviceState, hostname: String) -> Result<String, String> {
     use idevice::{
-        RemoteXpcClient,
         remote_pairing::{RemotePairingClient, RpPairingFile},
+        RemoteXpcClient,
     };
 
     let (mut adapter, handshake) = crate::idevice_tools::transport::open_rsd(&state).await?;
@@ -265,7 +267,10 @@ async fn run_pair(state: IdeviceState, hostname: String) -> Result<String, Strin
         .services
         .get("com.apple.internal.dt.coredevice.untrusted.tunnelservice")
         .ok_or_else(|| "Untrusted tunnel service not in RSD listing".to_string())?;
-    state.push_log(format!("Connecting to untrusted tunnel service on port {}", ts.port));
+    state.push_log(format!(
+        "Connecting to untrusted tunnel service on port {}",
+        ts.port
+    ));
     let ts_stream = adapter
         .connect(ts.port)
         .await
@@ -292,7 +297,10 @@ async fn run_pair(state: IdeviceState, hostname: String) -> Result<String, Strin
 #[cfg(target_arch = "wasm32")]
 async fn prompt_for_pin() -> String {
     web_sys::window()
-        .and_then(|w| w.prompt_with_message("Enter the 6-digit pairing PIN displayed on the device:").ok())
+        .and_then(|w| {
+            w.prompt_with_message("Enter the 6-digit pairing PIN displayed on the device:")
+                .ok()
+        })
         .flatten()
         .unwrap_or_default()
 }

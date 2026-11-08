@@ -83,7 +83,7 @@ fn id_attr(el: &Element, name: &str) -> Option<u8> {
     el.get_attribute(name)?.parse().ok()
 }
 
-fn one(selector: &str) -> Option<Element> {
+pub(crate) fn one(selector: &str) -> Option<Element> {
     document()?.query_selector(selector).ok().flatten()
 }
 
@@ -100,7 +100,7 @@ pub fn card(id: u8) -> Option<HtmlElement> {
     one(&format!("[data-card=\"{id}\"]"))?.dyn_into().ok()
 }
 
-fn reduced_motion() -> bool {
+pub(crate) fn reduced_motion() -> bool {
     web_sys::window()
         .and_then(|w| {
             w.match_media("(prefers-reduced-motion: reduce)")
@@ -157,7 +157,7 @@ fn js_fn(target: &JsValue, name: &str) -> Option<js_sys::Function> {
 
 /// `element.animate(frames, options)`, called through JS so no extra web-sys
 /// features are needed.
-fn animate(
+pub(crate) fn animate(
     el: &Element,
     frames: &[&[(&str, String)]],
     ms: f64,
@@ -194,7 +194,7 @@ fn cancel_animations(el: &Element) {
     }
 }
 
-fn next_frame(f: impl FnOnce() + 'static) {
+pub(crate) fn next_frame(f: impl FnOnce() + 'static) {
     if let Some(w) = web_sys::window() {
         let _ = w.request_animation_frame(Closure::once_into_js(f).unchecked_ref());
     }

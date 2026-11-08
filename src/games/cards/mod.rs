@@ -28,6 +28,7 @@ pub enum GameKind {
     StackAttack,
     Golf,
     Monuments,
+    ChickenScratch,
 }
 
 impl GameKind {
@@ -38,6 +39,7 @@ impl GameKind {
             GameKind::StackAttack => "stack-attack",
             GameKind::Golf => "golf",
             GameKind::Monuments => "monuments",
+            GameKind::ChickenScratch => "chicken-scratch",
         }
     }
 
@@ -48,6 +50,7 @@ impl GameKind {
             GameKind::StackAttack,
             GameKind::Golf,
             GameKind::Monuments,
+            GameKind::ChickenScratch,
         ]
             .into_iter()
             .find(|g| g.slug() == slug)
@@ -60,6 +63,7 @@ impl GameKind {
             GameKind::StackAttack => "Stack Attack",
             GameKind::Golf => "9 Holes of Golf",
             GameKind::Monuments => "Age of Monuments",
+            GameKind::ChickenScratch => "Chicken Scratch",
         }
     }
 
@@ -85,6 +89,10 @@ impl GameKind {
                 "Lead an ancient city through three ages. Draft a card each turn, \
                  trade with your neighbors, raise your monument and outscore them all."
             }
+            GameKind::ChickenScratch => {
+                "Dominoes from the double 12 down to the double blank. Every double you play \
+                 grows a chicken foot that has to be filled before play moves on."
+            }
         }
     }
 
@@ -95,6 +103,7 @@ impl GameKind {
             GameKind::StackAttack => (2, 6),
             GameKind::Golf => (2, 6),
             GameKind::Monuments => (3, 7),
+            GameKind::ChickenScratch => (2, 8),
         }
     }
 }

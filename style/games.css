@@ -318,13 +318,178 @@
   filter: brightness(0.55) saturate(0.6);
 }
 
+/* The pan-and-zoom board (games::board). The world layer is moved by the
+   camera, which glides it frame by frame (not with a CSS transition, which
+   phones can't hold in memory for a big board). */
+
+.board-viewport {
+  position: relative;
+  overflow: hidden;
+  height: clamp(15rem, 44vh, 36rem);
+  border-radius: 0.75rem;
+  background:
+    radial-gradient(circle at 50% 40%, rgb(255 255 255 / 0.07), transparent 70%),
+    #1f4d36;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25), inset 0 2px 18px rgb(0 0 0 / 0.35);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
+}
+
+.board-viewport:active {
+  cursor: grabbing;
+}
+
+.board-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+}
+
+.board-piece,
+.board-slot {
+  position: absolute;
+}
+
+.board-piece {
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.45);
+}
+
+.domino-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* A piece that just landed on the board glows and settles. */
+@keyframes tile-land {
+  0% {
+    scale: 1.12;
+    box-shadow: 0 0 0 3px rgb(251 191 36), 0 0 26px 8px rgb(251 191 36 / 0.85);
+  }
+  to {
+    scale: 1;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.45);
+  }
+}
+
+.tile-land {
+  animation: 1.1s ease-out tile-land;
+}
+
+/* Where a tile can go: faint for lines that need filling, glowing for the
+   tile you picked. */
+.board-slot {
+  border: 2px dashed rgb(255 255 255 / 0.28);
+  border-radius: 6px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.board-slot-live {
+  border: 2px dashed rgb(251 191 36);
+  background: rgb(251 191 36 / 0.18);
+  pointer-events: auto;
+  cursor: pointer;
+  animation: 1.4s ease-in-out infinite slot-pulse;
+}
+
+@keyframes slot-pulse {
+  0%,
+  to {
+    box-shadow: 0 0 0 0 rgb(251 191 36 / 0);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px rgb(251 191 36 / 0.75);
+  }
+}
+
+/* A piece flying onto the board. */
+.board-ghost {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 10px rgb(0 0 0 / 0.45));
+}
+
+/* Dominoes in hand: they wrap into rows rather than overlap, so every pip
+   stays readable. */
+.domino-hand {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  padding-top: 0.6rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.domino-in-hand {
+  position: relative;
+  width: 2.15rem;
+  height: 4.3rem;
+  border-radius: 0.35rem;
+  transition: translate 150ms ease-out, filter 150ms;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 640px) {
+  .domino-in-hand {
+    width: 2.6rem;
+    height: 5.2rem;
+  }
+}
+
+.domino-face {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
+}
+
+.domino-lift {
+  translate: 0 -0.55rem;
+}
+
+.domino-lift > .domino-face {
+  border-radius: 0.35rem;
+  box-shadow: 0 0 0 3px rgb(59 130 246);
+}
+
+.domino-dim > .domino-face {
+  filter: brightness(0.55) saturate(0.6);
+}
+
+.domino-pile {
+  border-radius: 0.35rem;
+}
+
+.domino-small {
+  width: 1.9rem;
+  height: 3.8rem;
+}
+
+.domino-mini {
+  width: 2.6rem;
+  height: 1.3rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .beam-breathe,
   .beam-loop,
   .row-appear,
   .piece-pop,
   .card-glow,
-  .card-flip {
+  .card-flip,
+  .tile-land,
+  .board-slot-live {
     animation: none;
   }
+
 }

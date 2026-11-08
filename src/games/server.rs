@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use crate::games::{
     cards::GameKind,
     five_crowns::server::FiveCrowns,
+    chicken_scratch::{logic::Options as ChickenOptions, server::ChickenScratch},
     golf::server::Golf,
     monuments::{logic::Options as MonumentOptions, server::Monuments},
     pirates_wager::{logic::Options as WagerOptions, server::PiratesWager},
@@ -845,6 +846,7 @@ pub struct GameState {
     stack_attack: Arc<Rooms<StackAttack>>,
     golf: Arc<Rooms<Golf>>,
     monuments: Arc<Rooms<Monuments>>,
+    chicken_scratch: Arc<Rooms<ChickenScratch>>,
 }
 
 impl Default for GameState {
@@ -862,6 +864,7 @@ impl GameState {
             stack_attack: Arc::new(Rooms::new()),
             golf: Arc::new(Rooms::new()),
             monuments: Arc::new(Rooms::new()),
+            chicken_scratch: Arc::new(Rooms::new()),
         }
     }
 
@@ -873,6 +876,7 @@ impl GameState {
         self.stack_attack.clone().spawn_reaper();
         self.golf.clone().spawn_reaper();
         self.monuments.clone().spawn_reaper();
+        self.chicken_scratch.clone().spawn_reaper();
     }
 
     pub async fn create_room(&self, id: String, name: String, passcode: String, rules: Rules) {
@@ -924,6 +928,12 @@ impl GameState {
                     .create(id, name, passcode, Monuments::new(options))
                     .await
             }
+            GameKind::ChickenScratch => {
+                let options: ChickenOptions = serde_json::from_str(options).unwrap_or_default();
+                self.chicken_scratch
+                    .create(id, name, passcode, ChickenScratch::new(options))
+                    .await
+            }
         }
         Ok(())
     }
@@ -935,6 +945,7 @@ impl GameState {
             GameKind::StackAttack => self.stack_attack.list().await,
             GameKind::Golf => self.golf.list().await,
             GameKind::Monuments => self.monuments.list().await,
+            GameKind::ChickenScratch => self.chicken_scratch.list().await,
         };
         rooms.into_iter().map(RoomInfo::from).collect()
     }
@@ -946,6 +957,7 @@ impl GameState {
             GameKind::StackAttack => self.stack_attack.exists(id).await,
             GameKind::Golf => self.golf.exists(id).await,
             GameKind::Monuments => self.monuments.exists(id).await,
+            GameKind::ChickenScratch => self.chicken_scratch.exists(id).await,
         }
     }
 }
@@ -997,6 +1009,10 @@ pub async fn card_ws_handler(
             }
             Some(GameKind::Monuments) => {
                 let rooms = state.monuments.clone();
+                rooms::serve(socket, rooms, room_id, passcode, query.token).await
+            }
+            Some(GameKind::ChickenScratch) => {
+                let rooms = state.chicken_scratch.clone();
                 rooms::serve(socket, rooms, room_id, passcode, query.token).await
             }
             None => {}

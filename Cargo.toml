@@ -177,8 +177,6 @@ reload-port = 8085
 #  The browserlist query used for optimizing the CSS.
 browserquery = "defaults"
 
-# The environment Leptos will run in, usually either "DEV" or "PROD"
-env = "DEV"
 bin-features = ["ssr"]
 bin-default-features = false
 lib-features = ["hydrate"]

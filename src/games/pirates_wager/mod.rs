@@ -934,11 +934,12 @@ fn AbilityPanel(game: Memo<GameView>) -> impl IntoView {
                     .find(|p| p.id == g.you)
                     .and_then(|p| p.bid)
                     .unwrap_or_default();
-                let dealt = g.dealt;
+                let at_min = bid == 0;
+                let at_max = bid >= g.dealt;
                 view! {
                     <button
                         class=button
-                        disabled=bid == 0
+                        disabled=at_min
                         on:click=|_| send_msg(&ClientMsg::ChangeBid { by: -1 })
                     >
                         {format!("Bid {}", bid.saturating_sub(1))}
@@ -948,7 +949,7 @@ fn AbilityPanel(game: Memo<GameView>) -> impl IntoView {
                     </button>
                     <button
                         class=button
-                        disabled=bid >= dealt
+                        disabled=at_max
                         on:click=|_| send_msg(&ClientMsg::ChangeBid { by: 1 })
                     >
                         {format!("Bid {}", bid + 1)}

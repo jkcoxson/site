@@ -65,11 +65,7 @@ pub async fn create_room(
             .map(|_| chars[rng.random_range(0..chars.len())] as char)
             .collect::<String>()
     };
-    let ctx = use_context::<Context>().ok_or_else(|| {
-        ServerFnError::<leptos::server_fn::error::NoCustomError>::ServerError(
-            "No context".to_string(),
-        )
-    })?;
+    let ctx = use_context::<Context>().ok_or_else(|| ServerFnError::new("No context"))?;
     ctx.game_state
         .create_room(id.clone(), name, passcode, rules)
         .await;
@@ -79,22 +75,14 @@ pub async fn create_room(
 #[server(RoomExists)]
 pub async fn room_exists(code: String) -> Result<bool, ServerFnError> {
     use crate::context::Context;
-    let ctx = use_context::<Context>().ok_or_else(|| {
-        ServerFnError::<leptos::server_fn::error::NoCustomError>::ServerError(
-            "No context".to_string(),
-        )
-    })?;
+    let ctx = use_context::<Context>().ok_or_else(|| ServerFnError::new("No context"))?;
     Ok(ctx.game_state.room_exists(&code).await)
 }
 
 #[server(ListRooms)]
 pub async fn list_rooms() -> Result<Vec<RoomInfo>, ServerFnError> {
     use crate::context::Context;
-    let ctx = use_context::<Context>().ok_or_else(|| {
-        ServerFnError::<leptos::server_fn::error::NoCustomError>::ServerError(
-            "No context".to_string(),
-        )
-    })?;
+    let ctx = use_context::<Context>().ok_or_else(|| ServerFnError::new("No context"))?;
     let infos = ctx.game_state.list_rooms().await;
     Ok(infos
         .into_iter()

@@ -41,7 +41,7 @@ impl Node {
     }
 
     /// Recursively gets a file given a path
-    pub fn traverse(&self, mut path: Vec<&str>) -> Option<NodeTraverseReturn> {
+    pub fn traverse(&self, mut path: Vec<&str>) -> Option<NodeTraverseReturn<'_>> {
         if path.is_empty() {
             Some(NodeTraverseReturn::Dir(self))
         } else {

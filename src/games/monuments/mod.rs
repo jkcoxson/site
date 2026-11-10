@@ -77,19 +77,19 @@ fn effect_face(e: Eff) -> (AnyView, bool) {
         Eff::Points(p) => (text(format!("⭐{p}")), true),
         Eff::Shields(n) => (text(repeat("🛡️", n)), true),
         Eff::Science(s) => (text(s.icon().into()), true),
-        Eff::Coins(c) => (text(format!("🪙{c}")), true),
-        Eff::Discount(Discount::RawLeft) => (text("◂ 🪵🪨🧱⛏️ 1🪙".into()), false),
-        Eff::Discount(Discount::RawRight) => (text("🪵🪨🧱⛏️ 1🪙 ▸".into()), false),
-        Eff::Discount(Discount::Goods) => (text("◂ 🫙🧵📜 1🪙 ▸".into()), false),
+        Eff::Coins(c) => (text(format!("🟡{c}")), true),
+        Eff::Discount(Discount::RawLeft) => (text("◂ 🪵🪨🧱⛏️ 1🟡".into()), false),
+        Eff::Discount(Discount::RawRight) => (text("🪵🪨🧱⛏️ 1🟡 ▸".into()), false),
+        Eff::Discount(Discount::Goods) => (text("◂ 🫙🧵📜 1🟡 ▸".into()), false),
         Eff::CoinsAround(color, k) => (
-            view! { <span>{format!("🪙{k} per ")} {swatch(color)} " ◂•▸"</span> }.into_any(),
+            view! { <span>{format!("🟡{k} per ")} {swatch(color)} " ◂•▸"</span> }.into_any(),
             false,
         ),
         Eff::Bounty(Per::Cards(color), k, p) => (
-            view! { <span>{format!("🪙{k} ⭐{p} per ")} {swatch(color)}</span> }.into_any(),
+            view! { <span>{format!("🟡{k} ⭐{p} per ")} {swatch(color)}</span> }.into_any(),
             false,
         ),
-        Eff::Bounty(Per::Stages, k, p) => (text(format!("🪙{k} ⭐{p} per 🏛️")), false),
+        Eff::Bounty(Per::Stages, k, p) => (text(format!("🟡{k} ⭐{p} per 🏛️")), false),
         Eff::League(League::Neighbors(color, k)) => (
             view! { <span>{format!("⭐{k} per ")} {swatch(color)} " ◂▸"</span> }.into_any(),
             false,
@@ -173,7 +173,7 @@ fn effect_text(e: Eff) -> String {
 fn gift_face(g: Gift) -> String {
     match g {
         Gift::Points(p) => format!("⭐{p}"),
-        Gift::Coins(c) => format!("🪙{c}"),
+        Gift::Coins(c) => format!("🟡{c}"),
         Gift::Shields(n) => repeat("🛡️", n),
         Gift::AnyRaw => choice_icons(&Res::RAW),
         Gift::AnyGoods => choice_icons(&Res::GOODS),
@@ -181,7 +181,7 @@ fn gift_face(g: Gift) -> String {
         Gift::FreeBuild => "🆓 build / age".into(),
         Gift::Salvage => "♻️ discards".into(),
         Gift::Seventh => "7th card".into(),
-        Gift::CheapRaw => "◂ raw 1🪙 ▸".into(),
+        Gift::CheapRaw => "◂ raw 1🟡 ▸".into(),
         Gift::CopyLeague => "copy ◂🟪▸".into(),
     }
 }
@@ -233,7 +233,7 @@ fn capitalized(s: &str) -> String {
 fn cost_icons(d: &CardDef) -> String {
     let mut s = icons(d.cost);
     if d.coins > 0 {
-        s.push_str(&format!("🪙{}", d.coins));
+        s.push_str(&format!("🟡{}", d.coins));
     }
     s
 }
@@ -324,13 +324,13 @@ fn card_detail(id: u8) -> impl IntoView {
 fn pay_text(g: &GameView, pay: &Pay) -> String {
     let mut parts = Vec::new();
     if pay.left > 0 {
-        parts.push(format!("{}🪙 to ◂ {}", pay.left, g.name(g.left())));
+        parts.push(format!("{}🟡 to ◂ {}", pay.left, g.name(g.left())));
     }
     if pay.right > 0 {
-        parts.push(format!("{}🪙 to {} ▸", pay.right, g.name(g.right())));
+        parts.push(format!("{}🟡 to {} ▸", pay.right, g.name(g.right())));
     }
     if pay.bank > 0 {
-        parts.push(format!("{}🪙 to the bank", pay.bank));
+        parts.push(format!("{}🟡 to the bank", pay.bank));
     }
     if parts.is_empty() {
         "nothing to pay".into()
@@ -344,7 +344,7 @@ fn done_text(g: &GameView, done: Done, pay: &Pay) -> String {
         Done::Built(id) => format!("Built {}", def(id).name),
         Done::Free(id) => format!("Built {} free", def(id).name),
         Done::Stage(k) => format!("Raised monument stage {k}"),
-        Done::Sold => "Sold a card for 3🪙".into(),
+        Done::Sold => "Sold a card for 3🟡".into(),
         Done::Salvaged(id) => format!("Built {} from the discards", def(id).name),
     };
     if pay.total() > 0 {
@@ -352,6 +352,188 @@ fn done_text(g: &GameView, done: Done, pay: &Pay) -> String {
     } else {
         what
     }
+}
+
+// ── Chips ─────────────────────────────────────────────────────────────────────
+
+const PILL: &str = "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm font-bold ring-1";
+const PILL_COINS: &str = "bg-yellow-200 text-yellow-950 ring-yellow-500";
+const PILL_SHIELDS: &str = "bg-red-100 text-red-900 ring-red-300";
+const PILL_POINTS: &str = "bg-blue-100 text-blue-900 ring-blue-300";
+const PILL_SCIENCE: &str = "bg-emerald-100 text-emerald-900 ring-emerald-300";
+
+fn pill(class: &'static str, title: &'static str, body: impl IntoView) -> impl IntoView {
+    view! {
+        <span class=format!("{PILL} {class}") title=title>
+            {body}
+        </span>
+    }
+}
+
+/// A coin amount going to someone: "◂ Ann 🟡2", "Bob ▸ 🟡1" or "🏦 🟡1".
+fn coin_chip(who: String, n: u8) -> impl IntoView {
+    view! {
+        <span class="inline-flex items-center gap-1 rounded-md bg-yellow-200 px-1.5 py-0.5 text-xs font-bold text-yellow-950 ring-1 ring-yellow-500">
+            <span class="max-w-[7rem] truncate font-semibold">{who}</span>
+            {format!("🟡{n}")}
+        </span>
+    }
+}
+
+/// Who gets paid what, as chips; nothing when it's free.
+fn pay_chips(g: &GameView, pay: &Pay) -> AnyView {
+    let mut chips = Vec::new();
+    if pay.left > 0 {
+        chips.push(coin_chip(format!("◂ {}", g.name(g.left())), pay.left).into_any());
+    }
+    if pay.right > 0 {
+        chips.push(coin_chip(format!("{} ▸", g.name(g.right())), pay.right).into_any());
+    }
+    if pay.bank > 0 {
+        chips.push(coin_chip("🏦".into(), pay.bank).into_any());
+    }
+    view! { <span class="flex flex-wrap gap-1">{chips}</span> }.into_any()
+}
+
+/// A short badge for a hand card's cheapest price: "◂🟡2 🟡1▸".
+fn pay_badge(pay: &Pay) -> String {
+    let mut parts = Vec::new();
+    if pay.left > 0 {
+        parts.push(format!("◂🟡{}", pay.left));
+    }
+    if pay.bank > 0 {
+        parts.push(format!("🟡{}", pay.bank));
+    }
+    if pay.right > 0 {
+        parts.push(format!("🟡{}▸", pay.right));
+    }
+    parts.join(" ")
+}
+
+/// What a city makes each turn, grouped: (resources it can be, how many,
+/// whether neighbors can buy it). Single resources first.
+fn production(city: &City) -> Vec<(u8, u8, bool)> {
+    let sale = city.producers(true);
+    let mut all = city.producers(false);
+    let mut out: Vec<(u8, u8, bool)> = Vec::new();
+    let mut add = |m: u8, for_sale: bool| {
+        if let Some(e) = out.iter_mut().find(|e| e.0 == m && e.2 == for_sale) {
+            e.1 += 1;
+        } else {
+            out.push((m, 1, for_sale));
+        }
+    };
+    for m in sale {
+        if let Some(i) = all.iter().position(|&x| x == m) {
+            all.remove(i);
+        }
+        add(m, true);
+    }
+    for m in all {
+        add(m, false);
+    }
+    out.sort_by_key(|&(m, _, sale)| (!sale, m.count_ones() > 1, m.trailing_zeros()));
+    out
+}
+
+/// A city's resources as chips. Raw materials are brown like their cards,
+/// crafted goods gray. With `buyer`, the chips show what one unit costs
+/// that neighbor (`Some(true)` when the city sits on the buyer's left);
+/// what can't be bought is dashed.
+fn resource_chips(city: &City, buyer: Option<(&City, bool)>) -> AnyView {
+    let chips = production(city);
+    if chips.is_empty() {
+        return view! { <span class="text-xs opacity-60">"nothing"</span> }.into_any();
+    }
+    chips
+        .into_iter()
+        .map(|(m, n, for_sale)| {
+            let res = mask_res(m);
+            let raw = res.first().is_some_and(|r| r.is_raw());
+            let mut class = String::from(
+                "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-sm leading-tight ",
+            );
+            class.push_str(if raw {
+                "bg-amber-100 text-amber-950 dark:bg-amber-900/60 dark:text-amber-50"
+            } else {
+                "bg-slate-200 text-slate-900 dark:bg-slate-600 dark:text-white"
+            });
+            class.push_str(match (for_sale, raw) {
+                (true, true) => " ring-1 ring-amber-700/50",
+                (true, false) => " ring-1 ring-slate-500/50",
+                (false, _) => " border border-dashed border-stone-500 opacity-70",
+            });
+            let title = if for_sale {
+                "Neighbors can buy this"
+            } else {
+                "Only for this city's own use"
+            };
+            let price = buyer.filter(|_| for_sale).and_then(|(me, left)| {
+                res.first().map(|&r| me.price(r, left))
+            });
+            view! {
+                <span class=class title=title>
+                    <span>{choice_icons(&res)}</span>
+                    {(n > 1)
+                        .then(|| {
+                            view! { <span class="text-xs font-bold">{format!("×{n}")}</span> }
+                        })}
+                    {price
+                        .map(|p| {
+                            let cheap = p == 1;
+                            view! {
+                                <span class=if cheap {
+                                    "ml-0.5 rounded bg-green-600 px-1 text-[0.65rem] font-bold text-white"
+                                } else {
+                                    "ml-0.5 rounded bg-yellow-300 px-1 text-[0.65rem] font-bold text-yellow-950"
+                                }>{format!("{p}🟡")}</span>
+                            }
+                        })}
+                </span>
+            }
+        })
+        .collect_view()
+        .into_any()
+}
+
+/// Your two neighbors and you side by side: what each makes and what
+/// buying from them costs you.
+fn trade_strip(g: &GameView) -> AnyView {
+    let cities = g.cities();
+    let me = &cities[g.you as usize];
+    let row = |label: String, coins: i32, city: &City, buyer: Option<(&City, bool)>, you: bool| {
+        view! {
+            <div class=if you {
+                "space-y-1 rounded-lg bg-white p-2 ring-2 ring-blue-400 dark:bg-stone-800"
+            } else {
+                "space-y-1 rounded-lg bg-white p-2 ring-1 ring-stone-300 dark:bg-stone-800 dark:ring-stone-600"
+            }>
+                <div class="flex items-center justify-between gap-1 text-xs font-semibold">
+                    <span class="truncate">{label}</span>
+                    <span class="shrink-0 rounded-full bg-yellow-200 px-1.5 text-yellow-950">
+                        {format!("🟡{coins}")}
+                    </span>
+                </div>
+                <div class="flex flex-wrap gap-1">{resource_chips(city, buyer)}</div>
+            </div>
+        }
+    };
+    let left = &cities[g.left() as usize];
+    let right = &cities[g.right() as usize];
+    view! {
+        <div class="grid gap-1.5 sm:grid-cols-3 dark:text-stone-100">
+            {row(format!("◂ {}", g.name(g.left())), left.coins, left, Some((me, true)), false)}
+            {row("You make".into(), me.coins, me, None, true)}
+            {row(
+                format!("{} ▸", g.name(g.right())),
+                right.coins,
+                right,
+                Some((me, false)),
+                false,
+            )}
+        </div>
+    }
+    .into_any()
 }
 
 // ── Lobby ─────────────────────────────────────────────────────────────────────
@@ -393,7 +575,7 @@ fn MonumentsRules() -> impl IntoView {
                 </li>
                 <li>
                     <span class=b>"Sell it"</span>
-                    " for 3🪙. You can always do this."
+                    " for 3🟡. You can always do this."
                 </li>
             </ul>
             <p>
@@ -409,7 +591,7 @@ fn MonumentsRules() -> impl IntoView {
                 building in an earlier age."
             </p>
             <p>
-                "Missing something? Buy it from a neighbor for 2🪙 each, paid to them. They \
+                "Missing something? Buy it from a neighbor for 2🟡 each, paid to them. They \
                 can't refuse, and selling doesn't stop them using it. You can only buy what \
                 their city and brown and gray cards make, and only with coins you had at the \
                 start of the turn. The game works out the cheapest ways to pay for you."
@@ -443,7 +625,7 @@ fn MonumentsRules() -> impl IntoView {
         </RulesSection>
         <RulesSection heading="Scoring">
             <ul class="list-disc space-y-1 pl-5">
-                <li>"War tokens, plus 1 point per 3🪙."</li>
+                <li>"War tokens, plus 1 point per 3🟡."</li>
                 <li>"Monument stages, civic buildings, commerce and leagues as printed."</li>
                 <li>
                     "Science: each symbol type scores its count squared, plus 7 for every set of \
@@ -528,7 +710,7 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                 .iter()
                 .map(|p| {
                     let mut tags = vec![
-                        (format!("🪙{}", p.city.coins), TAG_SOFT),
+                        (format!("🟡{}", p.city.coins), TAG_SOFT),
                         (format!("🛡️{}", p.city.shields()), TAG_SOFT),
                     ];
                     if p.id == g.left() && p.id != g.you {
@@ -674,7 +856,11 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
 
                 {move || match stage.get() {
                     StageKind::Choosing | StageKind::Seventh => {
-                        view! { <HandPanel game inspect /> }.into_any()
+                        view! {
+                            {move || game.with(trade_strip)}
+                            <HandPanel game inspect />
+                        }
+                            .into_any()
                     }
                     StageKind::Salvage => view! { <SalvagePanel game inspect /> }.into_any(),
                     StageKind::Over => {
@@ -743,17 +929,26 @@ fn HandPanel(game: Memo<GameView>, inspect: RwSignal<Option<u8>>) -> impl IntoVi
         }
     });
 
-    // A quick hint on each card: free, can't build, already have one.
-    let hint = move |id: u8| {
+    // A quick hint on each card: free, what it costs in coins and to whom,
+    // can't build, already have one.
+    let hint = move |id: u8| -> Option<(String, &'static str)> {
         game.with(|g| {
             let cities = g.cities();
             match build_cost(&cities, g.you as usize, id) {
-                Cost::Chain(_) => Some(("🔗 free", "bg-green-600 text-white")),
-                Cost::Cannot("You already have one.") => {
-                    Some(("have it", "bg-stone-600 text-white"))
+                Cost::Free => Some(("✓".into(), "bg-green-600 text-white")),
+                Cost::Chain(_) => Some(("🔗 free".into(), "bg-green-600 text-white")),
+                Cost::Pay(ways) => {
+                    let cheapest = ways.iter().min_by_key(|p| p.total())?;
+                    if cheapest.total() == 0 {
+                        Some(("✓".into(), "bg-green-600 text-white"))
+                    } else {
+                        Some((pay_badge(cheapest), "bg-yellow-300 text-yellow-950"))
+                    }
                 }
-                Cost::Cannot(_) => Some(("can't build", "bg-red-700 text-white")),
-                _ => None,
+                Cost::Cannot("You already have one.") => {
+                    Some(("have it".into(), "bg-stone-600 text-white"))
+                }
+                Cost::Cannot(_) => Some(("✗ can't".into(), "bg-red-700 text-white")),
             }
         })
     };
@@ -798,7 +993,7 @@ fn HandPanel(game: Memo<GameView>, inspect: RwSignal<Option<u8>>) -> impl IntoVi
                                         .map(|(text, class)| {
                                             view! {
                                                 <span class=format!(
-                                                    "absolute inset-x-1 bottom-1 rounded px-0.5 text-center text-[0.6rem] font-semibold leading-tight {class}",
+                                                    "absolute inset-x-1 bottom-1 rounded px-0.5 text-center text-[0.7rem] font-bold leading-tight {class}",
                                                 )>{text}</span>
                                             }
                                         })
@@ -813,18 +1008,16 @@ fn HandPanel(game: Memo<GameView>, inspect: RwSignal<Option<u8>>) -> impl IntoVi
                     return game
                         .with(|g| {
                             let what = match c.act {
-                                Act::Build | Act::Power => format!("build {}", def(c.card).name),
-                                Act::Stage => "raise your monument".to_string(),
-                                Act::Sell => format!("sell {} for 3🪙", def(c.card).name),
-                            };
-                            let pay = if c.pay.total() > 0 {
-                                format!(" ({})", pay_text(g, &c.pay))
-                            } else {
-                                String::new()
+                                Act::Build | Act::Power => format!("🔨 {}", def(c.card).name),
+                                Act::Stage => "🏛️ Monument stage".to_string(),
+                                Act::Sell => format!("💰 Sell {} for 🟡3", def(c.card).name),
                             };
                             view! {
                                 <div class="flex items-center justify-between gap-2 rounded-lg border border-stone-200 bg-white p-3 text-sm dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100">
-                                    <span>{format!("You'll {what}{pay}.")}</span>
+                                    <span class="flex flex-wrap items-center gap-1.5">
+                                        <span class="font-semibold">{what}</span>
+                                        {pay_chips(g, &c.pay)}
+                                    </span>
                                     <button
                                         class="shrink-0 touch-manipulation rounded bg-stone-600 px-3 py-2 text-white hover:bg-stone-500"
                                         on:click=|_| send_msg(&ClientMsg::Unchoose)
@@ -902,14 +1095,14 @@ fn pay_buttons(
         Cost::Pay(ways) => ways
             .into_iter()
             .map(|pay| {
-                let text = if pay.total() == 0 {
-                    label.clone()
-                } else {
-                    format!("{label}: {}", pay_text(g, &pay))
-                };
+                let label = label.clone();
                 view! {
-                    <button class=format!("{BTN} {style}") on:click=move |_| choose(card, act, pay)>
-                        {text}
+                    <button
+                        class=format!("{BTN} {style} flex flex-wrap items-center gap-1.5")
+                        on:click=move |_| choose(card, act, pay)
+                    >
+                        <span>{label}</span>
+                        {pay_chips(g, &pay)}
                     </button>
                 }
             })
@@ -936,7 +1129,7 @@ fn actions(g: &GameView, id: u8) -> AnyView {
         build_cost(&cities, me, id),
         id,
         Act::Build,
-        format!("Build {}", d.name),
+        format!("🔨 Build {}", d.name),
         BTN_GO,
     );
     let power = can_use_power(city, id).then(|| {
@@ -953,7 +1146,7 @@ fn actions(g: &GameView, id: u8) -> AnyView {
         let next = &city.stage_defs()[city.stages as usize];
         let gifts: Vec<String> = next.gifts.iter().map(|&g| gift_face(g)).collect();
         let label = format!(
-            "Monument stage {} ({} → {})",
+            "🏛️ Stage {} ({} → {})",
             city.stages + 1,
             icons(next.cost),
             gifts.join(" ")
@@ -969,8 +1162,8 @@ fn actions(g: &GameView, id: u8) -> AnyView {
     view! {
         <div class="space-y-2 rounded-lg border border-stone-200 bg-white p-3 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100">
             {card_detail(id)}
-            <p class="pt-1 text-xs text-stone-500 dark:text-stone-400">
-                {format!("You have 🪙{}.", city.coins)}
+            <p class="flex items-center gap-1 pt-1 text-xs text-stone-500 dark:text-stone-400">
+                "You have " {pill(PILL_COINS, "Your coins", format!("🟡 {}", city.coins))}
             </p>
             <div class="space-y-1.5">
                 {build} {power} {stage}
@@ -978,7 +1171,7 @@ fn actions(g: &GameView, id: u8) -> AnyView {
                     class=format!("{BTN} {BTN_SELL}")
                     on:click=move |_| choose(id, Act::Sell, Pay::default())
                 >
-                    "Sell it for 3🪙"
+                    "💰 Sell it for 🟡3"
                 </button>
             </div>
         </div>
@@ -1094,47 +1287,39 @@ fn city_panel(g: &GameView, id: u8, inspect: RwSignal<Option<u8>>) -> AnyView {
     };
     let points = score(&cities, id as usize);
     let (sci, wild) = city.science();
-    let tokens: Vec<String> = city
+    let tokens = city
         .tokens
         .iter()
         .map(|&t| {
-            if t > 0 {
-                format!("+{t}")
+            let (text, class, title) = if t > 0 {
+                (format!("+{t}"), "bg-green-600 text-white ring-green-800", "War victory")
             } else {
-                format!("{t}")
+                (format!("{t}"), "bg-red-600 text-white ring-red-800", "War defeat")
+            };
+            view! {
+                <span
+                    title=title
+                    class=format!(
+                        "inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-xs font-bold ring-1 {class}",
+                    )
+                >
+                    {format!("⚔️{text}")}
+                </span>
             }
         })
-        .collect();
+        .collect_view();
 
     // What they make. For a neighbor, what it costs you to buy.
-    let makes: Vec<(String, bool)> = {
-        let sale = city.producers(true);
-        let mut all = city.producers(false);
-        let mut out = Vec::new();
-        for m in &sale {
-            if let Some(i) = all.iter().position(|x| x == m) {
-                all.remove(i);
-            }
-            out.push((choice_icons(&mask_res(*m)), true));
-        }
-        out.extend(all.into_iter().map(|m| (choice_icons(&mask_res(m)), false)));
-        out
-    };
-    let price_note = if id == g.left() && !mine {
-        Some(format!(
-            "You buy from them at {}🪙 per raw material, {}🪙 per crafted good.",
-            me.price(Res::Wood, true),
-            me.price(Res::Glass, true)
-        ))
-    } else if id == g.right() && !mine {
-        Some(format!(
-            "You buy from them at {}🪙 per raw material, {}🪙 per crafted good.",
-            me.price(Res::Wood, false),
-            me.price(Res::Glass, false)
-        ))
+    let buyer = if mine {
+        None
+    } else if id == g.left() {
+        Some((me, true))
+    } else if id == g.right() {
+        Some((me, false))
     } else {
         None
     };
+    let makes = resource_chips(city, buyer);
 
     let stages = city
         .stage_defs()
@@ -1237,62 +1422,38 @@ fn city_panel(g: &GameView, id: u8, inspect: RwSignal<Option<u8>>) -> AnyView {
                     </span>
                 </p>
             </div>
-            <div class="flex flex-wrap gap-x-3 gap-y-1 text-sm">
-                <span title="Coins">{format!("🪙 {}", city.coins)}</span>
-                <span title="Shields">{format!("🛡️ {}", city.shields())}</span>
-                <span title="Points if the game ended now">{format!("⭐ {}", points.total)}</span>
-                <span title="Science">
-                    {format!(
-                        "{} {} {} {} {} {}{}",
-                        Sci::Stars.icon(),
-                        sci[0],
-                        Sci::Gears.icon(),
-                        sci[1],
-                        Sci::Quills.icon(),
-                        sci[2],
-                        if wild > 0 { format!(" +{wild} any") } else { String::new() },
-                    )}
-                </span>
-                {(!tokens.is_empty())
-                    .then(|| {
-                        view! {
-                            <span title="War tokens">{format!("⚔️ {}", tokens.join(" "))}</span>
-                        }
-                    })}
+            <div class="flex flex-wrap items-center gap-1.5">
+                {pill(PILL_COINS, "Coins", format!("🟡 {}", city.coins))}
+                {pill(PILL_SHIELDS, "Shields", format!("🛡️ {}", city.shields()))}
+                {pill(PILL_POINTS, "Points if the game ended now", format!("⭐ {}", points.total))}
+                {pill(
+                    PILL_SCIENCE,
+                    "Science symbols",
+                    view! {
+                        {Sci::ALL
+                            .into_iter()
+                            .zip(sci)
+                            .map(|(s, n)| {
+                                view! {
+                                    <span class=if n == 0 {
+                                        "opacity-40"
+                                    } else {
+                                        ""
+                                    }>{format!("{}{n}", s.icon())}</span>
+                                }
+                            })
+                            .collect_view()}
+                        {(wild > 0).then(|| view! { <span>{format!("+{wild}❓")}</span> })}
+                    },
+                )} {tokens}
             </div>
             <div class="space-y-1.5">
                 <div class="flex gap-1">{stages}</div>
                 <ul class="space-y-0.5 text-xs text-stone-600 dark:text-stone-300">{stage_help}</ul>
             </div>
-            <div class="space-y-1">
-                <div class="flex flex-wrap items-center gap-1 text-sm">
-                    <span class="text-xs text-stone-500 dark:text-stone-400">"Makes"</span>
-                    {makes
-                        .into_iter()
-                        .map(|(icons, for_sale)| {
-                            view! {
-                                <span
-                                    title=if for_sale {
-                                        "Neighbors can buy this"
-                                    } else {
-                                        "Only for this city's own use"
-                                    }
-                                    class=if for_sale {
-                                        "rounded bg-white px-1 ring-1 ring-stone-300 dark:bg-stone-800 dark:ring-stone-600"
-                                    } else {
-                                        "rounded border border-dashed border-stone-400 px-1 opacity-80"
-                                    }
-                                >
-                                    {icons}
-                                </span>
-                            }
-                        })
-                        .collect_view()}
-                </div>
-                {price_note
-                    .map(|n| {
-                        view! { <p class="text-xs text-stone-500 dark:text-stone-400">{n}</p> }
-                    })}
+            <div class="flex flex-wrap items-center gap-1">
+                <span class="text-xs text-stone-500 dark:text-stone-400">"Makes"</span>
+                {makes}
             </div>
             <div class="space-y-1">
                 {if city.built.is_empty() {
@@ -1343,7 +1504,7 @@ fn score_table(g: &GameView, scores: Vec<Breakdown>) -> impl IntoView {
                             "⚔️"
                         </th>
                         <th class="px-1 text-right" title="Coins">
-                            "🪙"
+                            "🟡"
                         </th>
                         <th class="px-1 text-right" title="Monument">
                             "🏛️"

@@ -360,7 +360,7 @@ impl TenStages {
                     .iter()
                     .filter_map(|id| hand.iter().find(|c| c.id == *id).copied())
                     .collect();
-                Group::new(need, &cards)
+                Group::in_order(need, &cards)
             })
             .collect();
         let Some(made) = made else {

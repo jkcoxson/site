@@ -258,22 +258,75 @@ impl Group {
             }
             Need::Run(_) => {
                 let low = melds::run_start(&naturals, 1..=TOP_RANK, false)?;
-                let mut slots: Vec<Option<Card>> = vec![None; cards.len()];
-                let mut wilds = Vec::new();
-                for card in cards.iter() {
-                    match card.rank() {
-                        Some(r) => slots[(r - low) as usize] = Some(*card),
-                        None => wilds.push(*card),
-                    }
-                }
-                cards = slots
-                    .into_iter()
-                    .map(|s| s.or_else(|| wilds.pop()))
-                    .collect::<Option<Vec<Card>>>()?;
-                Kind::Run { low }
+                return Group::run_at(&cards, low);
             }
         };
         Some(Group { kind, cards })
+    }
+
+    /// The run `cards` make starting at `low`, with wilds filling the gaps.
+    pub fn run_at(cards: &[Card], low: u8) -> Option<Group> {
+        let len = cards.len();
+        if len == 0
+            || low < 1
+            || low as usize + len - 1 > TOP_RANK as usize
+            || cards.iter().any(Card::is_skip)
+            || cards.iter().all(Card::is_wild)
+        {
+            return None;
+        }
+        let mut slots: Vec<Option<Card>> = vec![None; len];
+        let mut wilds = Vec::new();
+        for card in cards {
+            match card.rank() {
+                Some(r) => {
+                    let at = r.checked_sub(low)? as usize;
+                    if at >= len || slots[at].is_some() {
+                        return None;
+                    }
+                    slots[at] = Some(*card);
+                }
+                None => wilds.push(*card),
+            }
+        }
+        let cards = slots
+            .into_iter()
+            .map(|s| s.or_else(|| wilds.pop()))
+            .collect::<Option<Vec<Card>>>()?;
+        Some(Group {
+            kind: Kind::Run { low },
+            cards,
+        })
+    }
+
+    /// Like `new`, but a run keeps the order `cards` come in, so the player
+    /// decides which end its spare wilds go on.
+    pub fn in_order(need: Need, cards: &[Card]) -> Option<Group> {
+        if let Need::Run(n) = need {
+            if cards.len() != n as usize {
+                return None;
+            }
+            let (i, r) = cards
+                .iter()
+                .enumerate()
+                .find_map(|(i, c)| c.rank().map(|r| (i, r)))?;
+            let low = r.checked_sub(i as u8)?;
+            if let Some(g) = Group::run_at(cards, low) {
+                return Some(g);
+            }
+        }
+        Group::new(need, cards)
+    }
+
+    /// Every group `cards` can make for `need`: one for a set or color group,
+    /// one per place a run's spare wilds can sit.
+    pub fn every(need: Need, cards: &[Card]) -> Vec<Group> {
+        match need {
+            Need::Run(n) if cards.len() == n as usize => (1..=TOP_RANK)
+                .filter_map(|low| Group::run_at(cards, low))
+                .collect(),
+            _ => Group::new(need, cards).into_iter().collect(),
+        }
     }
 
     /// Whether `card` can be hit onto the low end (the start of a run) and
@@ -421,14 +474,11 @@ pub struct LayDown {
     pub wilds: usize,
 }
 
-/// The most ways `lay_downs` offers.
-pub const MAX_OPTIONS: usize = 12;
-
 /// The different ways `hand` can make `stage`, best first: the ones that
 /// leave the fewest cards (then points) in hand once you've also hit
 /// everything you can onto `table` and your new groups, then the ones using
 /// the fewest wilds. Ways that differ only in which copy of a card they use
-/// count once.
+/// count once; a run's wilds at either end count as different ways.
 pub fn lay_downs(stage: u8, hand: &[Card], table: &[Group]) -> Vec<LayDown> {
     let list = needs(stage);
     let usable: Vec<usize> = (0..hand.len()).filter(|&i| !hand[i].is_skip()).collect();
@@ -440,7 +490,11 @@ pub fn lay_downs(stage: u8, hand: &[Card], table: &[Group]) -> Vec<LayDown> {
         .iter()
         .map(|&need| {
             melds::masks_of_size(cards.len(), need.size())
-                .filter_map(|m| Group::new(need, &melds::pick(&cards, m)).map(|g| (m, g)))
+                .flat_map(|m| {
+                    Group::every(need, &melds::pick(&cards, m))
+                        .into_iter()
+                        .map(move |g| (m, g))
+                })
                 .collect()
         })
         .collect();
@@ -449,12 +503,16 @@ pub fn lay_downs(stage: u8, hand: &[Card], table: &[Group]) -> Vec<LayDown> {
     let mut found = Vec::new();
     let mut chosen: Vec<(u32, Group)> = Vec::new();
     search(list, &candidates, 0, 0, &mut chosen, &mut |chosen| {
-        let mut key: Vec<Vec<Face>> = chosen
+        let mut key: Vec<(Option<u8>, Vec<Face>)> = chosen
             .iter()
             .map(|(_, g)| {
                 let mut faces: Vec<Face> = g.cards.iter().map(|c| c.face).collect();
                 faces.sort();
-                faces
+                let low = match g.kind {
+                    Kind::Run { low } => Some(low),
+                    _ => None,
+                };
+                (low, faces)
             })
             .collect();
         key.sort();
@@ -490,7 +548,6 @@ pub fn lay_downs(stage: u8, hand: &[Card], table: &[Group]) -> Vec<LayDown> {
         });
     });
     found.sort_by_key(|l| (l.stuck, l.stuck_points, l.wilds));
-    found.truncate(MAX_OPTIONS);
     found
 }
 
@@ -743,6 +800,7 @@ pub enum ClientMsg {
         from_discard: bool,
     },
     /// Lay down this round's stage: card ids for each of its parts, in order.
+    /// A run's ids go low to high, which places its wilds.
     LayDown {
         groups: Vec<Vec<u8>>,
     },
@@ -830,6 +888,40 @@ mod tests {
         assert_eq!(g.kind, Kind::Run { low: 9 });
         assert_eq!(g.fits(&Card { id: 9, face: W }), [true, false]);
         assert_eq!(g.label(), "Run 9–12");
+    }
+
+    #[test]
+    fn run_wilds_go_where_the_player_puts_them() {
+        let h = hand(&[n(3, Red), n(4, Blue), n(5, Red), n(6, Green), W]);
+        let lows: Vec<Kind> = Group::every(Need::Run(5), &h)
+            .into_iter()
+            .map(|g| g.kind)
+            .collect();
+        assert_eq!(lows, vec![Kind::Run { low: 2 }, Kind::Run { low: 3 }]);
+        // Wild first: it's the 2.
+        let ordered = [h[4], h[0], h[1], h[2], h[3]];
+        let g = Group::in_order(Need::Run(5), &ordered).unwrap();
+        assert_eq!(g.label(), "Run 2–6");
+        // Unordered input falls back to the usual placement.
+        let g = Group::in_order(Need::Run(5), &[h[4], h[3], h[2], h[1], h[0]]).unwrap();
+        assert_eq!(g.label(), "Run 3–7");
+        // Both placements are offered as lay-downs.
+        let h = hand(&[
+            n(3, Red),
+            n(4, Blue),
+            n(5, Red),
+            n(6, Green),
+            n(7, Red),
+            n(8, Red),
+            W,
+            n(1, Yellow),
+        ]);
+        let labels: Vec<String> = lay_downs(4, &h, &[])
+            .iter()
+            .map(|l| l.groups[0].label())
+            .collect();
+        assert!(labels.contains(&"Run 2–8".to_string()));
+        assert!(labels.contains(&"Run 3–9".to_string()));
     }
 
     #[test]

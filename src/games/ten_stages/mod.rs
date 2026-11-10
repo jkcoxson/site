@@ -449,9 +449,23 @@ fn HandView(
         }
         hand.with(|h| table.with(|t| lay_downs(stage.get(), h, t)))
     });
+    // A picked card narrows the choices to the ways that use it.
+    let narrowed = Memo::new(move |_| {
+        let uses = |l: &LayDown, id: u8| l.groups.iter().any(|g| g.cards.iter().any(|c| c.id == id));
+        options.with(|o| match selected.get() {
+            Some(id) if o.iter().any(|l| uses(l, id)) => {
+                (true, o.iter().filter(|l| uses(l, id)).cloned().collect())
+            }
+            _ => (false, o.clone()),
+        })
+    });
     let option_at = RwSignal::new(0usize);
+    Effect::new(move |_| {
+        selected.track();
+        option_at.set(0);
+    });
     let option = move || {
-        options.with(|o| {
+        narrowed.with(|(_, o)| {
             let at = option_at.get().min(o.len().saturating_sub(1));
             o.get(at).cloned().map(|l| (at, o.len(), l))
         })
@@ -623,6 +637,14 @@ fn HandView(
                             let ready = my_turn.get() && drawn.get();
                             let multiple = count > 1;
                             let stuck = l.stuck;
+                            let filtered = narrowed.with(|(f, _)| *f);
+                            let hint = if filtered {
+                                Some("Showing ways that use your picked card.")
+                            } else if multiple {
+                                Some("Tap a card to see only the ways that use it.")
+                            } else {
+                                None
+                            };
                             let note = if !drawn.get() || !my_turn.get() {
                                 format!("You can make stage {s}.")
                             } else if stuck <= 1 {
@@ -662,6 +684,14 @@ fn HandView(
                                                 }
                                             })}
                                     </div>
+                                    {hint
+                                        .map(|h| {
+                                            view! {
+                                                <p class="text-[0.65rem] text-stone-500 dark:text-stone-400">
+                                                    {h}
+                                                </p>
+                                            }
+                                        })}
                                     {groups_preview(l.groups)}
                                     <button
                                         class=format!("w-full {BUTTON_AMBER}")

@@ -4,6 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::games::cards::melds::{self, Natural};
 use crate::games::cards::{HandCard, Motion, Spot, Standing, TableView};
 
 pub const ROUNDS: u8 = 11;
@@ -70,6 +71,14 @@ impl Card {
     /// Jokers are always wild; so is every card of this round's wild rank.
     pub fn is_wild(&self, wild: u8) -> bool {
         self.is_joker() || self.rank == wild
+    }
+
+    /// How melds see this card: wilds stand in for anything.
+    pub fn natural(&self, wild: u8) -> Natural {
+        match self.suit {
+            Some(suit) if !self.is_wild(wild) => Some((self.rank, suit as u8)),
+            _ => None,
+        }
     }
 
     /// Penalty points when left unmelded at the end of a round.
@@ -142,26 +151,10 @@ pub fn full_deck() -> Vec<Card> {
 /// Whether `cards` form a book (three or more of a rank) or a run (three or
 /// more consecutive cards of one suit), with wilds standing in for anything.
 pub fn is_valid_group(cards: &[Card], wild: u8) -> bool {
-    if cards.len() < 3 {
-        return false;
-    }
-    let naturals: Vec<&Card> = cards.iter().filter(|c| !c.is_wild(wild)).collect();
-    let Some(first) = naturals.first() else {
-        return true;
-    };
-    if naturals.iter().all(|c| c.rank == first.rank) {
-        return true;
-    }
-    // A run fits in 3..=K, so it can't be longer than eleven cards.
-    if cards.len() > 11 || naturals.iter().any(|c| c.suit != first.suit) {
-        return false;
-    }
-    let mut ranks: Vec<u8> = naturals.iter().map(|c| c.rank).collect();
-    ranks.sort_unstable();
-    if ranks.windows(2).any(|w| w[0] == w[1]) {
-        return false;
-    }
-    (ranks[ranks.len() - 1] - ranks[0]) as usize + 1 <= cards.len()
+    let naturals: Vec<Natural> = cards.iter().map(|c| c.natural(wild)).collect();
+    cards.len() >= 3
+        && (melds::set_rank(&naturals).is_some()
+            || melds::run_start(&naturals, 3..=13, true).is_some())
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]

@@ -92,7 +92,7 @@
   border: 0;
 }
 
-/* Card tables (Five Crowns, Pirate's Wager, Stack Attack, 9 Holes of Golf, Age of Monuments). --cw is the card width; --n (set inline) is the number
+/* Card tables (Five Crowns, Pirate's Wager, Stack Attack, 9 Holes of Golf, Age of Monuments, Ten Stages). --cw is the card width; --n (set inline) is the number
    of cards in hand, used to overlap them so a full hand fits a phone. */
 
 .card-table {

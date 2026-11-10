@@ -1,7 +1,9 @@
 // Jackson Coxson
 // Stack Attack game server, running on the shared room engine.
 
-use crate::games::cards::server::{broadcast_lobby, error, name, shuffle, standings, Log};
+use crate::games::cards::server::{
+    arrange_hand, broadcast_lobby, error, name, shuffle, standings, Log,
+};
 use crate::games::cards::Standing;
 use crate::games::number_cards::full_deck;
 use crate::games::rooms::{RoomGame, Seats};
@@ -489,14 +491,9 @@ impl StackAttack {
             return;
         };
         let hand = &mut t.hands[player];
-        let mut sorted = order.clone();
-        sorted.sort_unstable();
-        let mut ids: Vec<u8> = hand.iter().map(|c| c.id).collect();
-        ids.sort_unstable();
-        if sorted != ids {
+        if !arrange_hand(hand, &order) {
             return;
         }
-        hand.sort_by_key(|c| order.iter().position(|&id| id == c.id));
         seats.send(player, &ServerMsg::Game(Box::new(self.view(seats, player))));
     }
 

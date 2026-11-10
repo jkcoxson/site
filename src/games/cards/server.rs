@@ -3,7 +3,7 @@
 
 use serde::Serialize;
 
-use super::{LobbyInfo, SeatInfo, ServerMsg, Standing};
+use super::{HandCard, LobbyInfo, SeatInfo, ServerMsg, Standing};
 use crate::games::rooms::Seats;
 
 /// A fresh six-character room code.
@@ -23,6 +23,32 @@ pub fn shuffle<T>(items: &mut [T]) {
         let j = rng.random_range(0..=i);
         items.swap(i, j);
     }
+}
+
+/// The top card of the draw pile. When it runs out, everything but the top
+/// discard is shuffled back in first.
+pub fn draw_from_deck<C>(deck: &mut Vec<C>, discard: &mut Vec<C>) -> Option<C> {
+    if deck.is_empty() {
+        let top = discard.pop();
+        deck.append(discard);
+        shuffle(deck);
+        discard.extend(top);
+    }
+    deck.pop()
+}
+
+/// Put `hand` in the order of `order`, which must list every card id in the
+/// hand exactly once. Returns whether it did.
+pub fn arrange_hand<C: HandCard>(hand: &mut [C], order: &[u8]) -> bool {
+    let mut wanted = order.to_vec();
+    wanted.sort_unstable();
+    let mut ids: Vec<u8> = hand.iter().map(|c| c.id()).collect();
+    ids.sort_unstable();
+    if wanted != ids {
+        return false;
+    }
+    hand.sort_by_key(|c| order.iter().position(|&id| id == c.id()));
+    true
 }
 
 pub fn name(seats: &Seats, player: usize) -> String {

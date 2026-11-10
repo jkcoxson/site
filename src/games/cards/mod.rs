@@ -7,6 +7,7 @@
 
 #[cfg(target_arch = "wasm32")]
 pub mod fx;
+pub mod melds;
 pub mod seating;
 #[cfg(feature = "ssr")]
 pub mod server;
@@ -29,6 +30,7 @@ pub enum GameKind {
     Golf,
     Monuments,
     ChickenScratch,
+    TenStages,
 }
 
 impl GameKind {
@@ -40,6 +42,7 @@ impl GameKind {
             GameKind::Golf => "golf",
             GameKind::Monuments => "monuments",
             GameKind::ChickenScratch => "chicken-scratch",
+            GameKind::TenStages => "ten-stages",
         }
     }
 
@@ -51,6 +54,7 @@ impl GameKind {
             GameKind::Golf,
             GameKind::Monuments,
             GameKind::ChickenScratch,
+            GameKind::TenStages,
         ]
         .into_iter()
         .find(|g| g.slug() == slug)
@@ -64,6 +68,7 @@ impl GameKind {
             GameKind::Golf => "9 Holes of Golf",
             GameKind::Monuments => "Age of Monuments",
             GameKind::ChickenScratch => "Chicken Scratch",
+            GameKind::TenStages => "Ten Stages",
         }
     }
 
@@ -93,6 +98,10 @@ impl GameKind {
                 "Dominoes from the double 12 down to the double blank. Every double you play \
                  grows a chicken foot that has to be filled before play moves on."
             }
+            GameKind::TenStages => {
+                "Ten stages of sets, runs and colors to complete in order. Lay down your \
+                 stage, hit onto the table to go out, and Skip whoever's catching up."
+            }
         }
     }
 
@@ -104,6 +113,7 @@ impl GameKind {
             GameKind::Golf => (2, 6),
             GameKind::Monuments => (3, 7),
             GameKind::ChickenScratch => (2, 8),
+            GameKind::TenStages => (2, 6),
         }
     }
 }

@@ -16,6 +16,7 @@ pub mod rules;
 #[cfg(feature = "ssr")]
 pub mod server;
 pub mod stack_attack;
+pub mod ten_stages;
 
 use leptos::prelude::*;
 use leptos_router::hooks::use_params;
@@ -228,6 +229,19 @@ pub fn GamesLobby() -> impl IntoView {
                 </p>
                 <A
                     href="/games/chicken-scratch"
+                    attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                >
+                    "Play"
+                </A>
+            </div>
+            <div class="mt-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6">
+                <h2 class="text-xl font-semibold mb-2 dark:text-stone-100">"Ten Stages"</h2>
+                <p class="text-stone-600 dark:text-stone-400 mb-4 text-sm">
+                    "A rummy-style card game for two to six players. Work through ten stages of \
+                    sets, runs and colors, one per round, and be the first to finish them all."
+                </p>
+                <A
+                    href="/games/ten-stages"
                     attr:class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                 >
                     "Play"

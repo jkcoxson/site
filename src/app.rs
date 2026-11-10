@@ -13,7 +13,7 @@ use leptos_router::{
 use rand::RngExt;
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
-        <!DOCTYPE html> 
+        <!DOCTYPE html>
         <html lang="en">
             <head>
                 <meta charset="utf-8" />
@@ -106,6 +106,14 @@ pub fn App() -> impl IntoView {
                     <Route
                         path=path!("/games/chicken-scratch/:code")
                         view=crate::games::chicken_scratch::ChickenScratchRoom
+                    />
+                    <Route
+                        path=path!("/games/ten-stages")
+                        view=crate::games::ten_stages::TenStagesLobby
+                    />
+                    <Route
+                        path=path!("/games/ten-stages/:code")
+                        view=crate::games::ten_stages::TenStagesRoom
                     />
                     <Route path=path!("/games/golf") view=crate::games::golf::GolfLobby />
                     <Route path=path!("/games/golf/:code") view=crate::games::golf::GolfRoom />

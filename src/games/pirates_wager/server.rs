@@ -1,7 +1,9 @@
 // Jackson Coxson
 // Pirate's Wager game server, running on the shared room engine.
 
-use crate::games::cards::server::{broadcast_lobby, error, name, shuffle, standings, Log};
+use crate::games::cards::server::{
+    arrange_hand, broadcast_lobby, error, name, shuffle, standings, Log,
+};
 use crate::games::cards::Standing;
 use crate::games::rooms::{RoomGame, Seats};
 
@@ -644,14 +646,9 @@ impl PiratesWager {
         let Some(hand) = round.hands.get_mut(player) else {
             return;
         };
-        let mut sorted_order = order.clone();
-        sorted_order.sort_unstable();
-        let mut ids: Vec<u8> = hand.iter().map(|c| c.id).collect();
-        ids.sort_unstable();
-        if sorted_order != ids {
+        if !arrange_hand(hand, &order) {
             return;
         }
-        hand.sort_by_key(|c| order.iter().position(|&id| id == c.id));
         seats.send(player, &ServerMsg::Game(Box::new(self.view(seats, player))));
     }
 

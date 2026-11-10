@@ -26,6 +26,7 @@ use crate::games::{
     pirates_wager::{logic::Options as WagerOptions, server::PiratesWager},
     rooms::{self, RoomGame, Rooms, Seats},
     stack_attack::{logic::Options as StackOptions, server::StackAttack},
+    ten_stages::{logic::Options as StagesOptions, server::TenStages},
 };
 
 // ── Wire messages ─────────────────────────────────────────────────────────────
@@ -916,6 +917,7 @@ pub struct GameState {
     golf: Arc<Rooms<Golf>>,
     monuments: Arc<Rooms<Monuments>>,
     chicken_scratch: Arc<Rooms<ChickenScratch>>,
+    ten_stages: Arc<Rooms<TenStages>>,
 }
 
 impl Default for GameState {
@@ -934,6 +936,7 @@ impl GameState {
             golf: Arc::new(Rooms::new()),
             monuments: Arc::new(Rooms::new()),
             chicken_scratch: Arc::new(Rooms::new()),
+            ten_stages: Arc::new(Rooms::new()),
         }
     }
 
@@ -946,6 +949,7 @@ impl GameState {
         self.golf.clone().spawn_reaper();
         self.monuments.clone().spawn_reaper();
         self.chicken_scratch.clone().spawn_reaper();
+        self.ten_stages.clone().spawn_reaper();
     }
 
     pub async fn create_room(&self, id: String, name: String, passcode: String, rules: Rules) {
@@ -1003,6 +1007,12 @@ impl GameState {
                     .create(id, name, passcode, ChickenScratch::new(options))
                     .await
             }
+            GameKind::TenStages => {
+                let options: StagesOptions = serde_json::from_str(options).unwrap_or_default();
+                self.ten_stages
+                    .create(id, name, passcode, TenStages::new(options))
+                    .await
+            }
         }
         Ok(())
     }
@@ -1015,6 +1025,7 @@ impl GameState {
             GameKind::Golf => self.golf.list().await,
             GameKind::Monuments => self.monuments.list().await,
             GameKind::ChickenScratch => self.chicken_scratch.list().await,
+            GameKind::TenStages => self.ten_stages.list().await,
         };
         rooms.into_iter().map(RoomInfo::from).collect()
     }
@@ -1027,6 +1038,7 @@ impl GameState {
             GameKind::Golf => self.golf.exists(id).await,
             GameKind::Monuments => self.monuments.exists(id).await,
             GameKind::ChickenScratch => self.chicken_scratch.exists(id).await,
+            GameKind::TenStages => self.ten_stages.exists(id).await,
         }
     }
 }
@@ -1082,6 +1094,10 @@ pub async fn card_ws_handler(
             }
             Some(GameKind::ChickenScratch) => {
                 let rooms = state.chicken_scratch.clone();
+                rooms::serve(socket, rooms, room_id, passcode, query.token).await
+            }
+            Some(GameKind::TenStages) => {
+                let rooms = state.ten_stages.clone();
                 rooms::serve(socket, rooms, room_id, passcode, query.token).await
             }
             None => {}

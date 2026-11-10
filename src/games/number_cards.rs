@@ -1,6 +1,7 @@
 // Jackson Coxson
 // The numbered deck shared by Stack Attack and 9 Holes of Golf: twelve each
 // of 1 to 12 plus eighteen wild cards, and how those cards look on the table.
+// Other number decks (Ten Stages) reuse the look through `numbered_face`.
 
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -77,28 +78,41 @@ fn colors(card: Card) -> &'static str {
 /// A face-up card. Sized by the surrounding `--cw`; add `extra` classes for
 /// rings and the like.
 pub fn card_face(card: Card, extra: &'static str) -> impl IntoView {
-    let corner = if card.is_wild() {
+    let label = if card.is_wild() {
         "★".to_string()
     } else {
         card.rank.to_string()
     };
-    let middle = corner.clone();
+    let banner = card
+        .is_wild()
+        .then_some(("WILD", "bg-orange-600 text-white"));
+    numbered_face(label, colors(card), extra, banner)
+}
+
+/// A big-number card face in any colors, for decks built like this one:
+/// `label` sits in the corner and the middle, `colors` paints the card and
+/// `banner` is a strip of text (and its classes) along the bottom.
+pub fn numbered_face(
+    label: String,
+    colors: &str,
+    extra: &str,
+    banner: Option<(&'static str, &'static str)>,
+) -> impl IntoView {
+    let middle = label.clone();
     view! {
         <div class=format!(
-            "card-face num-card {} {extra} relative select-none overflow-hidden rounded-lg font-bold shadow-md",
-            colors(card),
+            "card-face num-card {colors} {extra} relative select-none overflow-hidden rounded-lg font-bold shadow-md",
         )>
-            <span class="num-card-corner absolute left-1 top-0.5 leading-none">{corner}</span>
+            <span class="num-card-corner absolute left-1 top-0.5 leading-none">{label}</span>
             <span class="absolute inset-0 flex items-center justify-center leading-none">
                 <span class="num-card-middle">{middle}</span>
             </span>
-            {card
-                .is_wild()
-                .then(|| {
+            {banner
+                .map(|(text, class)| {
                     view! {
-                        <span class="absolute inset-x-0 bottom-0 bg-orange-600 text-center text-[0.5rem] font-bold leading-tight text-white">
-                            "WILD"
-                        </span>
+                        <span class=format!(
+                            "absolute inset-x-0 bottom-0 {class} text-center text-[0.5rem] font-bold leading-tight",
+                        )>{text}</span>
                     }
                 })}
         </div>

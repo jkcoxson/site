@@ -1,7 +1,9 @@
 // Jackson Coxson
 // Five Crowns game server, running on the shared room engine.
 
-use crate::games::cards::server::{broadcast_lobby, error, name, shuffle, standings, Log};
+use crate::games::cards::server::{
+    arrange_hand, broadcast_lobby, draw_from_deck, error, name, shuffle, standings, Log,
+};
 use crate::games::cards::Standing;
 use crate::games::rooms::{RoomGame, Seats};
 
@@ -207,14 +209,7 @@ impl FiveCrowns {
             };
             card
         } else {
-            if round.deck.is_empty() {
-                // Shuffle everything but the top discard back into the deck.
-                let top = round.discard.pop();
-                round.deck.append(&mut round.discard);
-                shuffle(&mut round.deck);
-                round.discard.extend(top);
-            }
-            let Some(card) = round.deck.pop() else {
+            let Some(card) = draw_from_deck(&mut round.deck, &mut round.discard) else {
                 error(seats, player, "There are no cards left to draw.");
                 return;
             };
@@ -353,14 +348,9 @@ impl FiveCrowns {
             return;
         };
         let hand = &mut round.hands[player];
-        let mut sorted_order = order.clone();
-        sorted_order.sort_unstable();
-        let mut ids: Vec<u8> = hand.iter().map(|c| c.id).collect();
-        ids.sort_unstable();
-        if sorted_order != ids {
+        if !arrange_hand(hand, &order) {
             return;
         }
-        hand.sort_by_key(|c| order.iter().position(|&id| id == c.id));
         seats.send(player, &ServerMsg::Game(Box::new(self.view(seats, player))));
     }
 

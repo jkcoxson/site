@@ -1,7 +1,9 @@
 // Jackson Coxson
 // 9 Holes of Golf game server, running on the shared room engine.
 
-use crate::games::cards::server::{broadcast_lobby, error, name, shuffle, standings, Log};
+use crate::games::cards::server::{
+    broadcast_lobby, draw_from_deck, error, name, shuffle, standings, Log,
+};
 use crate::games::cards::Standing;
 use crate::games::number_cards::full_deck;
 use crate::games::rooms::{RoomGame, Seats};
@@ -277,14 +279,7 @@ impl Golf {
             };
             card
         } else {
-            if t.deck.is_empty() {
-                // Shuffle everything but the top discard back into the deck.
-                let top = t.discard.pop();
-                t.deck.append(&mut t.discard);
-                shuffle(&mut t.deck);
-                t.discard.extend(top);
-            }
-            let Some(card) = t.deck.pop() else {
+            let Some(card) = draw_from_deck(&mut t.deck, &mut t.discard) else {
                 error(seats, player, "There are no cards left to draw.");
                 return;
             };

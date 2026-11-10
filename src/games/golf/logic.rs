@@ -139,6 +139,9 @@ pub struct GameView {
     /// The card the current player is holding, and whether it came from
     /// the discard pile (and so must be used).
     pub held: Option<(Card, bool)>,
+    /// The current player discarded a card drawn from the deck and now has
+    /// to turn up one of their face-down cards.
+    pub must_flip: bool,
     /// Who turned up their last card first; everyone else gets one more turn.
     pub out: Option<u8>,
     pub stage: Stage,
@@ -194,6 +197,7 @@ impl TableView for GameView {
             discard_top: None,
             deck_size: 0,
             held: None,
+            must_flip: false,
             out: None,
             stage: Stage::Opening,
             log: Vec::new(),
@@ -234,7 +238,8 @@ pub enum ClientMsg {
         name: String,
     },
     StartGame,
-    /// Turn a face-down card up: one of your opening two, or your whole turn.
+    /// Turn a face-down card up: one of your opening two, or the one you
+    /// have to turn up after discarding a card drawn from the deck.
     Flip {
         slot: u8,
     },
@@ -246,7 +251,8 @@ pub enum ClientMsg {
     Swap {
         slot: u8,
     },
-    /// Discard the card drawn from the deck instead of using it.
+    /// Discard the card drawn from the deck instead of using it; you then
+    /// turn up one of your face-down cards.
     Toss,
     /// The host plays another hole, or ends the game.
     NextHole,

@@ -64,7 +64,7 @@ fn slot_action(g: &GameView, slot: usize) -> SlotAction {
         }
         Stage::Playing if g.current == g.you => match g.held {
             Some(_) => SlotAction::Swap,
-            None if face_down => SlotAction::Flip,
+            None if g.must_flip && face_down => SlotAction::Flip,
             None => SlotAction::None,
         },
         _ => SlotAction::None,
@@ -192,7 +192,7 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
     });
     let my_turn =
         Memo::new(move |_| stage.get() == StageKind::Playing && game.with(|g| g.current == g.you));
-    let can_draw = move || my_turn.get() && game.with(|g| g.held.is_none());
+    let can_draw = move || my_turn.get() && game.with(|g| g.held.is_none() && !g.must_flip);
     let can_take = move || can_draw() && game.with(|g| g.discard_top.is_some());
     let can_toss = move || my_turn.get() && game.with(|g| matches!(g.held, Some((_, false))));
     let you = Memo::new(move |_| game.with(|g| g.you));
@@ -201,7 +201,9 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
         game.with(|g| {
             let out = g.out.map(|o| name_of(g, o));
             let last = |s: String| match &out {
-                Some(o) if g.out != Some(g.you) => format!("{o} is out, so this is your last turn. {s}"),
+                Some(o) if g.out != Some(g.you) => {
+                    format!("{o} is out, so this is your last turn. {s}")
+                }
                 _ => s,
             };
             match &g.stage {
@@ -212,18 +214,22 @@ fn TableView(game: Memo<GameView>) -> impl IntoView {
                         .find(|p| p.id == g.you)
                         .map_or(0, |p| p.grid.iter().filter(|c| c.is_some()).count());
                     if up < OPENING_FLIPS {
-                        format!("Pick {} card{} to turn up.", OPENING_FLIPS - up, if up == 1 { "" } else { "s" })
+                        format!(
+                            "Pick {} card{} to turn up.",
+                            OPENING_FLIPS - up,
+                            if up == 1 { "" } else { "s" }
+                        )
                     } else {
                         "Waiting for everyone to turn up two cards...".into()
                     }
                 }
                 Stage::Playing if g.current == g.you => match g.held {
-                    None => last(
-                        "Draw from the deck, take the discard, or tap a face-down card to turn it up."
-                            .into(),
-                    ),
+                    None if g.must_flip => "Tap one of your face-down cards to turn it up.".into(),
+                    None => last("Draw from the deck or take the discard.".into()),
                     Some((_, true)) => "Tap one of your cards to swap it out.".into(),
-                    Some((_, false)) => "Tap one of your cards to swap it out, or discard what you drew.".into(),
+                    Some((_, false)) => {
+                        "Tap one of your cards to swap it out, or discard what you drew.".into()
+                    }
                 },
                 Stage::Playing => format!("{}'s turn.", name_of(g, g.current)),
                 Stage::HoleOver { .. } => format!("Hole {} is done.", g.hole),
@@ -577,15 +583,13 @@ fn GolfRules() -> impl IntoView {
             <ul class="list-disc space-y-1 pl-5">
                 <li>
                     <span class=b>"Draw from the deck."</span>
-                    " Swap it for any card in your grid (face up or face down), or discard it."
+                    " Swap it for any card in your grid (face up or face down), or discard it and "
+                    <span class=b>"turn up"</span>
+                    " one of your face-down cards."
                 </li>
                 <li>
                     <span class=b>"Take the top discard."</span>
                     " You have to swap it for one of your cards."
-                </li>
-                <li>
-                    <span class=b>"Turn up"</span>
-                    " one of your face-down cards."
                 </li>
             </ul>
             <p>"A card you swap out goes on the discard pile, and the new card goes in face up."</p>

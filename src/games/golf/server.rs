@@ -20,6 +20,8 @@ struct Hole {
     /// The card the current player drew, and whether it came from the
     /// discard pile.
     held: Option<(Card, bool)>,
+    /// The current player tossed a deck card and has to turn one up.
+    must_flip: bool,
     /// Who turned up their last card first.
     out: Option<usize>,
 }
@@ -136,6 +138,7 @@ impl Golf {
             discard_top: t.and_then(|t| t.discard.last().copied()),
             deck_size: t.map_or(0, |t| t.deck.len() as u8),
             held: t.and_then(|t| t.held),
+            must_flip: t.is_some_and(|t| t.must_flip),
             out: t.and_then(|t| t.out.map(|o| o as u8)),
             stage,
             log: self.log.lines(),
@@ -162,6 +165,7 @@ impl Golf {
             face_up: vec![[false; GRID]; n],
             current: (self.dealer + 1) % n,
             held: None,
+            must_flip: false,
             out: None,
         });
         self.phase = Phase::Opening;
@@ -218,14 +222,19 @@ impl Golf {
                 let Some(t) = self.turn(seats, player) else {
                     return;
                 };
-                if t.held.is_some() {
-                    error(seats, player, "Place or discard the card you drew first.");
+                if !t.must_flip {
+                    error(
+                        seats,
+                        player,
+                        "You can only turn up a card after discarding one you drew from the deck.",
+                    );
                     return;
                 }
                 if t.face_up[player][slot] {
                     error(seats, player, "That card is already face up.");
                     return;
                 }
+                t.must_flip = false;
                 t.face_up[player][slot] = true;
                 let card = t.grids[player][slot];
                 self.act(player, ActionKind::Flipped { slot: slot as u8 });
@@ -257,7 +266,7 @@ impl Golf {
         let Some(t) = self.turn(seats, player) else {
             return;
         };
-        if t.held.is_some() {
+        if t.held.is_some() || t.must_flip {
             error(seats, player, "You already drew this turn.");
             return;
         }
@@ -349,14 +358,23 @@ impl Golf {
             Some((card, false)) => {
                 t.held = None;
                 t.discard.push(card);
+                // Discarding a deck card means turning one up instead. With
+                // nothing left face down, the turn just ends.
+                let flip = !t.all_up(player);
+                t.must_flip = flip;
                 self.act(player, ActionKind::Tossed);
                 self.log.note(format!(
                     "{} discarded {}.",
                     name(seats, player),
                     card.label()
                 ));
-                self.end_turn(seats, player);
+                if flip {
+                    self.sync(seats);
+                } else {
+                    self.end_turn(seats, player);
+                }
             }
+            None if t.must_flip => error(seats, player, "Turn up one of your cards."),
             None => error(seats, player, "Draw a card first."),
         }
     }
@@ -553,6 +571,19 @@ mod tests {
         }
     }
 
+    /// Draw from the deck, discard it and turn up `slot`.
+    fn toss_flip(seats: &mut Seats, g: &mut Golf, p: usize, slot: u8) {
+        g.handle(
+            seats,
+            p,
+            ClientMsg::Draw {
+                from_discard: false,
+            },
+        );
+        g.handle(seats, p, ClientMsg::Toss);
+        g.handle(seats, p, ClientMsg::Flip { slot });
+    }
+
     #[test]
     fn opening_needs_two_flips_each() {
         let (mut seats, mut g) = started(3);
@@ -597,8 +628,27 @@ mod tests {
         g.handle(&mut seats, 0, ClientMsg::Toss);
         let t = g.table.as_ref().unwrap();
         assert!(t.held.is_none());
+        assert!(t.must_flip, "tossing means turning one up");
+        assert_eq!(t.current, 0);
+        g.handle(&mut seats, 0, ClientMsg::Draw { from_discard: true });
+        assert!(g.table.as_ref().unwrap().held.is_none(), "no second draw");
+        g.handle(&mut seats, 0, ClientMsg::Flip { slot: 0 });
+        assert_eq!(g.table.as_ref().unwrap().current, 0, "already face up");
+        g.handle(&mut seats, 0, ClientMsg::Flip { slot: 1 });
+        let t = g.table.as_ref().unwrap();
+        assert!(!t.must_flip);
         assert_eq!(t.current, 1);
-        assert_eq!(t.up_count(0), 2);
+        assert_eq!(t.up_count(0), 3);
+    }
+
+    #[test]
+    fn cant_just_flip_on_your_turn() {
+        let (mut seats, mut g) = started(2);
+        open_all(&mut seats, &mut g, 2);
+        g.handle(&mut seats, 1, ClientMsg::Flip { slot: 1 });
+        let t = g.table.as_ref().unwrap();
+        assert_eq!(t.up_count(1), 2);
+        assert_eq!(t.current, 1);
     }
 
     #[test]
@@ -609,11 +659,11 @@ mod tests {
         let t = g.table.as_mut().unwrap();
         t.face_up[1] = [true; GRID];
         t.face_up[1][7] = false;
-        g.handle(&mut seats, 1, ClientMsg::Flip { slot: 7 });
+        toss_flip(&mut seats, &mut g, 1, 7);
         assert_eq!(g.table.as_ref().unwrap().out, Some(1));
-        g.handle(&mut seats, 2, ClientMsg::Flip { slot: 1 });
+        toss_flip(&mut seats, &mut g, 2, 1);
         assert!(matches!(g.phase, Phase::Playing));
-        g.handle(&mut seats, 0, ClientMsg::Flip { slot: 1 });
+        toss_flip(&mut seats, &mut g, 0, 1);
         assert!(matches!(g.phase, Phase::HoleOver(_)));
         assert_eq!(
             g.scores.iter().map(Vec::len).collect::<Vec<_>>(),
@@ -632,8 +682,8 @@ mod tests {
         let t = g.table.as_mut().unwrap();
         t.face_up[1] = [true; GRID];
         t.face_up[1][2] = false;
-        g.handle(&mut seats, 1, ClientMsg::Flip { slot: 2 });
-        g.handle(&mut seats, 0, ClientMsg::Flip { slot: 2 });
+        toss_flip(&mut seats, &mut g, 1, 2);
+        toss_flip(&mut seats, &mut g, 0, 2);
         assert!(matches!(g.phase, Phase::HoleOver(_)));
         g.handle(&mut seats, 1, ClientMsg::NextHole);
         assert!(matches!(g.phase, Phase::HoleOver(_)), "only the host deals");
@@ -671,7 +721,7 @@ mod tests {
                         Some(_) => ClientMsg::Swap {
                             slot: rng.random_range(0..GRID) as u8,
                         },
-                        None if !down.is_empty() && rng.random_bool(0.3) => ClientMsg::Flip {
+                        None if t.must_flip => ClientMsg::Flip {
                             slot: down[rng.random_range(0..down.len())],
                         },
                         None => ClientMsg::Draw {

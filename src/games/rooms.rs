@@ -322,9 +322,9 @@ impl<G: RoomGame> Rooms<G> {
     }
 
     /// Spawn a background task that periodically reaps idle rooms. Rooms empty
-    /// for more than 5 minutes are removed.
+    /// for more than an hour are removed.
     pub fn spawn_reaper(self: Arc<Self>) {
-        const IDLE_TTL: Duration = Duration::from_secs(5 * 60);
+        const IDLE_TTL: Duration = Duration::from_secs(60 * 60);
         const SCAN_INTERVAL: Duration = Duration::from_secs(60);
         tokio::spawn(async move {
             let mut ticker = tokio::time::interval(SCAN_INTERVAL);
